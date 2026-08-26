@@ -231,3 +231,4 @@ E:\1_PRN211\LanguageCenterManagement\LanguageCenterManagement\obj\Debug\net10.0\
 E:\1_PRN211\LanguageCenterManagement\LanguageCenterManagement\obj\Debug\net10.0\LanguageCenterManagement.pdb
 E:\1_PRN211\LanguageCenterManagement\LanguageCenterManagement\obj\Debug\net10.0\LanguageCenterManagement.genruntimeconfig.cache
 E:\1_PRN211\LanguageCenterManagement\LanguageCenterManagement\obj\Debug\net10.0\ref\LanguageCenterManagement.dll
+E:\1_PRN211\LanguageCenterManagement\LanguageCenterManagement\obj\Debug\net10.0\LanguageCenterManagement.sourcelink.json
