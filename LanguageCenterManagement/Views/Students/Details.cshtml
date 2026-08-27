@@ -1,0 +1,121 @@
+﻿@model LanguageCenterManagement.Models.Student
+
+@{
+    ViewData["Title"] = "Student Details";
+}
+
+<h1>Student Details</h1>
+
+<div>
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            Student Code
+        </dt>
+        <dd class="col-sm-9">
+            @Model.StudentCode
+        </dd>
+
+        <dt class="col-sm-3">
+            Full Name
+        </dt>
+        <dd class="col-sm-9">
+            @Model.FullName
+        </dd>
+
+        <dt class="col-sm-3">
+            Date of Birth
+        </dt>
+        <dd class="col-sm-9">
+            @(Model.DateOfBirth?.ToString("dd/MM/yyyy"))
+        </dd>
+
+        <dt class="col-sm-3">
+            Gender
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Gender
+        </dd>
+
+        <dt class="col-sm-3">
+            Phone
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Phone
+        </dd>
+
+        <dt class="col-sm-3">
+            Email
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Email
+        </dd>
+
+        <dt class="col-sm-3">
+            Address
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Address
+        </dd>
+
+        <dt class="col-sm-3">
+            Status
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Status
+        </dd>
+
+        <dt class="col-sm-3">
+            Created At
+        </dt>
+        <dd class="col-sm-9">
+            @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+        </dd>
+
+    </dl>
+</div>
+
+<h3>Enrollment History</h3>
+
+@if (Model.Enrollments.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>Course</th>
+                <th>Registration Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var enrollment in Model.Enrollments)
+            {
+                <tr>
+                    <td>@enrollment.Class?.ClassName</td>
+                    <td>@enrollment.Class?.Course?.CourseName</td>
+                    <td>
+                        @enrollment.RegistrationDate.ToString("dd/MM/yyyy")
+                    </td>
+                    <td>@enrollment.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>This student has no enrollment history.</p>
+}
+
+<a asp-action="Edit"
+   asp-route-id="@Model.StudentId"
+   class="btn btn-warning">
+    Edit
+</a>
+
+<a asp-action="Index"
+   class="btn btn-secondary">
+    Back
+</a>

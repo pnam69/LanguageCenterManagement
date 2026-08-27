@@ -1,0 +1,41 @@
+﻿@model LanguageCenterManagement.Models.Student
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Delete Student</h1>
+
+<div class="alert alert-danger" role="alert">
+    <h4 class="alert-heading">Warning!</h4>
+    <p>Are you sure you want to delete this student?</p>
+</div>
+    <d1 class="row">
+    <dt class="col-sm-3">
+        Student Code
+    </dt>
+    <dd class="col-sm-9">
+        @Model.StudentCode
+    </dd>
+
+    <dt class="col-sm-3">
+        Student Name
+    </dt>
+    <dd class="col-sm-9">
+        @Model.FullName
+    </dd>
+    <dt class="col-sm-3">
+    Phone
+    </dt>
+        <dd class="col-sm-9">
+            @Model.Phone
+    </dd>
+
+</d1>
+
+<form asp-action="Delete" method="post">
+<input type="hidden" asp-for="StudentId" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
