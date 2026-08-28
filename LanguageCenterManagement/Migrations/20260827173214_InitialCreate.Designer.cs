@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LanguageCenterManagement.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260826153217_AddIdentity")]
-    partial class AddIdentity
+    [Migration("20260827173214_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -180,11 +180,11 @@ namespace LanguageCenterManagement.Migrations
 
             modelBuilder.Entity("LanguageCenterManagement.Models.LanguageClass", b =>
                 {
-                    b.Property<int>("ClassId")
+                    b.Property<int>("LanguageClassId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LanguageClassId"));
 
                     b.Property<string>("ClassCode")
                         .IsRequired()
@@ -210,7 +210,7 @@ namespace LanguageCenterManagement.Migrations
                     b.Property<int>("TeacherId")
                         .HasColumnType("int");
 
-                    b.HasKey("ClassId");
+                    b.HasKey("LanguageClassId");
 
                     b.HasIndex("ClassCode")
                         .IsUnique();
@@ -354,6 +354,16 @@ namespace LanguageCenterManagement.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeacherId"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -362,6 +372,10 @@ namespace LanguageCenterManagement.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)

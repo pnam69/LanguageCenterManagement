@@ -1,0 +1,123 @@
+﻿@model LanguageCenterManagement.Models.LanguageClass
+
+@{
+    ViewData["Title"] = "Add Class";
+}
+
+<h1>Add Language Class</h1>
+
+<form asp-action="Create" method="post">
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="ClassCode"
+               class="form-label">
+        </label>
+
+        <input asp-for="ClassCode"
+               class="form-control" />
+
+        <span asp-validation-for="ClassCode"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ClassName"
+               class="form-label">
+        </label>
+
+        <input asp-for="ClassName"
+               class="form-control" />
+
+        <span asp-validation-for="ClassName"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CourseId"
+               class="form-label">
+            Course
+        </label>
+
+        <select asp-for="CourseId"
+                asp-items="ViewBag.CourseId"
+                class="form-select">
+
+            <option value="">-- Select Course --</option>
+
+        </select>
+
+        <span asp-validation-for="CourseId"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TeacherId"
+               class="form-label">
+            Teacher
+        </label>
+
+        <select asp-for="TeacherId"
+                asp-items="ViewBag.TeacherId"
+                class="form-select">
+
+            <option value="">-- Select Teacher --</option>
+
+        </select>
+
+        <span asp-validation-for="TeacherId"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="MaxStudents"
+               class="form-label">
+        </label>
+
+        <input asp-for="MaxStudents"
+               type="number"
+               min="1"
+               class="form-control" />
+
+        <span asp-validation-for="MaxStudents"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status"
+               class="form-label">
+        </label>
+
+        <select asp-for="Status"
+                class="form-select">
+
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+
+        </select>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Save
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back
+    </a>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

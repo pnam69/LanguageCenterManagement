@@ -1,0 +1,64 @@
+﻿@model LanguageCenterManagement.Models.LanguageClass
+
+@{
+    ViewData["Title"] = "Delete Class";
+}
+
+<h1>Delete Language Class</h1>
+
+<div class="alert alert-danger">
+    Are you sure you want to delete this class?
+</div>
+
+<dl class="row">
+
+    <dt class="col-sm-3">
+        Class Code
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.ClassCode
+    </dd>
+
+    <dt class="col-sm-3">
+        Class Name
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.ClassName
+    </dd>
+
+    <dt class="col-sm-3">
+        Course
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Course?.CourseName
+    </dd>
+
+    <dt class="col-sm-3">
+        Teacher
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Teacher?.FullName
+    </dd>
+
+</dl>
+
+<form asp-action="Delete" method="post">
+
+    <input type="hidden"
+           asp-for="LanguageClassId" />
+
+    <button type="submit"
+            class="btn btn-danger">
+        Delete
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+
+</form>

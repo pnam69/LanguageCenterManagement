@@ -77,16 +77,24 @@ namespace LanguageCenterManagement.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Enrollment>()
-                .HasOne(x => x.Student)
-                .WithMany(x => x.Enrollments)
-                .HasForeignKey(x => x.StudentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(e => e.Student)
+                .WithMany(s => s.Enrollments)
+                .HasForeignKey(e => e.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Enrollment>()
-                .HasOne(x => x.Class)
-                .WithMany(x => x.Enrollments)
-                .HasForeignKey(x => x.ClassId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(e => e.Class)
+                .WithMany(c => c.Enrollments)
+                .HasForeignKey(e => e.ClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Enrollment>()
+                .HasIndex(e => new
+                {
+                    e.StudentId,
+                    e.ClassId
+                })
+                .IsUnique();
         }
     }
 }

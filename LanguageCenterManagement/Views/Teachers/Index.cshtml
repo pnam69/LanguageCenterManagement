@@ -1,0 +1,93 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.Teacher>
+
+@{
+    ViewData["Title"] = "Teachers";
+}
+
+<h1>Teacher Management</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Add Teacher
+    </a>
+</p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text"
+               name="search"
+               value="@ViewBag.Search"
+               class="form-control"
+               placeholder="Search by code, name, phone, email or specialization" />
+
+        <button type="submit"
+                class="btn btn-secondary">
+            Search
+        </button>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Full Name</th>
+            <th>Date of Birth</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Specialization</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var teacher in Model)
+        {
+            <tr>
+                <td>@teacher.TeacherCode</td>
+                <td>@teacher.FullName</td>
+                <td>
+                    @(teacher.DateOfBirth?.ToString("dd/MM/yyyy"))
+                </td>
+                <td>@teacher.Phone</td>
+                <td>@teacher.Email</td>
+                <td>@teacher.Specialization</td>
+                <td>@teacher.Status</td>
+                <td>
+                    <a asp-action="Details"
+                       asp-route-id="@teacher.TeacherId"
+                       class="btn btn-info btn-sm">
+                        Details
+                    </a>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@teacher.TeacherId"
+                       class="btn btn-warning btn-sm">
+                        Edit
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@teacher.TeacherId"
+                       class="btn btn-danger btn-sm">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

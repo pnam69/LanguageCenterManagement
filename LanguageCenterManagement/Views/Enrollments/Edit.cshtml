@@ -1,0 +1,106 @@
+﻿@model LanguageCenterManagement.Models.Enrollment
+
+@{
+    ViewData["Title"] = "Edit Enrollment";
+}
+
+<h1>Edit Enrollment</h1>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden"
+           asp-for="EnrollmentId" />
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger">
+    </div>
+
+    <div class="mb-3">
+
+        <label asp-for="StudentId"
+               class="form-label">
+            Student
+        </label>
+
+        <select asp-for="StudentId"
+                asp-items="ViewBag.StudentId"
+                class="form-select">
+        </select>
+
+        <span asp-validation-for="StudentId"
+              class="text-danger">
+        </span>
+
+    </div>
+
+    <div class="mb-3">
+
+        <label asp-for="ClassId"
+               class="form-label">
+            Class
+        </label>
+
+        <select asp-for="ClassId"
+                asp-items="ViewBag.ClassId"
+                class="form-select">
+        </select>
+
+        <span asp-validation-for="ClassId"
+              class="text-danger">
+        </span>
+
+    </div>
+
+    <div class="mb-3">
+
+        <label asp-for="Status"
+               class="form-label">
+            Status
+        </label>
+
+        <select asp-for="Status"
+                class="form-select">
+
+            <option value="Pending">
+                Pending
+            </option>
+
+            <option value="Confirmed">
+                Confirmed
+            </option>
+
+            <option value="Studying">
+                Studying
+            </option>
+
+            <option value="Completed">
+                Completed
+            </option>
+
+            <option value="Cancelled">
+                Cancelled
+            </option>
+
+        </select>
+
+        <span asp-validation-for="Status"
+              class="text-danger">
+        </span>
+
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Save Changes
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back
+    </a>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

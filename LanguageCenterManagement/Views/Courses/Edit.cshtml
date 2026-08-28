@@ -1,0 +1,122 @@
+﻿@model LanguageCenterManagement.Models.Course
+
+@{
+    ViewData["Title"] = "Edit Course";
+}
+
+<h1>Edit Course</h1>
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden"
+           asp-for="CourseId" />
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="CourseCode"
+               class="form-label">
+        </label>
+
+        <input asp-for="CourseCode"
+               class="form-control" />
+
+        <span asp-validation-for="CourseCode"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CourseName"
+               class="form-label">
+        </label>
+
+        <input asp-for="CourseName"
+               class="form-control" />
+
+        <span asp-validation-for="CourseName"
+              class="text-danger">
+        </span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description"
+               class="form-label">
+        </label>
+
+        <textarea asp-for="Description"
+                  class="form-control">
+        </textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TuitionFee"
+               class="form-label">
+        </label>
+
+        <input asp-for="TuitionFee"
+               type="number"
+               step="0.01"
+               min="0"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Duration"
+               class="form-label">
+        </label>
+
+        <input asp-for="Duration"
+               type="number"
+               min="1"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Level"
+               class="form-label">
+        </label>
+
+        <select asp-for="Level"
+                class="form-select">
+
+            <option value="">-- Select Level --</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Elementary">Elementary</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Upper-Intermediate">Upper-Intermediate</option>
+            <option value="Advanced">Advanced</option>
+
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status"
+               class="form-label">
+        </label>
+
+        <select asp-for="Status"
+                class="form-select">
+
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+
+        </select>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Save Changes
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back
+    </a>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

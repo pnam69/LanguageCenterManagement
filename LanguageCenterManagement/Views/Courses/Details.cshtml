@@ -1,0 +1,75 @@
+﻿@model LanguageCenterManagement.Models.Course
+
+@{
+    ViewData["Title"] = "Course Details";
+}
+
+<h1>Course Details</h1>
+
+<dl class="row">
+
+    <dt class="col-sm-3">Course Code</dt>
+    <dd class="col-sm-9">@Model.CourseCode</dd>
+
+    <dt class="col-sm-3">Course Name</dt>
+    <dd class="col-sm-9">@Model.CourseName</dd>
+
+    <dt class="col-sm-3">Description</dt>
+    <dd class="col-sm-9">@Model.Description</dd>
+
+    <dt class="col-sm-3">Tuition Fee</dt>
+    <dd class="col-sm-9">
+        @Model.TuitionFee.ToString("N0")
+    </dd>
+
+    <dt class="col-sm-3">Duration</dt>
+    <dd class="col-sm-9">@Model.Duration</dd>
+
+    <dt class="col-sm-3">Level</dt>
+    <dd class="col-sm-9">@Model.Level</dd>
+
+    <dt class="col-sm-3">Status</dt>
+    <dd class="col-sm-9">@Model.Status</dd>
+
+</dl>
+
+<h3>Classes Using This Course</h3>
+
+@if (Model.Classes.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Class Code</th>
+                <th>Class Name</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var classItem in Model.Classes)
+            {
+                <tr>
+                    <td>@classItem.ClassCode</td>
+                    <td>@classItem.ClassName</td>
+                    <td>@classItem.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No classes are currently using this course.</p>
+}
+
+<a asp-action="Edit"
+   asp-route-id="@Model.CourseId"
+   class="btn btn-warning">
+    Edit
+</a>
+
+<a asp-action="Index"
+   class="btn btn-secondary">
+    Back
+</a>

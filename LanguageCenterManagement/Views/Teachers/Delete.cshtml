@@ -1,0 +1,41 @@
+﻿@model LanguageCenterManagement.Models.Teacher
+
+@{
+    ViewData["Title"] = "Delete Teacher";
+}
+
+<h1>Delete Teacher</h1>
+
+<div class="alert alert-danger">
+    Are you sure you want to delete this teacher?
+</div>
+
+<dl class="row">
+
+    <dt class="col-sm-3">Teacher Code</dt>
+    <dd class="col-sm-9">@Model.TeacherCode</dd>
+
+    <dt class="col-sm-3">Full Name</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
+
+    <dt class="col-sm-3">Specialization</dt>
+    <dd class="col-sm-9">@Model.Specialization</dd>
+
+</dl>
+
+<form asp-action="Delete" method="post">
+
+    <input type="hidden"
+           asp-for="TeacherId" />
+
+    <button type="submit"
+            class="btn btn-danger">
+        Delete
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+
+</form>

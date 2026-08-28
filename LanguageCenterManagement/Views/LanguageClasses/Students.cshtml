@@ -1,0 +1,160 @@
+﻿@model LanguageCenterManagement.Models.LanguageClass
+
+@{
+    ViewData["Title"] = "Class Students";
+
+    var activeEnrollments = Model.Enrollments
+        .Where(e => e.Status != "Cancelled")
+        .ToList();
+
+    var currentStudents = activeEnrollments.Count;
+
+    var remainingSeats = Model.MaxStudents - currentStudents;
+
+    if (remainingSeats < 0)
+    {
+        remainingSeats = 0;
+    }
+}
+
+<h1>Class Students</h1>
+
+<div class="mb-4">
+
+    <h3>
+        @Model.ClassCode - @Model.ClassName
+    </h3>
+
+    <p>
+        <strong>Course:</strong>
+        @Model.Course?.CourseName
+    </p>
+
+    <p>
+        <strong>Teacher:</strong>
+        @Model.Teacher?.FullName
+    </p>
+
+</div>
+
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Maximum Students</h5>
+                <h3>@Model.MaxStudents</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Current Students</h5>
+                <h3>@currentStudents</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Available Seats</h5>
+                <h3>@remainingSeats</h3>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@if (remainingSeats == 0)
+{
+    <div class="alert alert-warning">
+        This class is full.
+    </div>
+}
+
+<div class="mb-3">
+
+    <a asp-controller="Enrollments"
+       asp-action="Create"
+       asp-route-classId="@Model.LanguageClassId"
+       class="btn btn-primary">
+        Register Student
+    </a>
+
+    <a asp-action="Details"
+       asp-route-id="@Model.LanguageClassId"
+       class="btn btn-secondary">
+        Class Details
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back
+    </a>
+
+</div>
+
+<table class="table table-bordered table-striped">
+
+    <thead>
+        <tr>
+            <th>Student Code</th>
+            <th>Student Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Registration Date</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var enrollment in Model.Enrollments
+            .OrderBy(e => e.Student!.FullName))
+        {
+            <tr>
+
+                <td>
+                    @enrollment.Student?.StudentCode
+                </td>
+
+                <td>
+                    @enrollment.Student?.FullName
+                </td>
+
+                <td>
+                    @enrollment.Student?.Phone
+                </td>
+
+                <td>
+                    @enrollment.Student?.Email
+                </td>
+
+                <td>
+                    @enrollment.RegistrationDate
+                    .ToString("dd/MM/yyyy")
+                </td>
+
+                <td>
+                    @enrollment.Status
+                </td>
+
+                <td>
+                    <a asp-controller="Enrollments"
+                       asp-action="Edit"
+                       asp-route-id="@enrollment.EnrollmentId"
+                       class="btn btn-warning btn-sm">
+                        Edit
+                    </a>
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>

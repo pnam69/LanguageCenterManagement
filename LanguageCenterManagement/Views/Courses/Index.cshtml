@@ -1,0 +1,91 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.Course>
+
+@{
+    ViewData["Title"] = "Courses";
+}
+
+<h1>Course Management</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Add Course
+    </a>
+</p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text"
+               name="search"
+               value="@ViewBag.Search"
+               class="form-control"
+               placeholder="Search by code, name or level" />
+
+        <button type="submit"
+                class="btn btn-secondary">
+            Search
+        </button>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Course Name</th>
+            <th>Description</th>
+            <th>Tuition Fee</th>
+            <th>Duration</th>
+            <th>Level</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var course in Model)
+        {
+            <tr>
+                <td>@course.CourseCode</td>
+                <td>@course.CourseName</td>
+                <td>@course.Description</td>
+                <td>@course.TuitionFee.ToString("N0")</td>
+                <td>@course.Duration</td>
+                <td>@course.Level</td>
+                <td>@course.Status</td>
+                <td>
+                    <a asp-action="Details"
+                       asp-route-id="@course.CourseId"
+                       class="btn btn-info btn-sm">
+                        Details
+                    </a>
+
+                    <a asp-action="Edit"
+                       asp-route-id="@course.CourseId"
+                       class="btn btn-warning btn-sm">
+                        Edit
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@course.CourseId"
+                       class="btn btn-danger btn-sm">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,62 @@
+﻿@model LanguageCenterManagement.Models.Enrollment
+
+@{
+    ViewData["Title"] = "Enrollment Details";
+}
+
+<h1>Enrollment Details</h1>
+
+<dl class="row">
+
+    <dt class="col-sm-3">
+        Student
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Student?.FullName
+    </dd>
+
+    <dt class="col-sm-3">
+        Class
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Class?.ClassName
+    </dd>
+
+    <dt class="col-sm-3">
+        Course
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Class?.Course?.CourseName
+    </dd>
+
+    <dt class="col-sm-3">
+        Registration Date
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.RegistrationDate.ToString("dd/MM/yyyy")
+    </dd>
+
+    <dt class="col-sm-3">
+        Status
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Status
+    </dd>
+
+</dl>
+
+<a asp-action="Edit"
+   asp-route-id="@Model.EnrollmentId"
+   class="btn btn-warning">
+    Edit
+</a>
+
+<a asp-action="Index"
+   class="btn btn-secondary">
+    Back
+</a>

@@ -1,0 +1,93 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.LanguageClass>
+
+@{
+    ViewData["Title"] = "Language Classes";
+}
+
+<h1>Language Class Management</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        Add Class
+    </a>
+</p>
+
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="input-group">
+        <input type="text"
+               name="search"
+               value="@ViewBag.Search"
+               class="form-control"
+               placeholder="Search by class code, class name, course or teacher" />
+
+        <button type="submit"
+                class="btn btn-secondary">
+            Search
+        </button>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Class Code</th>
+            <th>Class Name</th>
+            <th>Course</th>
+            <th>Teacher</th>
+            <th>Maximum Students</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ClassCode</td>
+                <td>@item.ClassName</td>
+                <td>@item.Course?.CourseName</td>
+                <td>@item.Teacher?.FullName</td>
+                <td>@item.MaxStudents</td>
+                <td>@item.Status</td>
+                <td>
+                    <a asp-action="Details"
+                       asp-route-id="@item.LanguageClassId"
+                       class="btn btn-info btn-sm">
+                        Details
+                    </a>
+                    <a asp-action="Students"
+                       asp-route-id="@item.LanguageClassId"
+                       class="btn btn-success btn-sm">
+                        Students
+                    </a>
+                    <a asp-action="Edit"
+                       asp-route-id="@item.LanguageClassId"
+                       class="btn btn-warning btn-sm">
+                        Edit
+                    </a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@item.LanguageClassId"
+                       class="btn btn-danger btn-sm">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

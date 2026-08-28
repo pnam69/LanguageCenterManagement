@@ -5,7 +5,7 @@ namespace LanguageCenterManagement.Models
     public class LanguageClass
     {
         [Key]
-        public int ClassId { get; set; }
+        public int LanguageClassId { get; set; }
 
         [Required]
         [StringLength(20)]
