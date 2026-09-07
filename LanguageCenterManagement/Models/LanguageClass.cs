@@ -27,10 +27,11 @@ namespace LanguageCenterManagement.Models
         [StringLength(20)]
         public string Status { get; set; } = "Active";
 
-        public ICollection<Schedule> Schedules { get; set; }
-            = new List<Schedule>();
+        public ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 
-        public ICollection<Enrollment> Enrollments { get; set; }
-            = new List<Enrollment>();
+        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+        public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
+        public ICollection<LearningResult> LearningResults { get; set; } = new List<LearningResult>();
+        public ICollection<Material> Materials { get; set; } = new List<Material>();
     }
 }

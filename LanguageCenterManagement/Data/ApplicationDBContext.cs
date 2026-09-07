@@ -19,6 +19,25 @@ namespace LanguageCenterManagement.Data
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+
+        public DbSet<Question> Questions { get; set; }
+
+        public DbSet<Answer> Answers { get; set; }
+
+        public DbSet<Exam> Exams { get; set; }
+
+        public DbSet<ExamQuestion> ExamQuestions { get; set; }
+
+        public DbSet<ExamResult> ExamResults { get; set; }
+
+        public DbSet<Tuition> Tuitions { get; set; }
+
+        public DbSet<Payment> Payments { get; set; }
+
+        public DbSet<LearningResult> LearningResults { get; set; }
+
+        public DbSet<Material> Materials { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -48,6 +67,20 @@ namespace LanguageCenterManagement.Data
                 .HasIndex(x => x.RoomCode)
                 .IsUnique();
 
+            modelBuilder.Entity<Schedule>()
+                .HasIndex(s => new
+                {
+                    s.ClassId,
+                    s.StartTime
+                });
+
+            modelBuilder.Entity<Schedule>()
+                .HasIndex(s => new
+                {
+                    s.RoomId,
+                    s.StartTime
+                });
+
             modelBuilder.Entity<Enrollment>()
                 .HasIndex(x => new { x.StudentId, x.ClassId })
                 .IsUnique();
@@ -68,7 +101,7 @@ namespace LanguageCenterManagement.Data
                 .HasOne(x => x.Class)
                 .WithMany(x => x.Schedules)
                 .HasForeignKey(x => x.ClassId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Schedule>()
                 .HasOne(x => x.Room)
@@ -95,6 +128,158 @@ namespace LanguageCenterManagement.Data
                     e.ClassId
                 })
                 .IsUnique();
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Student)
+                .WithMany(s => s.Attendances)
+                .HasForeignKey(a => a.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Class)
+                .WithMany(c => c.Attendances)
+                .HasForeignKey(a => a.ClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasIndex(a => new
+                {
+                    a.StudentId,
+                    a.ClassId,
+                    a.AttendanceDate
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<Answer>()
+                .HasOne(a => a.Question)
+                .WithMany(q => q.Answers)
+                .HasForeignKey(a => a.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ExamQuestion>()
+                .HasOne(eq => eq.Exam)
+                .WithMany(e => e.ExamQuestions)
+                .HasForeignKey(eq => eq.ExamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ExamQuestion>()
+                .HasOne(eq => eq.Question)
+                .WithMany(q => q.ExamQuestions)
+                .HasForeignKey(eq => eq.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExamResult>()
+                .HasOne(er => er.Exam)
+                .WithMany(e => e.ExamResults)
+                .HasForeignKey(er => er.ExamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExamResult>()
+                .HasOne(er => er.Student)
+                .WithMany(s => s.ExamResults)
+                .HasForeignKey(er => er.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tuition>()
+                .HasOne(t => t.Student)
+                .WithMany()
+                .HasForeignKey(t => t.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Tuition>()
+                .HasOne(t => t.Class)
+                .WithMany()
+                .HasForeignKey(t => t.ClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Tuition)
+                .WithMany()
+                .HasForeignKey(p => p.TuitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LearningResult>()
+                .HasOne(l => l.Student)
+                .WithMany(s => s.LearningResults)
+                .HasForeignKey(l => l.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LearningResult>()
+                .HasOne(l => l.Class)
+                .WithMany(c => c.LearningResults)
+                .HasForeignKey(l => l.ClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Material>()
+                .HasOne(m => m.Class)
+                .WithMany(c => c.Materials)
+                .HasForeignKey(m => m.ClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Room>()
+                .HasIndex(r => r.RoomCode)
+                .IsUnique();
+
+            modelBuilder.Entity<Enrollment>()
+                .HasIndex(e => new
+                {
+                    e.StudentId,
+                    e.ClassId
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<Attendance>()
+                .HasIndex(a => new
+                {
+                    a.StudentId,
+                    a.ClassId,
+                    a.AttendanceDate
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<ExamQuestion>()
+                .HasIndex(eq => new
+                {
+                    eq.ExamId,
+                    eq.QuestionId
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<ExamResult>()
+                .HasIndex(er => new
+                {
+                    er.StudentId,
+                    er.ExamId
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<Course>()
+                .Property(c => c.TuitionFee)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Tuition>()
+                .Property(t => t.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Tuition>()
+                .Property(t => t.PaidAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Exam>()
+                .Property(e => e.MaxScore)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<ExamResult>()
+                .Property(e => e.Score)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<LearningResult>()
+                .Property(l => l.AverageScore)
+                .HasPrecision(5, 2);
         }
     }
 }

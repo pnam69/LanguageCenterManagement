@@ -35,7 +35,9 @@ namespace LanguageCenterManagement.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public ICollection<Enrollment> Enrollments { get; set; }
-            = new List<Enrollment>();
+        public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+        public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
+        public ICollection<ExamResult> ExamResults { get; set; } = new List<ExamResult>();
+        public ICollection<LearningResult> LearningResults { get; set; } = new List<LearningResult>();
     }
 }
