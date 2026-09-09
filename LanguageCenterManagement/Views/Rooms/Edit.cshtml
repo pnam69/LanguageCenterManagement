@@ -1,0 +1,105 @@
+﻿@model LanguageCenterManagement.Models.Room
+
+@{
+    ViewData["Title"] = "Edit Room";
+}
+
+<h1>Edit Room</h1>
+
+<hr />
+
+<form asp-action="Edit" method="post">
+
+    <input type="hidden"
+           asp-for="RoomId" />
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="RoomCode"
+               class="form-label">
+            Room Code
+        </label>
+
+        <input asp-for="RoomCode"
+               class="form-control" />
+
+        <span asp-validation-for="RoomCode"
+              class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="RoomName"
+               class="form-label">
+            Room Name
+        </label>
+
+        <input asp-for="RoomName"
+               class="form-control" />
+
+        <span asp-validation-for="RoomName"
+              class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Capacity"
+               class="form-label">
+            Capacity
+        </label>
+
+        <input asp-for="Capacity"
+               type="number"
+               min="1"
+               class="form-control" />
+
+        <span asp-validation-for="Capacity"
+              class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status"
+               class="form-label">
+            Status
+        </label>
+
+        <select asp-for="Status"
+                class="form-select">
+
+            <option value="Available">
+                Available
+            </option>
+
+            <option value="InUse">
+                In Use
+            </option>
+
+            <option value="Maintenance">
+                Maintenance
+            </option>
+
+            <option value="Inactive">
+                Inactive
+            </option>
+
+        </select>
+
+        <span asp-validation-for="Status"
+              class="text-danger"></span>
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Save Changes
+    </button>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to List
+    </a>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

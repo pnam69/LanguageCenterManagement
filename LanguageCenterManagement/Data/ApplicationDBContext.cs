@@ -55,10 +55,6 @@ namespace LanguageCenterManagement.Data
                 .HasIndex(x => x.CourseCode)
                 .IsUnique();
 
-            modelBuilder.Entity<Course>()
-                .Property(x => x.TuitionFee)
-                .HasPrecision(18, 2);
-
             modelBuilder.Entity<LanguageClass>()
                 .HasIndex(x => x.ClassCode)
                 .IsUnique();

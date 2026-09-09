@@ -8,11 +8,14 @@ namespace LanguageCenterManagement.Controllers
     public class AccountController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AccountController(
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -45,6 +48,22 @@ namespace LanguageCenterManagement.Controllers
                     Url.IsLocalUrl(returnUrl))
                 {
                     return Redirect(returnUrl);
+                }
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null)
+                {
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Index", "Dashboard");
+                    }
+                    else if (await _userManager.IsInRoleAsync(user, "Teacher"))
+                    {
+                        return RedirectToAction("Index", "TeacherDashboard");
+                    }
+                    else if (await _userManager.IsInRoleAsync(user, "Student"))
+                    {
+                        return RedirectToAction("Index", "StudentDashboard");
+                    }
                 }
 
                 return RedirectToAction("Index", "Dashboard");
