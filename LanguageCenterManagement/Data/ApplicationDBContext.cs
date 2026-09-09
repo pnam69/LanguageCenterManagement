@@ -38,6 +38,7 @@ namespace LanguageCenterManagement.Data
         public DbSet<LearningResult> LearningResults { get; set; }
 
         public DbSet<Material> Materials { get; set; }
+        public DbSet<ScheduleChangeRequest> ScheduleChangeRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -276,6 +277,17 @@ namespace LanguageCenterManagement.Data
             modelBuilder.Entity<LearningResult>()
                 .Property(l => l.AverageScore)
                 .HasPrecision(5, 2);
+            modelBuilder.Entity<ScheduleChangeRequest>()
+                .HasOne(r => r.Schedule)
+                .WithMany()
+                .HasForeignKey(r => r.ScheduleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ScheduleChangeRequest>()
+                .HasOne(r => r.Teacher)
+                .WithMany()
+                .HasForeignKey(r => r.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
