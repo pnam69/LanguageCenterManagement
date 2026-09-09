@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<h1>Student Dashboard</h1>
+
+<p>Welcome, @User.Identity?.Name</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>My Classes</h5>
+                <p>View your enrolled classes and schedules.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Attendance</h5>
+                <p>View your attendance records.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Exam Results</h5>
+                <p>View your exam results.</p>
+            </div>
+        </div>
+    </div>
+</div>

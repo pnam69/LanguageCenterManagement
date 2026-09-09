@@ -1,0 +1,65 @@
+﻿@model LanguageCenterManagement.Models.Room
+
+@{
+    ViewData["Title"] = "Room Details";
+}
+
+<h1>Room Details</h1>
+
+<hr />
+
+<dl class="row">
+
+    <dt class="col-sm-3">
+        Room Code
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.RoomCode
+    </dd>
+
+    <dt class="col-sm-3">
+        Room Name
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.RoomName
+    </dd>
+
+    <dt class="col-sm-3">
+        Capacity
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Capacity
+    </dd>
+
+    <dt class="col-sm-3">
+        Status
+    </dt>
+
+    <dd class="col-sm-9">
+        @Model.Status
+    </dd>
+
+</dl>
+
+<div class="mt-3">
+    <a asp-action="Schedule"
+       asp-route-id="@Model.RoomId"
+       class="btn btn-primary">
+        View Schedule
+    </a>
+
+    <a asp-action="Edit"
+       asp-route-id="@Model.RoomId"
+       class="btn btn-warning">
+        Edit
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to List
+    </a>
+
+</div>
