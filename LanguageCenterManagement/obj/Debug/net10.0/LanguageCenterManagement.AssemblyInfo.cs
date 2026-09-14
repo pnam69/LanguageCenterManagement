@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LanguageCenterManagement")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f821a82411c4e5f49ed8ea6d5e283b0477bd2cf8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1f07b4ebec3c0a4df290065f9ec278e48f4711f4")]
 [assembly: System.Reflection.AssemblyProductAttribute("LanguageCenterManagement")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LanguageCenterManagement")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
