@@ -240,6 +240,8 @@ namespace LanguageCenterManagement.Controllers
                 return View(model);
             }
 
+
+
             _context.Schedules.AddRange(schedulesToCreate);
 
             await _context.SaveChangesAsync();
@@ -313,6 +315,30 @@ namespace LanguageCenterManagement.Controllers
                 var selectedRoom = await _context.Rooms
                     .FirstOrDefaultAsync(r => r.RoomId == schedule.RoomId);
 
+                if (selectedClass == null)
+                {
+                    ModelState.AddModelError(
+                        "ClassId",
+                        "The selected class does not exist.");
+                }
+                else
+                {
+                    var teacherConflict = await _context.Schedules
+                        .Include(s => s.Class)
+                        .AnyAsync(s =>
+                            s.ScheduleId != schedule.ScheduleId &&
+                            s.Class != null &&
+                            s.Class.TeacherId == selectedClass.TeacherId &&
+                            s.StudyDate.Date == schedule.StudyDate.Date &&
+                            schedule.StartTime < s.EndTime &&
+                            schedule.EndTime > s.StartTime);
+                    if (teacherConflict)
+                    {
+                        ModelState.AddModelError(
+                            "",
+                            "The teacher of the selected class is already occupied during this time.");
+                    }
+                }
                 if (selectedRoom == null)
                 {
                     ModelState.AddModelError(
