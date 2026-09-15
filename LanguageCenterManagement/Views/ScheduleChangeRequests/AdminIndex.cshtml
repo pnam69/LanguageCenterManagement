@@ -1,0 +1,128 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.ScheduleChangeRequest>
+
+@{
+    ViewData["Title"] = "Schedule Change Requests";
+}
+
+<h1>Schedule Change Requests</h1>
+
+<div class="mb-3">
+    <a asp-controller="Dashboard"
+       asp-action="Index"
+       class="btn btn-secondary">
+        Dashboard
+    </a>
+
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        There are no schedule change requests.
+    </div>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Teacher</th>
+                <th>Class</th>
+                <th>Original Date</th>
+                <th>Time</th>
+                <th>Room</th>
+                <th>Reason</th>
+                <th>Proposed Make-up</th>
+                <th>Status</th>
+                <th>Request Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.Teacher?.FullName
+                    </td>
+
+                    <td>
+                        @item.Schedule?.Class?.ClassName
+                    </td>
+
+                    <td>
+                        @item.Schedule?.StudyDate.ToString("dd/MM/yyyy")
+                    </td>
+
+                    <td>
+                        @item.Schedule?.StartTime.ToString(@"hh\:mm")
+                        -
+                        @item.Schedule?.EndTime.ToString(@"hh\:mm")
+                    </td>
+
+                    <td>
+                        @item.Schedule?.Room?.RoomName
+                    </td>
+
+                    <td>
+                        @item.Reason
+                    </td>
+
+                    <td>
+                        @if (item.ProposedDate.HasValue)
+                        {
+                            <div>
+                                @item.ProposedDate.Value.ToString("dd/MM/yyyy")
+                            </div>
+
+                            @if (item.ProposedStartTime.HasValue &&
+                                 item.ProposedEndTime.HasValue)
+                            {
+                                <div>
+                                    @item.ProposedStartTime.Value.ToString(@"hh\:mm")
+                                    -
+                                    @item.ProposedEndTime.Value.ToString(@"hh\:mm")
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span>-</span>
+                        }
+                    </td>
+
+                    <td>
+                        @item.Status
+                    </td>
+
+                    <td>
+                        @item.RequestDate.ToString("dd/MM/yyyy HH:mm")
+                    </td>
+
+                    <td>
+                        <a asp-action="Review"
+                           asp-route-id="@item.ScheduleChangeRequestId"
+                           class="btn btn-sm btn-primary">
+                            Review
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

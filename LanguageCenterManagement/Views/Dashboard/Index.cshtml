@@ -1,11 +1,203 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Admin Dashboard";
 }
 
-<h1>Dashboard</h1>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p class="text-muted mb-0">
+                Manage the language center's system.
+            </p>
+        </div>
 
-<p>Welcome, @User.Identity?.Name</p>
+        <div>
+            <form asp-controller="Account"
+                  asp-action="Logout"
+                  method="post"
+                  class="d-inline">
+                @Html.AntiForgeryToken()
 
-<p>
-    You are logged in successfully.
-</p>
+                <button type="submit"
+                        class="btn btn-outline-danger">
+                    Log Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <!-- Students -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Students</h5>
+
+                    <p class="card-text">
+                        Manage student information and student records.
+                    </p>
+
+                    <a asp-controller="Students"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Manage Students
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teachers -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Teachers</h5>
+
+                    <p class="card-text">
+                        Manage teachers and teacher information.
+                    </p>
+
+                    <a asp-controller="Teachers"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Manage Teachers
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accounts -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Accounts</h5>
+
+                    <p class="card-text">
+                        Create login accounts and assign roles.
+                    </p>
+
+                    <a asp-controller="Account"
+                       asp-action="Create"
+                       class="btn btn-primary">
+                        Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Courses -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Courses</h5>
+
+                    <p class="card-text">
+                        Manage language courses and tuition information.
+                    </p>
+
+                    <a asp-controller="Courses"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Manage Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classes -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Classes</h5>
+
+                    <p class="card-text">
+                        Manage classes, teachers, and course assignments.
+                    </p>
+
+                    <a asp-controller="LanguageClasses"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Manage Classes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rooms -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Rooms</h5>
+
+                    <p class="card-text">
+                        Manage classrooms, capacity, and room status.
+                    </p>
+
+                    <a asp-controller="Rooms"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Manage Rooms
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedules -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Schedules</h5>
+
+                    <p class="card-text">
+                        Create and manage class schedules and room assignments.
+                    </p>
+
+                    <a asp-controller="Schedules"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Manage Schedules
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Change Requests -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Schedule Change Requests</h5>
+
+                    <p class="card-text">
+                        Review teacher leave and make-up schedule requests.
+                    </p>
+
+                    <a asp-controller="ScheduleChangeRequests"
+                       asp-action="AdminIndex"
+                       class="btn btn-primary">
+                        Review Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrollments -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Enrollments</h5>
+
+                    <p class="card-text">
+                        Manage student class registrations and enrollment status.
+                    </p>
+
+                    <a asp-controller="Enrollments"
+                       asp-action="Index"
+                       class="btn btn-primary">
+                        Manage Enrollments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

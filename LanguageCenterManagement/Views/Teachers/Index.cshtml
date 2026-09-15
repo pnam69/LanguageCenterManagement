@@ -5,6 +5,17 @@
 }
 
 <h1>Teacher Management</h1>
+<form asp-controller="Account"
+      asp-action="Logout"
+      method="post"
+      class="d-inline">
+    @Html.AntiForgeryToken()
+
+    <button type="submit"
+            class="btn btn-outline-danger">
+        Log Out
+    </button>
+</form>
 
 @if (TempData["Success"] != null)
 {

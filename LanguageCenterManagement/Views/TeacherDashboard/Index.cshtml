@@ -7,6 +7,17 @@
 <p>Welcome, @User.Identity?.Name</p>
 
 <div class="row">
+    <form asp-controller="Account"
+          asp-action="Logout"
+          method="post"
+          class="d-inline">
+        @Html.AntiForgeryToken()
+
+        <button type="submit"
+                class="btn btn-outline-danger">
+            Log Out
+        </button>
+    </form>
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
@@ -30,6 +41,27 @@
             <div class="card-body">
                 <h5>Exams</h5>
                 <p>Manage exams and student results.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    Schedule Change Requests
+                </h5>
+
+                <p class="card-text">
+                    Submit and track requests for schedule changes
+                    or make-up classes.
+                </p>
+
+                <a asp-controller="ScheduleChangeRequests"
+                   asp-action="Create"
+                   class="btn btn-primary">
+                    View Requests
+                </a>
             </div>
         </div>
     </div>

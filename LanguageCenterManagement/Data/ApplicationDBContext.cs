@@ -288,6 +288,12 @@ namespace LanguageCenterManagement.Data
                 .WithMany()
                 .HasForeignKey(r => r.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ScheduleChangeRequest>()
+                .HasOne(r => r.MakeUpSchedule)
+                .WithMany()
+                .HasForeignKey(r => r.MakeUpScheduleId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
