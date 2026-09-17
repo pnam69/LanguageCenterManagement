@@ -39,5 +39,9 @@ namespace LanguageCenterManagement.Models
         public DateTime RequestDate { get; set; } = DateTime.Now;
 
         public DateTime? DecisionDate { get; set; }
+
+        public int? ProposedRoomId { get; set; }
+
+        public Room? ProposedRoom { get; set; }
     }
 }

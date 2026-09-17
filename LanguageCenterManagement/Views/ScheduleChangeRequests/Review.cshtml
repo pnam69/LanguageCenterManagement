@@ -5,22 +5,20 @@
 }
 
 <h1>Review Schedule Change Request</h1>
-<div class="mb-3">
-    <a asp-controller="ScheduleChangeRequests"
-       asp-action="AdminIndex"
-       class="btn btn-secondary">
-        Back to Requests
-    </a>
 
-    <a asp-controller="Dashboard"
-       asp-action="Index"
-       class="btn btn-outline-secondary">
-        Dashboard
-    </a>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
 
-</div>
-<div asp-validation-summary="ModelOnly"
-     class="text-danger mb-3"></div>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
 
 <div class="card mb-4">
     <div class="card-header">
@@ -29,6 +27,7 @@
 
     <div class="card-body">
         <dl class="row">
+
             <dt class="col-sm-3">
                 Teacher
             </dt>
@@ -54,9 +53,14 @@
                 Original Time
             </dt>
             <dd class="col-sm-9">
-                @Model.Schedule?.StartTime.ToString(@"hh\:mm")
-                -
-                @Model.Schedule?.EndTime.ToString(@"hh\:mm")
+                @if (Model.Schedule != null)
+                {
+                    <span>
+                        @Model.Schedule.StartTime.ToString(@"hh\:mm")
+                        -
+                        @Model.Schedule.EndTime.ToString(@"hh\:mm")
+                    </span>
+                }
             </dd>
 
             <dt class="col-sm-3">
@@ -74,22 +78,24 @@
             </dd>
 
             <dt class="col-sm-3">
-                Proposed Make-up Date
+                Teacher's Proposed Date
             </dt>
             <dd class="col-sm-9">
                 @(Model.ProposedDate?.ToString("dd/MM/yyyy") ?? "-")
             </dd>
 
             <dt class="col-sm-3">
-                Proposed Make-up Time
+                Teacher's Proposed Time
             </dt>
             <dd class="col-sm-9">
                 @if (Model.ProposedStartTime.HasValue &&
                      Model.ProposedEndTime.HasValue)
                 {
-                    @Model.ProposedStartTime.Value.ToString(@"hh\:mm")
-                    @: -
-                    @Model.ProposedEndTime.Value.ToString(@"hh\:mm")
+                    <span>
+                        @Model.ProposedStartTime.Value.ToString(@"hh\:mm")
+                        -
+                        @Model.ProposedEndTime.Value.ToString(@"hh\:mm")
+                    </span>
                 }
                 else
                 {
@@ -110,34 +116,9 @@
             <dd class="col-sm-9">
                 @Model.Status
             </dd>
+
         </dl>
     </div>
-    @if (Model.ProposedDate.HasValue &&
-     Model.ProposedStartTime.HasValue &&
-     Model.ProposedEndTime.HasValue)
-    {
-        <div class="alert alert-warning mt-3">
-            <strong>Approval behavior:</strong>
-
-            <p class="mb-0">
-                Approving this request will move the original schedule
-                to the proposed date and time. The system will keep the
-                original room if it is available; otherwise, it will
-                automatically look for another suitable room.
-            </p>
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-info mt-3">
-            <strong>No make-up schedule proposed.</strong>
-
-            <p class="mb-0">
-                Approving this request will approve the leave request
-                without changing the current schedule.
-            </p>
-        </div>
-    }
 </div>
 
 @if (Model.Status == "Pending")
@@ -150,9 +131,67 @@
         <div class="card-body">
 
             <form method="post">
+
                 <input type="hidden"
                        name="id"
                        value="@Model.ScheduleChangeRequestId" />
+
+                <div class="mb-3">
+                    <label for="proposedDate"
+                           class="form-label">
+                        Make-up Date
+                    </label>
+
+                    <input type="date"
+                           id="proposedDate"
+                           name="proposedDate"
+                           class="form-control"
+                           value="@(Model.ProposedDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="proposedStartTime"
+                           class="form-label">
+                        Make-up Start Time
+                    </label>
+
+                    <input type="time"
+                           id="proposedStartTime"
+                           name="proposedStartTime"
+                           class="form-control"
+                           value="@(Model.ProposedStartTime?.ToString(@"hh\:mm"))" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="proposedEndTime"
+                           class="form-label">
+                        Make-up End Time
+                    </label>
+
+                    <input type="time"
+                           id="proposedEndTime"
+                           name="proposedEndTime"
+                           class="form-control"
+                           value="@(Model.ProposedEndTime?.ToString(@"hh\:mm"))" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Make-up Room</label>
+                    <select name="roomId" id="roomId" class="form-select">
+                        <option value="">-- Auto-select / keep proposed --</option>
+                    </select>
+                    <div class="form-text">
+                        Leave empty to use the teacher’s proposed room (if available) or auto-select.
+                        You can also force a different room.
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    The administrator can change the proposed make-up
+                    date and time before approving the request.
+                    The system will check teacher and room conflicts
+                    automatically.
+                </div>
 
                 <div class="mb-3">
                     <label for="adminNote"
@@ -183,6 +222,7 @@
                    class="btn btn-secondary">
                     Back
                 </a>
+
             </form>
 
         </div>
@@ -192,6 +232,7 @@ else
 {
     <div class="card">
         <div class="card-body">
+
             <p>
                 This request has already been processed.
             </p>
@@ -206,10 +247,87 @@ else
                 @(Model.DecisionDate?.ToString("dd/MM/yyyy HH:mm") ?? "-")
             </p>
 
+            @if (Model.MakeUpSchedule != null)
+            {
+                <hr />
+
+                <h5>Make-up Schedule</h5>
+
+                <p>
+                    <strong>Date:</strong>
+                    @Model.MakeUpSchedule.StudyDate.ToString("dd/MM/yyyy")
+                </p>
+
+                <p>
+                    <strong>Time:</strong>
+                    @Model.MakeUpSchedule.StartTime.ToString(@"hh\:mm")
+                    -
+                    @Model.MakeUpSchedule.EndTime.ToString(@"hh\:mm")
+                </p>
+
+                <p>
+                    <strong>Room:</strong>
+                    @Model.MakeUpSchedule.Room?.RoomName
+                </p>
+            }
+
             <a asp-action="AdminIndex"
                class="btn btn-secondary">
                 Back
             </a>
+
         </div>
     </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        async function loadAvailableRooms() {
+            const date = document.getElementById("proposedDate")?.value;
+            const startTime = document.getElementById("proposedStartTime")?.value;
+            const endTime = document.getElementById("proposedEndTime")?.value;
+            const roomSelect = document.getElementById("roomId");
+
+            if (!date || !startTime || !endTime) {
+                roomSelect.innerHTML = '<option value="">-- Select date and time first --</option>';
+                return;
+            }
+
+            if (endTime <= startTime) {
+                roomSelect.innerHTML = '<option value="">-- End time must be later than start time --</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `/Schedules/GetAvailableRooms?studyDate=${encodeURIComponent(date)}&startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`
+                );
+
+                if (!response.ok) return;
+
+                const rooms = await response.json();
+
+                roomSelect.innerHTML = '<option value="">-- Auto-select / keep proposed --</option>';
+                rooms.forEach(room => {
+                    const option = document.createElement("option");
+                    option.value = room.id;
+                    option.textContent = room.text;
+                    roomSelect.appendChild(option);
+                });
+
+                if (rooms.length === 0) {
+                    roomSelect.innerHTML = '<option value="">-- No rooms available --</option>';
+                }
+            } catch (error) {
+                console.error("Failed to load available rooms:", error);
+            }
+        }
+
+        // Call when date/time change and on page load
+        ["proposedDate", "proposedStartTime", "proposedEndTime"].forEach(id => {
+            document.getElementById(id)?.addEventListener("change", loadAvailableRooms);
+        });
+        loadAvailableRooms();
+    </script>
 }

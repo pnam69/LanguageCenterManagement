@@ -19,6 +19,8 @@ namespace LanguageCenterManagement.ViewModels
 
         public string? RoomName { get; set; }
 
+        public int? RoomId { get; set; }
+
         [Required]
         [StringLength(500)]
         [Display(Name = "Reason")]

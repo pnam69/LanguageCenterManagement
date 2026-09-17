@@ -2,35 +2,101 @@
     ViewData["Title"] = "Student Dashboard";
 }
 
-<h1>Student Dashboard</h1>
+<div class="container">
 
-<p>Welcome, @User.Identity?.Name</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Student Dashboard</h1>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5>My Classes</h5>
-                <p>View your enrolled classes and schedules.</p>
-            </div>
+            <p class="text-muted mb-0">
+                Welcome, @User.Identity?.Name
+            </p>
+        </div>
+
+        <div>
+            <form asp-controller="Account"
+                  asp-action="Logout"
+                  method="post"
+                  class="d-inline">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-outline-danger">
+                    Log Out
+                </button>
+
+            </form>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5>Attendance</h5>
-                <p>View your attendance records.</p>
-            </div>
-        </div>
-    </div>
+    <div class="row">
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body">
-                <h5>Exam Results</h5>
-                <p>View your exam results.</p>
+        <!-- My Classes -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        My Classes
+                    </h5>
+
+                    <p class="card-text">
+                        View your enrolled classes and schedules.
+                    </p>
+
+                    <a href="#"
+                       class="btn btn-primary">
+                        View Classes
+                    </a>
+
+                </div>
             </div>
         </div>
+
+        <!-- Attendance -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Attendance
+                    </h5>
+
+                    <p class="card-text">
+                        View your attendance records.
+                    </p>
+
+                    <a href="#"
+                       class="btn btn-primary">
+                        View Attendance
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Exam Results -->
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Exam Results
+                    </h5>
+
+                    <p class="card-text">
+                        View your exam results.
+                    </p>
+
+                    <a href="#"
+                       class="btn btn-primary">
+                        View Results
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>

@@ -3,48 +3,317 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - LanguageCenterManagement</title>
+
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/LanguageCenterManagement.styles.css" asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/LanguageCenterManagement.styles.css"
+          asp-append-version="true" />
 </head>
+
 <body>
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
+
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">LanguageCenterManagement</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+
+                @* Brand *@
+                @if (User.IsInRole("Admin"))
+                {
+                    <a class="navbar-brand fw-bold"
+                       asp-controller="Dashboard"
+                       asp-action="Index">
+                        Language Center
+                    </a>
+                }
+                else if (User.IsInRole("Teacher"))
+                {
+                    <a class="navbar-brand fw-bold"
+                       asp-controller="TeacherDashboard"
+                       asp-action="Index">
+                        Language Center
+                    </a>
+                }
+                else if (User.IsInRole("Student"))
+                {
+                    <a class="navbar-brand fw-bold"
+                       asp-controller="StudentDashboard"
+                       asp-action="Index">
+                        Language Center
+                    </a>
+                }
+                else
+                {
+                    <a class="navbar-brand fw-bold"
+                       asp-controller="Home"
+                       asp-action="Index">
+                        Language Center
+                    </a>
+                }
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+
+                <div class="collapse navbar-collapse"
+                     id="mainNavbar">
+
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        @* =========================
+                           ADMIN NAVIGATION
+                           ========================= *@
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Dashboard"
+                                   asp-action="Index">
+                                    Dashboard
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Students"
+                                   asp-action="Index">
+                                    Students
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Teachers"
+                                   asp-action="Index">
+                                    Teachers
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Courses"
+                                   asp-action="Index">
+                                    Courses
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="LanguageClasses"
+                                   asp-action="Index">
+                                    Classes
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Rooms"
+                                   asp-action="Index">
+                                    Rooms
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Schedules"
+                                   asp-action="Index">
+                                    Schedules
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Enrollments"
+                                   asp-action="Index">
+                                    Enrollments
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="ScheduleChangeRequests"
+                                   asp-action="AdminIndex">
+                                    Change Requests
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Account"
+                                   asp-action="Create">
+                                    Accounts
+                                </a>
+                            </li>
+                        }
+
+                        @* =========================
+                           TEACHER NAVIGATION
+                           ========================= *@
+
+                        @if (User.IsInRole("Teacher"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="TeacherDashboard"
+                                   asp-action="Index">
+                                    Dashboard
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="ScheduleChangeRequests"
+                                   asp-action="Index">
+                                    My Schedule Requests
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="ScheduleChangeRequests"
+                                   asp-action="Create">
+                                    Request Schedule Change
+                                </a>
+                            </li>
+                        }
+
+                        @* =========================
+                           STUDENT NAVIGATION
+                           ========================= *@
+
+                        @if (User.IsInRole("Student"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="StudentDashboard"
+                                   asp-action="Index">
+                                    Dashboard
+                                </a>
+                            </li>
+                        }
+
                     </ul>
+
+                    @* =========================
+                       USER / LOGOUT
+                       ========================= *@
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="d-flex align-items-center gap-3">
+
+                            <span class="text-muted">
+                                @User.Identity.Name
+                            </span>
+
+                            <form asp-controller="Account"
+                                  asp-action="Logout"
+                                  method="post"
+                                  class="d-inline">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm">
+                                    Log Out
+                                </button>
+
+                            </form>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary btn-sm"
+                           asp-controller="Account"
+                           asp-action="Login">
+                            Log In
+                        </a>
+                    }
+
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
+
+        @* Global success/error messages *@
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show"
+                 role="alert">
+
+                @TempData["SuccessMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
+                </button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show"
+                 role="alert">
+
+                @TempData["ErrorMessage"]
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
+                </button>
+            </div>
+        }
+
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+
     </div>
 
     <footer class="border-top footer text-muted">
+
         <div class="container">
-            &copy; 2026 - LanguageCenterManagement - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - LanguageCenterManagement -
+            <a asp-controller="Home"
+               asp-action="Privacy">
+                Privacy
+            </a>
         </div>
+
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

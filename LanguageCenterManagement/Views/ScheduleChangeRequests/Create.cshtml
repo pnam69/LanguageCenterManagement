@@ -51,6 +51,7 @@
 
         <div class="card-body">
             <div class="row">
+
                 <div class="col-md-6 mb-2">
                     <strong>Class:</strong>
                     <span id="className">
@@ -82,13 +83,13 @@
                             : $"{Model.StartTime:hh\\:mm} - {Model.EndTime:hh\\:mm}")
                     </span>
                 </div>
+
             </div>
         </div>
     </div>
 
     <div class="mb-3">
-        <label asp-for="Reason" class="form-label">
-        </label>
+        <label asp-for="Reason" class="form-label"></label>
 
         <textarea asp-for="Reason"
                   class="form-control"
@@ -109,39 +110,71 @@
     </p>
 
     <div class="mb-3">
-        <label asp-for="ProposedDate" class="form-label">
-        </label>
+        <label asp-for="ProposedDate" class="form-label"></label>
 
         <input asp-for="ProposedDate"
                class="form-control"
-               type="date" />
+               type="date"
+               id="proposedDate" />
 
         <span asp-validation-for="ProposedDate"
               class="text-danger"></span>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="ProposedStartTime" class="form-label">
-        </label>
+    <div class="row">
 
-        <input asp-for="ProposedStartTime"
-               class="form-control"
-               type="time" />
+        <div class="col-md-6 mb-3">
+            <label asp-for="ProposedStartTime" class="form-label"></label>
 
-        <span asp-validation-for="ProposedStartTime"
-              class="text-danger"></span>
+            <input asp-for="ProposedStartTime"
+                   class="form-control"
+                   type="time"
+                   id="proposedStartTime" />
+
+            <span asp-validation-for="ProposedStartTime"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="ProposedEndTime" class="form-label"></label>
+
+            <input asp-for="ProposedEndTime"
+                   class="form-control"
+                   type="time"
+                   id="proposedEndTime" />
+
+            <span asp-validation-for="ProposedEndTime"
+                  class="text-danger"></span>
+        </div>
+
     </div>
 
     <div class="mb-3">
-        <label asp-for="ProposedEndTime" class="form-label">
+        <label asp-for="RoomId" class="form-label">
+            Proposed Room
         </label>
 
-        <input asp-for="ProposedEndTime"
-               class="form-control"
-               type="time" />
+        @* <select asp-for="RoomId"
+                asp-items="ViewBag.RoomId"
+                class="form-select"
+                id="roomId">
 
-        <span asp-validation-for="ProposedEndTime"
+            <option value="">-- Select Room --</option>
+
+        </select> *@
+
+        <select asp-for="RoomId"
+                class="form-select"
+                id="roomId">
+            <option value="">-- Select Room --</option>
+        </select>
+
+        <span asp-validation-for="RoomId"
               class="text-danger"></span>
+
+        <div class="form-text">
+            Only rooms available at the proposed date and time will be shown.
+        </div>
     </div>
 
     <button type="submit"
@@ -153,49 +186,70 @@
        class="btn btn-secondary">
         Cancel
     </a>
+
 </form>
 
 @section Scripts {
+
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        const schedules = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                                    schedules?.Select(s => new
+        const schedules = @Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(
+                            schedules?.Select(s => new
                             {
-                                id = s.ScheduleId,
-                                            className = s.Class?.ClassName,
-                                            studyDate = s.StudyDate.ToString("dd/MM/yyyy"),
-                                            startTime = s.StartTime.ToString(@"hh\:mm"),
-                                            endTime = s.EndTime.ToString(@"hh\:mm"),
-                                            roomName = s.Room?.RoomName
+                                    id = s.ScheduleId,
+                                    className = s.Class?.ClassName,
+                                    studyDate = s.StudyDate.ToString("dd/MM/yyyy"),
+                                    startTime = s.StartTime.ToString(@"hh\:mm"),
+                                    endTime = s.EndTime.ToString(@"hh\:mm"),
+                                    roomName = s.Room?.RoomName
                             }) ?? Enumerable.Empty<object>()
-                    ));
-
-        const scheduleSelect = document.getElementById("ScheduleId");
-
-        const className = document.getElementById("className");
-        const roomName = document.getElementById("roomName");
-        const studyDate = document.getElementById("studyDate");
-        const studyTime = document.getElementById("studyTime");
-
-        function updateScheduleInformation() {
-            const selectedId = parseInt(scheduleSelect.value);
-
-            const schedule = schedules.find(
-                x => x.id === selectedId
+                    )
             );
 
+        const scheduleSelect =
+            document.getElementById("ScheduleId");
+
+        const className =
+            document.getElementById("className");
+
+        const roomName =
+            document.getElementById("roomName");
+
+        const studyDate =
+            document.getElementById("studyDate");
+
+        const studyTime =
+            document.getElementById("studyTime");
+
+        function updateScheduleInformation() {
+
+            const selectedId =
+                parseInt(scheduleSelect.value);
+
+            const schedule =
+                schedules.find(x => x.id === selectedId);
+
             if (!schedule) {
+
                 className.textContent = "-";
                 roomName.textContent = "-";
                 studyDate.textContent = "-";
                 studyTime.textContent = "-";
+
                 return;
             }
 
-            className.textContent = schedule.className ?? "-";
-            roomName.textContent = schedule.roomName ?? "-";
-            studyDate.textContent = schedule.studyDate;
+            className.textContent =
+                schedule.className ?? "-";
+
+            roomName.textContent =
+                schedule.roomName ?? "-";
+
+            studyDate.textContent =
+                schedule.studyDate;
+
             studyTime.textContent =
                 `${schedule.startTime} - ${schedule.endTime}`;
         }
@@ -206,5 +260,97 @@
         );
 
         updateScheduleInformation();
+
+
+        async function loadAvailableRooms() {
+
+            const date =
+                document.getElementById("proposedDate").value;
+
+            const startTime =
+                document.getElementById("proposedStartTime").value;
+
+            const endTime =
+                document.getElementById("proposedEndTime").value;
+
+            const roomSelect =
+                document.getElementById("roomId");
+
+            if (!date || !startTime || !endTime) {
+
+                roomSelect.innerHTML =
+                    '<option value="">-- Select date and time first --</option>';
+
+                return;
+            }
+
+            if (endTime <= startTime) {
+
+                roomSelect.innerHTML =
+                    '<option value="">-- End time must be later than start time --</option>';
+
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    `/Schedules/GetAvailableRooms?studyDate=${encodeURIComponent(date)}&startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`
+                );
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const rooms = await response.json();
+
+                roomSelect.innerHTML =
+                    '<option value="">-- Select Room --</option>';
+
+                rooms.forEach(room => {
+
+                    const option =
+                        document.createElement("option");
+
+                    option.value = room.id;
+                    option.textContent = room.text;
+
+                    roomSelect.appendChild(option);
+                });
+
+                if (rooms.length === 0) {
+
+                    roomSelect.innerHTML =
+                        '<option value="">-- No rooms available --</option>';
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to load available rooms:",
+                    error
+                );
+            }
+        }
+
+        document.getElementById("proposedDate")
+            .addEventListener(
+                "change",
+                loadAvailableRooms
+            );
+
+        document.getElementById("proposedStartTime")
+            .addEventListener(
+                "change",
+                loadAvailableRooms
+            );
+
+        document.getElementById("proposedEndTime")
+            .addEventListener(
+                "change",
+                loadAvailableRooms
+            );
+
+        loadAvailableRooms();
     </script>
 }

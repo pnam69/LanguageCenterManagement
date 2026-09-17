@@ -38,7 +38,8 @@
 
         <select asp-for="RoomId"
                 class="form-select"
-                asp-items="ViewBag.RoomId">
+                asp-items="ViewBag.RoomId"
+                id="roomId">
             <option value="">-- Select Room --</option>
         </select>
 
@@ -53,7 +54,8 @@
 
         <input asp-for="StudyDate"
                type="date"
-               class="form-control" />
+               class="form-control"
+               id="studyDate" />
 
         <span asp-validation-for="StudyDate"
               class="text-danger"></span>
@@ -68,7 +70,8 @@
 
             <input asp-for="StartTime"
                    type="time"
-                   class="form-control" />
+                   class="form-control"
+                   id="startTime" />
 
             <span asp-validation-for="StartTime"
                   class="text-danger"></span>
@@ -81,7 +84,8 @@
 
             <input asp-for="EndTime"
                    type="time"
-                   class="form-control" />
+                   class="form-control"
+                   id="endTime" />
 
             <span asp-validation-for="EndTime"
                   class="text-danger"></span>
@@ -118,5 +122,108 @@
 </form>
 
 @section Scripts {
+
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        async function loadAvailableRooms() {
+
+            const date =
+                document.getElementById("studyDate").value;
+
+            const startTime =
+                document.getElementById("startTime").value;
+
+            const endTime =
+                document.getElementById("endTime").value;
+
+            const roomSelect =
+                document.getElementById("roomId");
+
+            if (!date || !startTime || !endTime) {
+                return;
+            }
+
+            if (endTime <= startTime) {
+
+                roomSelect.innerHTML =
+                    '<option value="">-- End time must be later than start time --</option>';
+
+                return;
+            }
+
+            const currentRoomId =
+                roomSelect.value;
+
+            const scheduleId =
+                document.querySelector(
+                    'input[name="ScheduleId"]'
+                ).value;
+
+            try {
+
+                const response = await fetch(
+                    `/Schedules/GetAvailableRooms?studyDate=${encodeURIComponent(date)}&startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}&excludeScheduleId=${scheduleId}`
+                );
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const rooms = await response.json();
+
+                roomSelect.innerHTML =
+                    '<option value="">-- Select Room --</option>';
+
+                rooms.forEach(room => {
+
+                    const option =
+                        document.createElement("option");
+
+                    option.value = room.id;
+                    option.textContent = room.text;
+
+                    if (
+                        currentRoomId &&
+                        currentRoomId == room.id
+                    ) {
+                        option.selected = true;
+                    }
+
+                    roomSelect.appendChild(option);
+                });
+
+                if (rooms.length === 0) {
+
+                    roomSelect.innerHTML =
+                        '<option value="">-- No rooms available --</option>';
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to load available rooms:",
+                    error
+                );
+            }
+        }
+
+        document.getElementById("studyDate")
+            .addEventListener(
+                "change",
+                loadAvailableRooms
+            );
+
+        document.getElementById("startTime")
+            .addEventListener(
+                "change",
+                loadAvailableRooms
+            );
+
+        document.getElementById("endTime")
+            .addEventListener(
+                "change",
+                loadAvailableRooms
+            );
+    </script>
 }

@@ -1,0 +1,193 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.ScheduleChangeRequest>
+
+@{
+    ViewData["Title"] = "My Schedule Change Requests";
+}
+
+<h1>My Schedule Change Requests</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-primary">
+        Submit Schedule Change Request
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You have not submitted any schedule change requests.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Original Date</th>
+                    <th>Original Time</th>
+                    <th>Original Room</th>
+                    <th>Reason</th>
+                    <th>Proposed Make-up</th>
+                    <th>Status</th>
+                    <th>Request Date</th>
+                    <th>Admin Note</th>
+                    <th>Make-up Schedule</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @item.Schedule?.Class?.ClassName
+                        </td>
+
+                        <td>
+                            @if (item.Schedule != null)
+                            {
+                                @item.Schedule.StudyDate.ToString("dd/MM/yyyy")
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.Schedule != null)
+                            {
+                                <span>
+                                    @item.Schedule.StartTime.ToString(@"hh\:mm")
+                                    -
+                                    @item.Schedule.EndTime.ToString(@"hh\:mm")
+                                </span>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @item.Schedule?.Room?.RoomName
+                        </td>
+
+                        <td>
+                            @item.Reason
+                        </td>
+
+                        <td>
+                            @if (item.ProposedDate.HasValue)
+                            {
+                                <div>
+                                    @item.ProposedDate.Value.ToString("dd/MM/yyyy")
+                                </div>
+
+                                @if (item.ProposedStartTime.HasValue &&
+                                     item.ProposedEndTime.HasValue)
+                                {
+                                    <div>
+                                        @item.ProposedStartTime.Value.ToString(@"hh\:mm")
+                                        -
+                                        @item.ProposedEndTime.Value.ToString(@"hh\:mm")
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @item.Status
+                        </td>
+
+                        <td>
+                            @item.RequestDate.ToString("dd/MM/yyyy HH:mm")
+                        </td>
+
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.AdminNote))
+                            {
+                                @item.AdminNote
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.MakeUpSchedule != null)
+                            {
+                                <div>
+                                    <strong>
+                                        @item.MakeUpSchedule.StudyDate.ToString("dd/MM/yyyy")
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    @item.MakeUpSchedule.StartTime.ToString(@"hh\:mm")
+                                    -
+                                    @item.MakeUpSchedule.EndTime.ToString(@"hh\:mm")
+                                </div>
+
+                                <div>
+                                    Room:
+                                    @item.MakeUpSchedule.Room?.RoomName
+                                </div>
+
+                                <div>
+                                    Status:
+                                    @item.MakeUpSchedule.Status
+                                </div>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-controller="TeacherDashboard"
+       asp-action="Index"
+       class="btn btn-secondary">
+        Back to Dashboard
+    </a>
+
+    <form asp-controller="Account"
+          asp-action="Logout"
+          method="post"
+          class="d-inline">
+        @Html.AntiForgeryToken()
+
+        <button type="submit"
+                class="btn btn-danger">
+            Logout
+        </button>
+    </form>
+</div>

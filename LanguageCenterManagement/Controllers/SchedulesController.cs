@@ -467,6 +467,51 @@ namespace LanguageCenterManagement.Controllers
                 .ToList();
         }
 
+        [Authorize(Roles = "Admin,Teacher")]
+        [HttpGet]
+        public async Task<IActionResult> GetAvailableRooms(
+            DateTime studyDate,
+            TimeSpan startTime,
+            TimeSpan endTime,
+            int? excludeScheduleId = null)
+        {
+            if (endTime <= startTime)
+            {
+                return BadRequest();
+            }
+
+            var rooms = await _context.Rooms
+                .Where(r =>
+                    r.Status != "Maintenance" &&
+                    r.Status != "Inactive")
+                .OrderBy(r => r.RoomCode)
+                .ToListAsync();
+
+            var schedules = await _context.Schedules
+                .Where(s =>
+                    s.StudyDate == studyDate.Date &&
+                    s.Status != "Cancelled" &&
+                    s.Status != "TeacherLeave" &&
+                    (!excludeScheduleId.HasValue ||
+                     s.ScheduleId != excludeScheduleId.Value))
+                .ToListAsync();
+
+            var availableRooms = rooms
+                .Where(room =>
+                    !schedules.Any(schedule =>
+                        schedule.RoomId == room.RoomId &&
+                        startTime < schedule.EndTime &&
+                        endTime > schedule.StartTime))
+                .Select(room => new
+                {
+                    id = room.RoomId,
+                    text = $"{room.RoomCode} - {room.RoomName} (Capacity: {room.Capacity})"
+                })
+                .ToList();
+
+            return Json(availableRooms);
+        }
+
         private bool ScheduleExists(int id)
         {
             return _context.Schedules
