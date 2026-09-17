@@ -32,22 +32,23 @@
 
     <div class="row">
 
-        <!-- My Classes -->
+        <!-- My Schedule -->
         <div class="col-md-4 mb-4">
             <div class="card h-100">
                 <div class="card-body">
 
                     <h5 class="card-title">
-                        My Classes
+                        My Schedule
                     </h5>
 
                     <p class="card-text">
-                        View the classes assigned to you.
+                        View your classes, teaching times, and assigned rooms.
                     </p>
 
-                    <a href="#"
+                    <a asp-controller="TeacherSchedule"
+                       asp-action="Index"
                        class="btn btn-primary">
-                        View Classes
+                        View Schedule
                     </a>
 
                 </div>

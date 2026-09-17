@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LanguageCenterManagement.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Teacher")]
     public class EnrollmentsController : Controller
     {
         private readonly ApplicationDbContext _context;

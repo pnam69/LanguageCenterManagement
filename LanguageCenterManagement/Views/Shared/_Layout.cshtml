@@ -180,6 +180,14 @@
 
                             <li class="nav-item">
                                 <a class="nav-link"
+                                   asp-controller="TeacherSchedule"
+                                   asp-action="Index">
+                                    My Schedule
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link"
                                    asp-controller="ScheduleChangeRequests"
                                    asp-action="Index">
                                     My Schedule Requests
@@ -201,13 +209,29 @@
 
                         @if (User.IsInRole("Student"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="StudentDashboard"
-                                   asp-action="Index">
-                                    Dashboard
-                                </a>
-                            </li>
+	                        <li class="nav-item">
+		                        <a class="nav-link"
+		                           asp-controller="StudentDashboard"
+		                           asp-action="Index">
+			                        Dashboard
+		                        </a>
+	                        </li>
+
+	                        <li class="nav-item">
+		                        <a class="nav-link"
+		                           asp-controller="StudentClasses"
+		                           asp-action="Index">
+			                        My Classes
+		                        </a>
+	                        </li>
+
+	                        <li class="nav-item">
+		                        <a class="nav-link"
+		                           asp-controller="StudentSchedule"
+		                           asp-action="Index">
+			                        My Schedule
+		                        </a>
+	                        </li>
                         }
 
                     </ul>
