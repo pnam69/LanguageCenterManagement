@@ -87,6 +87,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW5yb2xsbWVudHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Exams/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXhhbXNcQ3JlYXRlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Exams/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXhhbXNcRGV0YWlscy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Exams/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXhhbXNcRWRpdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Exams/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXhhbXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -117,6 +133,26 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/LanguageClasses/Students.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTGFuZ3VhZ2VDbGFzc2VzXFN0dWRlbnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Questions/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUXVlc3Rpb25zXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Questions/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUXVlc3Rpb25zXERlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Questions/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUXVlc3Rpb25zXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Questions/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUXVlc3Rpb25zXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Questions/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUXVlc3Rpb25zXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Rooms/Create.cshtml]
@@ -209,6 +245,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/TeacherDashboard/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhY2hlckRhc2hib2FyZFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/TeacherExamResults/Enter.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhY2hlckV4YW1SZXN1bHRzXEVudGVyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/TeacherExamResults/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGVhY2hlckV4YW1SZXN1bHRzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/1_PRN211/LanguageCenterManagement/LanguageCenterManagement/Views/Teachers/Create.cshtml]

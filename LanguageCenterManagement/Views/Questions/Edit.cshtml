@@ -1,0 +1,128 @@
+﻿@model LanguageCenterManagement.Models.Question
+
+@{
+	ViewData["Title"] = "Edit Question";
+
+	var answers = Model.Answers.ToList();
+}
+
+<div class="container-fluid px-lg-5 py-4">
+
+	<h2 class="fw-bold mb-4">Edit Question</h2>
+
+	<form asp-action="Edit"
+		  asp-route-id="@Model.QuestionId"
+		  method="post">
+
+		<div asp-validation-summary="ModelOnly"
+			 class="text-danger mb-3"></div>
+
+		<div class="card border-0 shadow-sm">
+
+			<div class="card-body p-4">
+
+				<div class="mb-3">
+
+					<label asp-for="QuestionText"
+						   class="form-label">
+						Question
+					</label>
+
+					<textarea asp-for="QuestionText"
+							  class="form-control"
+							  rows="3"></textarea>
+
+				</div>
+
+				<div class="row">
+
+					<div class="col-md-6 mb-3">
+
+						<label asp-for="QuestionType"
+							   class="form-label">
+							Type
+						</label>
+
+						<select asp-for="QuestionType"
+								class="form-select">
+							<option value="MultipleChoice">
+								Multiple Choice
+							</option>
+						</select>
+
+					</div>
+
+					<div class="col-md-6 mb-3">
+
+						<label asp-for="Score"
+							   class="form-label">
+							Score
+						</label>
+
+						<input asp-for="Score"
+							   type="number"
+							   min="1"
+							   class="form-control" />
+
+					</div>
+
+				</div>
+
+				<hr />
+
+				<h5 class="fw-bold mb-3">
+					Answers
+				</h5>
+
+				@for (int i = 0; i < 4; i++)
+				{
+					var answer = i < answers.Count
+						? answers[i]
+						: null;
+
+					<div class="input-group mb-2">
+
+						<div class="input-group-text">
+
+							<input type="radio"
+								   name="correctAnswer"
+								   value="@i"
+								   @(answer?.IsCorrect == true
+										? "checked"
+										: "") />
+
+						</div>
+
+						<input name="answerTexts"
+							   value="@answer?.AnswerText"
+							   class="form-control"
+							   placeholder="Answer @(i + 1)" />
+
+					</div>
+				}
+
+				<div class="mt-4">
+
+					<button type="submit"
+							class="btn btn-primary">
+						Save Changes
+					</button>
+
+					<a asp-action="Index"
+					   class="btn btn-outline-secondary">
+						Cancel
+					</a>
+
+				</div>
+
+			</div>
+
+		</div>
+
+	</form>
+
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

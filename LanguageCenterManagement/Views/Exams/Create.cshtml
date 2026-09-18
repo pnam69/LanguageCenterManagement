@@ -1,0 +1,256 @@
+﻿@model LanguageCenterManagement.ViewModels.ExamCreateViewModel
+
+@{
+	ViewData["Title"] = "Create Exam";
+
+	var questions =
+		ViewBag.Questions as IEnumerable<LanguageCenterManagement.Models.Question>
+		?? Enumerable.Empty<LanguageCenterManagement.Models.Question>();
+
+	var selectedIds =
+		ViewBag.SelectedQuestionIds as List<int>
+		?? new List<int>();
+}
+
+<div class="container-fluid px-lg-5 py-4">
+
+	<div class="mb-4">
+		<h2 class="fw-bold">Create Exam</h2>
+		<p class="text-muted">
+			Create an exam and select the questions it will contain.
+		</p>
+	</div>
+
+	<form asp-action="Create" method="post">
+
+		<div asp-validation-summary="ModelOnly"
+			 class="text-danger mb-3"></div>
+
+		<div class="card border-0 shadow-sm mb-4">
+			<div class="card-body p-4">
+
+				<h5 class="fw-bold mb-3">Exam Information</h5>
+
+				<div class="row g-3">
+
+					<div class="col-md-6">
+						<label asp-for="ExamName" class="form-label"></label>
+						<input asp-for="ExamName" class="form-control" />
+						<span asp-validation-for="ExamName"
+							  class="text-danger"></span>
+					</div>
+
+					<div class="col-md-6">
+						<label asp-for="ClassId" class="form-label">
+							Class
+						</label>
+
+						<select asp-for="ClassId"
+								asp-items="ViewBag.ClassId"
+								class="form-select">
+							<option value="">-- Select Class --</option>
+						</select>
+
+						<span asp-validation-for="ClassId"
+							  class="text-danger"></span>
+					</div>
+
+					<div class="col-md-3">
+						<label asp-for="ExamType" class="form-label">
+							Exam Type
+						</label>
+
+						<select asp-for="ExamType"
+								class="form-select">
+							<option value="Test">Test</option>
+							<option value="Midterm">Midterm</option>
+							<option value="Final">Final</option>
+							<option value="Quiz">Quiz</option>
+						</select>
+					</div>
+
+					<div class="col-md-3">
+						<label asp-for="ExamDate" class="form-label">
+							Exam Date
+						</label>
+
+						<input asp-for="ExamDate"
+							   type="datetime-local"
+							   class="form-control" />
+					</div>
+
+					<div class="col-md-3">
+						<label asp-for="Duration" class="form-label">
+							Duration (minutes)
+						</label>
+
+						<input asp-for="Duration"
+							   type="number"
+							   class="form-control" />
+
+						<span asp-validation-for="Duration"
+							  class="text-danger"></span>
+					</div>
+
+					<div class="col-md-3">
+						<label asp-for="MaxScore" class="form-label">
+							Max Score
+						</label>
+
+						<input asp-for="MaxScore"
+							   type="number"
+							   step="0.1"
+							   class="form-control" />
+					</div>
+
+					<div class="col-md-4">
+						<label asp-for="Status" class="form-label">
+							Status
+						</label>
+
+						<select asp-for="Status"
+								class="form-select">
+							<option value="Draft">Draft</option>
+							<option value="Published">Published</option>
+							<option value="Completed">Completed</option>
+							<option value="Cancelled">Cancelled</option>
+						</select>
+					</div>
+
+					<div class="col-md-8">
+						<label asp-for="Description"
+							   class="form-label">
+							Description
+						</label>
+
+						<textarea asp-for="Description"
+								  class="form-control"
+								  rows="2"></textarea>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<div class="card border-0 shadow-sm mb-4">
+			<div class="card-body p-4">
+
+				<div class="d-flex justify-content-between
+							align-items-center mb-3">
+
+					<div>
+						<h5 class="fw-bold mb-1">
+							Exam Questions
+						</h5>
+
+						<p class="text-muted mb-0">
+							Select the questions that belong to this exam.
+						</p>
+					</div>
+
+					<a asp-controller="Questions"
+					   asp-action="Create"
+					   class="btn btn-outline-primary">
+						<i class="bi bi-plus-lg me-1"></i>
+						Create Question
+					</a>
+				</div>
+
+				<span asp-validation-for="SelectedQuestionIds"
+					  class="text-danger"></span>
+
+				@if (!questions.Any())
+				{
+					<div class="alert alert-warning">
+						No questions exist yet.
+						Create questions first.
+					</div>
+				}
+				else
+				{
+					<div class="list-group">
+
+						@foreach (var question in questions)
+						{
+							<div class="list-group-item">
+
+								<div class="form-check">
+
+									<input class="form-check-input"
+										   type="checkbox"
+										   name="SelectedQuestionIds"
+										   value="@question.QuestionId"
+										   id="question_@question.QuestionId"
+										   @(selectedIds.Contains(question.QuestionId)
+												? "checked"
+												: "") />
+
+									<label class="form-check-label"
+										   for="question_@question.QuestionId">
+
+										<strong>
+											Question @question.QuestionId
+										</strong>
+
+										<span class="ms-2">
+											@question.QuestionText
+										</span>
+
+										<span class="badge bg-secondary ms-2">
+											@question.Score pt
+										</span>
+
+									</label>
+
+								</div>
+
+								@if (question.Answers.Any())
+								{
+									<div class="ms-4 mt-2 text-muted small">
+										@foreach (var answer in question.Answers)
+										{
+											<div>
+												@if (answer.IsCorrect)
+												{
+													<i class="bi bi-check-circle-fill text-success"></i>
+												}
+												else
+												{
+													<i class="bi bi-circle"></i>
+												}
+
+												@answer.AnswerText
+											</div>
+										}
+									</div>
+								}
+
+							</div>
+						}
+
+					</div>
+				}
+
+			</div>
+		</div>
+
+		<div class="d-flex gap-2">
+			<button type="submit"
+					class="btn btn-primary">
+				<i class="bi bi-check-lg me-1"></i>
+				Create Exam
+			</button>
+
+			<a asp-action="Index"
+			   class="btn btn-outline-secondary">
+				Cancel
+			</a>
+		</div>
+
+	</form>
+
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

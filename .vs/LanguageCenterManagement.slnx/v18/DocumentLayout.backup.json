@@ -3,76 +3,56 @@
   "WorkspaceRootPath": "E:\\1_PRN211\\LanguageCenterManagement\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\teacherattendance\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\teacherattendance\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\controllers\\teacherattendancecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\controllers\\teacherattendancecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\teacherdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\teacherdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\teacherattendance\\take.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\teacherattendance\\take.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\questions\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\questions\\delete.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\viewmodels\\teacherattendanceviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\viewmodels\\teacherattendanceviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\questions\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\questions\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\questions\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\questions\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\exams\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\exams\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\exams\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\exams\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\exams\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\exams\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\questions\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\questions\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\questions\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\questions\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\exams\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\exams\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\account\\logout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\account\\logout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\controllers\\examscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\controllers\\examscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\controllers\\studentattendancecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\controllers\\studentattendancecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\studentattendance\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\studentattendance\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\controllers\\studentexamresultscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\controllers\\studentexamresultscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\studentexamresults\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\studentexamresults\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\studentdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\studentdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\models\\examresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\models\\examresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\models\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\models\\attendance.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\data\\identityseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\data\\identityseeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\viewmodels\\examcreateviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\viewmodels\\examcreateviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -82,7 +62,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -110,236 +90,171 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ApplicationDBContext.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Data\\ApplicationDBContext.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Data\\ApplicationDBContext.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Data\\ApplicationDBContext.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\Data\\ApplicationDBContext.cs",
-              "ViewState": "AgIAADkAAAAAAAAAAADwv0UAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:55:51.21Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Take.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherAttendance\\Take.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\TeacherAttendance\\Take.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherAttendance\\Take.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\TeacherAttendance\\Take.cshtml",
-              "ViewState": "AgIAAK0AAAAAAAAAAAAowMcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:52:31.742Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Index.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherAttendance\\Index.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\TeacherAttendance\\Index.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherAttendance\\Index.cshtml*",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\TeacherAttendance\\Index.cshtml*",
-              "ViewState": "AgIAAEcAAAAAAAAAAAAtwFUAAABHAAAAAAAAAA==",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml*",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml*",
+              "ViewState": "AgIAAFIAAAAAAAAAAAAqwGUAAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:52:08.355Z",
+              "WhenOpened": "2026-09-18T15:02:38.238Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "TeacherAttendanceController.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\TeacherAttendanceController.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Controllers\\TeacherAttendanceController.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\TeacherAttendanceController.cs*",
-              "RelativeToolTip": "LanguageCenterManagement\\Controllers\\TeacherAttendanceController.cs*",
-              "ViewState": "AgIAAHQAAAAAAAAAAAAewIgAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:51:24.219Z",
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "ViewState": "AgIAACgAAAAAAAAAAAAqwD0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-18T15:02:02.701Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "TeacherAttendanceViewModel.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\ViewModels\\TeacherAttendanceViewModel.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\ViewModels\\TeacherAttendanceViewModel.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\ViewModels\\TeacherAttendanceViewModel.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\ViewModels\\TeacherAttendanceViewModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:50:55.869Z",
+              "DocumentIndex": 2,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Details.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Details.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Details.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Questions\\Details.cshtml",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAqwFkAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-18T15:01:38.552Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
-              "ViewState": "AgIAACoAAAAAAAAAAAAAAD0AAAA5AAAAAAAAAA==",
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Edit.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Edit.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Edit.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Questions\\Edit.cshtml",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAqwH8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:48:34.715Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "AccountController.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\AccountController.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Controllers\\AccountController.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\AccountController.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\Controllers\\AccountController.cs",
-              "ViewState": "AgIAAA8BAAAAAAAAAAAUwB8BAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:41:56.248Z",
+              "WhenOpened": "2026-09-18T15:00:23.884Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
-              "Title": "Logout.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Account\\Logout.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Account\\Logout.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Account\\Logout.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\Account\\Logout.cshtml",
-              "ViewState": "AgIAACAAAAAAAAAAAAAmwDYAAAAGAAAAAAAAAA==",
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Create.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Create.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Create.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Questions\\Create.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:39:05.271Z",
+              "WhenOpened": "2026-09-18T14:59:49.465Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Index.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Index.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Index.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Questions\\Index.cshtml",
+              "ViewState": "AgIAAFwAAAAAAAAAAAAqwHQAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-18T14:59:32.856Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAPQAAAAAAAAAAADgvwEBAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:37:09.015Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
               "Title": "Index.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\StudentDashboard\\Index.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\StudentDashboard\\Index.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\StudentDashboard\\Index.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\StudentDashboard\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAKMAAAAAAAAAAAAAAA==",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Index.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Exams\\Index.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Index.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Exams\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJ4AAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:35:55.142Z",
+              "WhenOpened": "2026-09-18T14:59:01.318Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\StudentExamResults\\Index.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\StudentExamResults\\Index.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\StudentExamResults\\Index.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\StudentExamResults\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAADwv2IAAAAGAAAAAAAAAA==",
+              "DocumentIndex": 5,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Details.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Exams\\Details.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Details.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Exams\\Details.cshtml",
+              "ViewState": "AgIAAJIAAAAAAAAAAAAqwKoAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:35:33.943Z",
+              "WhenOpened": "2026-09-18T14:58:49.432Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "StudentExamResultsController.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\StudentExamResultsController.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Controllers\\StudentExamResultsController.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\StudentExamResultsController.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\Controllers\\StudentExamResultsController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:34:54.59Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\StudentAttendance\\Index.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\StudentAttendance\\Index.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\StudentAttendance\\Index.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\StudentAttendance\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGgAAAAGAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Edit.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Exams\\Edit.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Edit.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Exams\\Edit.cshtml",
+              "ViewState": "AgIAAMAAAAAAAAAAAAAqwM8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T05:34:19.154Z",
+              "WhenOpened": "2026-09-18T14:50:12.265Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 9,
-              "Title": "StudentAttendanceController.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\StudentAttendanceController.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Controllers\\StudentAttendanceController.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\StudentAttendanceController.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\Controllers\\StudentAttendanceController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:33:40.219Z",
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAL4AAAAAAAAAAAAawMoAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-18T14:49:42.665Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "ExamResult.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Models\\ExamResult.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Models\\ExamResult.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Models\\ExamResult.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\Models\\ExamResult.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAYwBkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:32:44.312Z",
+              "DocumentIndex": 10,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Create.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Exams\\Create.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Create.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Exams\\Create.cshtml",
+              "ViewState": "AgIAAHgAAAAAAAAAAAAqwIkAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-18T14:48:23.469Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "Attendance.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Models\\Attendance.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Models\\Attendance.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Models\\Attendance.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\Models\\Attendance.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAA1wBYAAAABAAAAAAAAAA==",
+              "DocumentIndex": 11,
+              "Title": "ExamsController.cs",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\ExamsController.cs",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Controllers\\ExamsController.cs",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\ExamsController.cs",
+              "RelativeToolTip": "LanguageCenterManagement\\Controllers\\ExamsController.cs",
+              "ViewState": "AgIAADEBAAAAAAAAAAAIwEcBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:32:25.687Z",
+              "WhenOpened": "2026-09-18T14:44:08.108Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "IdentitySeeder.cs",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Data\\IdentitySeeder.cs",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Data\\IdentitySeeder.cs",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Data\\IdentitySeeder.cs",
-              "RelativeToolTip": "LanguageCenterManagement\\Data\\IdentitySeeder.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAQwCIAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 12,
+              "Title": "ExamCreateViewModel.cs",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\ViewModels\\ExamCreateViewModel.cs",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\ViewModels\\ExamCreateViewModel.cs",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\ViewModels\\ExamCreateViewModel.cs",
+              "RelativeToolTip": "LanguageCenterManagement\\ViewModels\\ExamCreateViewModel.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAIwCIAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-18T05:30:22.613Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\appsettings.json",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\appsettings.json",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\appsettings.json",
-              "RelativeToolTip": "LanguageCenterManagement\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAqAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-09-18T05:28:47.679Z",
+              "WhenOpened": "2026-09-18T14:36:27.842Z",
               "EditorCaption": ""
             }
           ]

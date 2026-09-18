@@ -1,0 +1,90 @@
+﻿@model LanguageCenterManagement.Models.Question
+
+@{
+	ViewData["Title"] = "Question Details";
+}
+
+<div class="container-fluid px-lg-5 py-4">
+
+	<div class="d-flex justify-content-between align-items-center mb-4">
+
+		<h2 class="fw-bold">Question Details</h2>
+
+		<div class="d-flex gap-2">
+
+			<a asp-action="Edit"
+			   asp-route-id="@Model.QuestionId"
+			   class="btn btn-primary">
+				Edit
+			</a>
+
+			<a asp-action="Index"
+			   class="btn btn-outline-secondary">
+				Back
+			</a>
+
+		</div>
+
+	</div>
+
+	<div class="card border-0 shadow-sm">
+
+		<div class="card-body p-4">
+
+			<h5 class="fw-bold">
+				@Model.QuestionText
+			</h5>
+
+			<p class="text-muted">
+				Type: @Model.QuestionType |
+				Score: @Model.Score
+			</p>
+
+			<hr />
+
+			<h5 class="fw-bold mb-3">
+				Answers
+			</h5>
+
+			@foreach (var answer in Model.Answers)
+			{
+				<div class="p-3 border rounded mb-2">
+
+					@if (answer.IsCorrect)
+					{
+						<i class="bi bi-check-circle-fill text-success me-2"></i>
+						<strong>@answer.AnswerText</strong>
+					}
+					else
+					{
+						<i class="bi bi-circle text-muted me-2"></i>
+						@answer.AnswerText
+					}
+
+				</div>
+			}
+
+			@if (Model.ExamQuestions.Any())
+			{
+				<hr />
+
+				<h5 class="fw-bold mb-3">
+					Used In Exams
+				</h5>
+
+				@foreach (var examQuestion in Model.ExamQuestions)
+				{
+					<a asp-controller="Exams"
+					   asp-action="Details"
+					   asp-route-id="@examQuestion.ExamId"
+					   class="d-block mb-2">
+						@examQuestion.Exam?.ExamName
+					</a>
+				}
+			}
+
+		</div>
+
+	</div>
+
+</div>

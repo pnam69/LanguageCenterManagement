@@ -197,6 +197,33 @@
                                     Schedule Requests
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link px-3 rounded hover-bg-light"
+                                   asp-controller="Exams"
+                                   asp-action="Index">
+                                    <i class="bi bi-file-earmark-text me-1"></i>
+                                    Exams
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link px-3 rounded hover-bg-light"
+                                   asp-controller="TeacherExamResults"
+                                   asp-action="Index">
+                                    <i class="bi bi-award me-1"></i>
+                                    Exam Results
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link px-3 rounded hover-bg-light"
+                                   asp-controller="Questions"
+                                   asp-action="Index">
+                                    <i class="bi bi-question-circle me-1"></i>
+                                    Questions
+                                </a>
+                            </li>
                         }
 
                         @if (User.IsInRole("Student"))
