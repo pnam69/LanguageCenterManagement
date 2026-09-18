@@ -272,16 +272,20 @@ namespace LanguageCenterManagement.Controllers
 
             return RedirectToAction(nameof(Create));
         }
+        [Authorize]
+        [HttpGet]
+        public IActionResult LogoutConfirmation()
+        {
+            return View("Logout");
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-
             return RedirectToAction("Login", "Account");
         }
-
         private async Task LoadCreateAccountDropdownsAsync(
             int? selectedTeacherId = null,
             int? selectedStudentId = null)

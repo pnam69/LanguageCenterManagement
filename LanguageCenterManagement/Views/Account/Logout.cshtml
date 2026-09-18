@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Log Out";
+}
+
+<div class="container-fluid mt-5 mb-5 px-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-5 text-center">
+
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle
+                                d-flex align-items-center justify-content-center mx-auto mb-4"
+                         style="width: 70px; height: 70px;">
+                        <i class="bi bi-box-arrow-right fs-2"></i>
+                    </div>
+
+                    <h3 class="fw-bold mb-2">
+                        Log Out
+                    </h3>
+
+                    <p class="text-muted mb-4">
+                        Are you sure you want to log out of your account?
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-2">
+
+                        <form asp-controller="Account"
+                              asp-action="Logout"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-danger px-4">
+                                <i class="bi bi-box-arrow-right me-1"></i>
+                                Log Out
+                            </button>
+
+                        </form>
+
+                        <button type="button"
+                                class="btn btn-outline-secondary px-4"
+                                onclick="history.back()">
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
