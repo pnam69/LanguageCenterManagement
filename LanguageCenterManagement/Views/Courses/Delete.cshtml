@@ -4,40 +4,58 @@
     ViewData["Title"] = "Delete Course";
 }
 
-<h1>Delete Course</h1>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <!-- Header màu đỏ cảnh báo -->
+                <div class="card-header bg-danger text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Course
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <div class="alert alert-warning border-warning d-flex align-items-center mb-4" role="alert">
+                        <i class="bi bi-info-circle-fill me-3 fs-4 text-warning"></i>
+                        <div>
+                            <strong>Are you sure?</strong><br />
+                            You are about to permanently delete this course. This action cannot be undone.
+                        </div>
+                    </div>
 
-<div class="alert alert-danger">
-    Are you sure you want to delete this course?
+                    <!-- Khối hiển thị thông tin khóa học -->
+                    <div class="bg-light p-4 rounded-3 mb-4 border">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted mb-2">Course Code</dt>
+                            <dd class="col-sm-8 fw-bold mb-2">@Model.CourseCode</dd>
+
+                            <dt class="col-sm-4 text-muted mb-2">Course Name</dt>
+                            <dd class="col-sm-8 fw-bold mb-2">@Model.CourseName</dd>
+
+                            <dt class="col-sm-4 text-muted mb-0">Tuition Fee</dt>
+                            <dd class="col-sm-8 fw-bold text-success mb-0">
+                                $@Model.TuitionFee.ToString("N0")
+                            </dd>
+                        </dl>
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="CourseId" />
+                        
+                        <hr class="text-muted mb-4">
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold px-4 shadow-sm">
+                                <i class="bi bi-trash3-fill me-1"></i> Delete Confirm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<dl class="row">
-
-    <dt class="col-sm-3">Course Code</dt>
-    <dd class="col-sm-9">@Model.CourseCode</dd>
-
-    <dt class="col-sm-3">Course Name</dt>
-    <dd class="col-sm-9">@Model.CourseName</dd>
-
-    <dt class="col-sm-3">Tuition Fee</dt>
-    <dd class="col-sm-9">
-        @Model.TuitionFee.ToString("N0")
-    </dd>
-
-</dl>
-
-<form asp-action="Delete" method="post">
-
-    <input type="hidden"
-           asp-for="CourseId" />
-
-    <button type="submit"
-            class="btn btn-danger">
-        Delete
-    </button>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Cancel
-    </a>
-
-</form>

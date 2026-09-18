@@ -1,6 +1,61 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0 rounded-3">
+                <!-- Header của tài liệu -->
+                <div class="card-header bg-primary text-white py-4 rounded-top text-center">
+                    <i class="bi bi-shield-check mb-2" style="font-size: 3rem;"></i>
+                    <h3 class="mb-0 fw-bold">@ViewData["Title"]</h3>
+                    <p class="mb-0 text-white-50 mt-1">Last updated: September 2026</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    
+                    <div class="mb-4">
+                        <p class="lead text-muted">
+                            Welcome to the Language Center Management System. We are committed to protecting your personal information and your right to privacy.
+                        </p>
+                    </div>
+
+                    <!-- Mục 1 -->
+                    <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">1. Information We Collect</h5>
+                    <p class="text-muted mb-4">
+                        We collect personal information that you voluntarily provide to us when you register on the system, express an interest in obtaining information about our courses, or otherwise when you contact us. This includes names, phone numbers, email addresses, and educational records.
+                    </p>
+
+                    <!-- Mục 2 -->
+                    <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">2. How We Use Your Information</h5>
+                    <p class="text-muted mb-2">
+                        We use personal information collected via our system for a variety of educational and administrative purposes, including:
+                    </p>
+                    <ul class="text-muted mb-4">
+                        <li>To facilitate account creation and logon processes.</li>
+                        <li>To manage user accounts (Students, Teachers, Admins).</li>
+                        <li>To track academic progress, attendance, and enrollments.</li>
+                        <li>To send administrative notices and schedule updates to you.</li>
+                    </ul>
+
+                    <!-- Mục 3 -->
+                    <h5 class="fw-bold text-primary border-bottom pb-2 mb-3">3. Data Security</h5>
+                    <p class="text-muted mb-4">
+                        We implement strict organizational and technical security measures to protect your personal data. Only authorized personnel have access to student and teacher records, ensuring that your information remains confidential and secure within our system.
+                    </p>
+
+                    <!-- Khối liên hệ -->
+                    <div class="alert alert-light border d-flex align-items-center mt-5 mb-0" role="alert">
+                        <i class="bi bi-envelope-at-fill text-primary fs-3 me-3"></i>
+                        <div class="text-muted">
+                            <strong>Have questions?</strong><br />
+                            If you have questions or comments about this notice, please contact our administrative office at <a href="mailto:privacy@languagecenter.edu" class="text-decoration-none">privacy@languagecenter.edu</a>.
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

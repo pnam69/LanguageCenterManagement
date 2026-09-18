@@ -11,158 +11,153 @@
         .ToList();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="container-fluid mt-4 mb-5 px-lg-4">
+    
+    <!-- Cụm thông báo (Alerts) -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-    <div>
-        <h1>Schedule Timetable</h1>
-
-        <div class="text-muted">
-            @monday.ToString("dd/MM/yyyy")
-            -
-            @sunday.ToString("dd/MM/yyyy")
+    <!-- Header: Tiêu đề & Nút thao tác -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h3 class="fw-bold text-primary mb-1">
+                <i class="bi bi-calendar3-week me-2"></i>Schedule Timetable
+            </h3>
+            <p class="text-muted mb-0">
+                Displaying schedule from <strong class="text-dark">@monday.ToString("dd/MM/yyyy")</strong> to <strong class="text-dark">@sunday.ToString("dd/MM/yyyy")</strong>
+            </p>
+        </div>
+        
+        <div>
+            <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm fw-bold">
+                <i class="bi bi-calendar-plus-fill me-1"></i> Create Weekly Schedule
+            </a>
         </div>
     </div>
 
-    <a asp-action="Create"
-       class="btn btn-primary">
-        Create Weekly Schedule
-    </a>
-
-</div>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
+    <!-- Thanh điều hướng tuần (Week Navigation) -->
+    <div class="card shadow-sm border-0 rounded-3 mb-4 bg-light">
+        <div class="card-body py-3 d-flex justify-content-center">
+            <div class="btn-group shadow-sm" role="group">
+                <a asp-action="Index" asp-route-weekStart="@monday.AddDays(-7).ToString("yyyy-MM-dd")" class="btn btn-white border bg-white fw-medium px-4">
+                    <i class="bi bi-chevron-left me-1"></i> Previous Week
+                </a>
+                
+                <a asp-action="Index" asp-route-weekStart="@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-primary fw-bold px-4">
+                    <i class="bi bi-calendar-event me-1"></i> Current Week
+                </a>
+                
+                <a asp-action="Index" asp-route-weekStart="@monday.AddDays(7).ToString("yyyy-MM-dd")" class="btn btn-white border bg-white fw-medium px-4">
+                    Next Week <i class="bi bi-chevron-right ms-1"></i>
+                </a>
+            </div>
+        </div>
     </div>
-}
 
-<div class="mb-3">
+    <!-- Bảng lưới Thời khóa biểu -->
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        @if (!Model.Any())
+        {
+            <!-- Trạng thái trống (Empty State) -->
+            <div class="alert alert-light text-center border-0 p-5 mb-0">
+                <i class="bi bi-calendar2-x text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted fw-bold">No Schedules Found</h4>
+                <p class="text-muted mb-0">There are no classes scheduled for the selected week.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0" style="table-layout: fixed;">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center align-middle bg-white" style="width: 100px; border-bottom-width: 2px;">
+                                <i class="bi bi-clock text-primary fs-5"></i>
+                            </th>
 
-    <a asp-action="Index"
-       asp-route-weekStart="@monday.AddDays(-7).ToString("yyyy-MM-dd")"
-       class="btn btn-outline-secondary">
-        Previous Week
-    </a>
-
-    <a asp-action="Index"
-       asp-route-weekStart="@DateTime.Today.ToString("yyyy-MM-dd")"
-       class="btn btn-outline-primary">
-        Current Week
-    </a>
-
-    <a asp-action="Index"
-       asp-route-weekStart="@monday.AddDays(7).ToString("yyyy-MM-dd")"
-       class="btn btn-outline-secondary">
-        Next Week
-    </a>
-
-</div>
-
-<div class="table-responsive">
-
-    <table class="table table-bordered align-middle">
-
-        <thead>
-            <tr>
-                <th style="min-width: 100px;">
-                    Time
-                </th>
-
-                @foreach (var day in days)
-                {
-                    <th class="text-center"
-                        style="min-width: 180px;">
-                        @day.ToString("dddd")
-                        <br />
-                        <small>
-                            @day.ToString("dd/MM")
-                        </small>
-                    </th>
-                }
-            </tr>
-        </thead>
-
-        <tbody>
-
-            @foreach (var time in Model
-                .Select(s => s.StartTime)
-                .Distinct()
-                .OrderBy(t => t))
-            {
-                <tr>
-
-                    <td class="fw-bold">
-                        @time.ToString(@"hh\:mm")
-                    </td>
-
-                    @foreach (var day in days)
-                    {
-                        var daySchedules = Model
-                            .Where(s =>
-                                s.StudyDate.Date == day.Date &&
-                                s.StartTime == time)
-                            .ToList();
-
-                        <td>
-
-                            @foreach (var schedule in daySchedules)
+                            @foreach (var day in days)
                             {
-                                <div class="border rounded p-2 mb-2">
-
-                                    <div class="fw-bold">
-                                        @schedule.Class?.ClassName
+                                <!-- Làm nổi bật cột ngày hiện tại nếu trùng với hôm nay -->
+                                var isToday = day.Date == DateTime.Today;
+                                <th class="text-center p-3 @(isToday ? "bg-primary bg-opacity-10 border-primary" : "")" style="width: 200px; border-bottom-width: 2px;">
+                                    <div class="fw-bold @(isToday ? "text-primary" : "text-dark") fs-6">
+                                        @day.ToString("dddd")
                                     </div>
-
-                                    <div>
-                                        Room:
-                                        @schedule.Room?.RoomCode
+                                    <div class="small @(isToday ? "text-primary fw-bold" : "text-muted")">
+                                        @day.ToString("dd/MM")
                                     </div>
-
-                                    <div>
-                                        @schedule.StartTime.ToString(@"hh\:mm")
-                                        -
-                                        @schedule.EndTime.ToString(@"hh\:mm")
-                                    </div>
-
-                                    <div class="small text-muted">
-                                        @schedule.Class?.Teacher?.FullName
-                                    </div>
-
-                                    <div class="mt-2">
-
-                                        <a asp-action="Edit"
-                                           asp-route-id="@schedule.ScheduleId"
-                                           class="btn btn-sm btn-warning">
-                                            Edit
-                                        </a>
-
-                                        <a asp-action="Details"
-                                           asp-route-id="@schedule.ScheduleId"
-                                           class="btn btn-sm btn-info">
-                                            Details
-                                        </a>
-
-                                    </div>
-
-                                </div>
+                                </th>
                             }
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        @foreach (var time in Model.Select(s => s.StartTime).Distinct().OrderBy(t => t))
+                        {
+                            <tr>
+                                <!-- Cột Thời gian (Trục Y) -->
+                                <td class="text-center fw-bold text-primary bg-light">
+                                    @time.ToString(@"hh\:mm")
+                                </td>
 
-                            @if (!daySchedules.Any())
-                            {
-                                <span class="text-muted">
-                                    —
-                                </span>
-                            }
+                                <!-- Các cột Ngày trong tuần (Trục X) -->
+                                @foreach (var day in days)
+                                {
+                                    var daySchedules = Model.Where(s => s.StudyDate.Date == day.Date && s.StartTime == time).ToList();
+                                    var isToday = day.Date == DateTime.Today;
 
-                        </td>
-                    }
+                                    <td class="p-2 align-top @(isToday ? "bg-primary bg-opacity-10" : "")">
+                                        
+                                        @foreach (var schedule in daySchedules)
+                                        {
+                                            <!-- Thẻ sự kiện lớp học (Event Card) -->
+                                            <div class="card bg-primary bg-opacity-10 border border-primary border-opacity-25 shadow-sm mb-2 h-100">
+                                                <div class="card-body p-2 d-flex flex-column h-100">
+                                                    
+                                                    <div class="fw-bold text-primary border-bottom border-primary border-opacity-25 pb-1 mb-2 lh-sm text-truncate" title="@schedule.Class?.ClassName">
+                                                        @schedule.Class?.ClassName
+                                                    </div>
+                                                    
+                                                    <div class="small text-dark mb-1 text-truncate">
+                                                        <i class="bi bi-door-open-fill text-secondary me-1"></i> Room: <strong class="fw-medium">@schedule.Room?.RoomCode</strong>
+                                                    </div>
+                                                    
+                                                    <div class="small text-dark mb-1 text-truncate">
+                                                        <i class="bi bi-clock-fill text-secondary me-1"></i> @schedule.StartTime.ToString(@"hh\:mm") - @schedule.EndTime.ToString(@"hh\:mm")
+                                                    </div>
+                                                    
+                                                    <div class="small text-muted mb-2 text-truncate" title="@schedule.Class?.Teacher?.FullName">
+                                                        <i class="bi bi-person-badge-fill text-secondary me-1"></i> @schedule.Class?.Teacher?.FullName
+                                                    </div>
+                                                    
+                                                    <!-- Chỉ giữ lại một nút Edit, dàn tràn chiều ngang -->
+                                                    <div class="mt-auto pt-1 d-grid">
+                                                        <a asp-action="Edit" asp-route-id="@schedule.ScheduleId" class="btn btn-sm btn-outline-warning p-1 fw-medium shadow-sm" title="Edit Schedule">
+                                                            <i class="bi bi-pencil me-1"></i> Edit
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
 
-                </tr>
-            }
-
-        </tbody>
-
-    </table>
-
+                                        <!-- Trạng thái ô trống -->
+                                        @if (!daySchedules.Any())
+                                        {
+                                            <div class="d-flex align-items-center justify-content-center h-100 text-muted opacity-25">
+                                                <i class="bi bi-dash-lg"></i>
+                                            </div>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
 </div>

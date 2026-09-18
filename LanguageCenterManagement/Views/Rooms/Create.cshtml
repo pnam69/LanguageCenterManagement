@@ -4,98 +4,78 @@
     ViewData["Title"] = "Create Room";
 }
 
-<h1>Create Room</h1>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-door-open-fill me-2"></i>Create New Room
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-<hr />
+                        <!-- Hàng 1: Room Code & Room Name -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="RoomCode" class="form-control" placeholder="Room Code" />
+                                    <label asp-for="RoomCode">Room Code</label>
+                                    <span asp-validation-for="RoomCode" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-floating">
+                                    <input asp-for="RoomName" class="form-control" placeholder="Room Name" />
+                                    <label asp-for="RoomName">Room Name</label>
+                                    <span asp-validation-for="RoomName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-<form asp-action="Create" method="post">
+                        <!-- Hàng 2: Capacity & Status -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="Capacity" type="number" min="1" class="form-control" placeholder="Capacity" />
+                                    <label asp-for="Capacity">Capacity</label>
+                                    <span asp-validation-for="Capacity" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="Status" class="form-select">
+                                        <option value="Available">Available</option>
+                                        <option value="InUse">In Use</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                        <option value="Inactive">Inactive</option>
+                                    </select>
+                                    <label asp-for="Status">Status</label>
+                                    <span asp-validation-for="Status" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <div asp-validation-summary="ModelOnly"
-         class="text-danger mb-3"></div>
+                        <hr class="text-muted mb-4">
 
-    <div class="mb-3">
-        <label asp-for="RoomCode"
-               class="form-label">
-            Room Code
-        </label>
-
-        <input asp-for="RoomCode"
-               class="form-control" />
-
-        <span asp-validation-for="RoomCode"
-              class="text-danger"></span>
+                        <!-- Các nút hành động -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm">
+                                Create Room
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="RoomName"
-               class="form-label">
-            Room Name
-        </label>
-
-        <input asp-for="RoomName"
-               class="form-control" />
-
-        <span asp-validation-for="RoomName"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Capacity"
-               class="form-label">
-            Capacity
-        </label>
-
-        <input asp-for="Capacity"
-               type="number"
-               min="1"
-               class="form-control" />
-
-        <span asp-validation-for="Capacity"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Status"
-               class="form-label">
-            Status
-        </label>
-
-        <select asp-for="Status"
-                class="form-select">
-
-            <option value="Available">
-                Available
-            </option>
-
-            <option value="InUse">
-                In Use
-            </option>
-
-            <option value="Maintenance">
-                Maintenance
-            </option>
-
-            <option value="Inactive">
-                Inactive
-            </option>
-
-        </select>
-
-        <span asp-validation-for="Status"
-              class="text-danger"></span>
-    </div>
-
-    <button type="submit"
-            class="btn btn-primary">
-        Create
-    </button>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Back to List
-    </a>
-
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

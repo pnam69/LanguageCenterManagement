@@ -26,33 +26,8 @@ namespace LanguageCenterManagement.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(string? returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
-            // Already logged in → send them to the correct dashboard
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var user = await _userManager.GetUserAsync(User);
-                if (user != null)
-                {
-                    if (await _userManager.IsInRoleAsync(user, "Admin"))
-                    {
-                        return RedirectToAction("Index", "Dashboard");
-                    }
-                    if (await _userManager.IsInRoleAsync(user, "Teacher"))
-                    {
-                        return RedirectToAction("Index", "TeacherDashboard");
-                    }
-                    if (await _userManager.IsInRoleAsync(user, "Student"))
-                    {
-                        return RedirectToAction("Index", "StudentDashboard");
-                    }
-                }
-
-                // Fallback
-                return RedirectToAction("Index", "Dashboard");
-            }
-
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -118,13 +93,7 @@ namespace LanguageCenterManagement.Controllers
 
             return View(model);
         }
-        [HttpGet]
-        public IActionResult AccessDenied(string? returnUrl = null)
-        {
-            ViewBag.ReturnUrl = returnUrl;
 
-            return View();
-        }
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Create()

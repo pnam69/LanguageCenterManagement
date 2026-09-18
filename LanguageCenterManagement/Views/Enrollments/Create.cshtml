@@ -4,109 +4,68 @@
     ViewData["Title"] = "Register Student";
 }
 
-<h1>Register Student</h1>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-person-plus-fill me-2"></i>Register Student
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-<form asp-action="Create" method="post">
+                        <!-- Khối chọn Học viên (Student) -->
+                        <div class="form-floating mb-3">
+                            <select asp-for="StudentId" asp-items="ViewBag.StudentId" class="form-select" id="studentSelect">
+                                <option value="">-- Select Student --</option>
+                            </select>
+                            <label asp-for="StudentId">Student</label>
+                            <span asp-validation-for="StudentId" class="text-danger small"></span>
+                        </div>
 
-    <div asp-validation-summary="ModelOnly"
-         class="text-danger">
+                        <!-- Khối chọn Lớp học (Class) -->
+                        <div class="form-floating mb-3">
+                            <select asp-for="ClassId" asp-items="ViewBag.ClassId" class="form-select" id="classSelect">
+                                <option value="">-- Select Class --</option>
+                            </select>
+                            <label asp-for="ClassId">Class</label>
+                            <span asp-validation-for="ClassId" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Khối trạng thái đăng ký (Status) -->
+                        <div class="form-floating mb-4">
+                            <select asp-for="Status" class="form-select" id="statusSelect">
+                                <option value="Pending">Pending</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Studying">Studying</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                            <label asp-for="Status">Registration Status</label>
+                            <span asp-validation-for="Status" class="text-danger small"></span>
+                        </div>
+
+                        <hr class="text-muted mb-4">
+
+                        <!-- Các nút hành động -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm">
+                                Register
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-
-        <label asp-for="StudentId"
-               class="form-label">
-            Student
-        </label>
-
-        <select asp-for="StudentId"
-                asp-items="ViewBag.StudentId"
-                class="form-select">
-
-            <option value="">
-                -- Select Student --
-            </option>
-
-        </select>
-
-        <span asp-validation-for="StudentId"
-              class="text-danger">
-        </span>
-
-    </div>
-
-    <div class="mb-3">
-
-        <label asp-for="ClassId"
-               class="form-label">
-            Class
-        </label>
-
-        <select asp-for="ClassId"
-                asp-items="ViewBag.ClassId"
-                class="form-select">
-
-            <option value="">
-                -- Select Class --
-            </option>
-
-        </select>
-
-        <span asp-validation-for="ClassId"
-              class="text-danger">
-        </span>
-
-    </div>
-
-    <div class="mb-3">
-
-        <label asp-for="Status"
-               class="form-label">
-            Status
-        </label>
-
-        <select asp-for="Status"
-                class="form-select">
-
-            <option value="Pending">
-                Pending
-            </option>
-
-            <option value="Confirmed">
-                Confirmed
-            </option>
-
-            <option value="Studying">
-                Studying
-            </option>
-
-            <option value="Completed">
-                Completed
-            </option>
-
-            <option value="Cancelled">
-                Cancelled
-            </option>
-
-        </select>
-
-        <span asp-validation-for="Status"
-              class="text-danger">
-        </span>
-
-    </div>
-
-    <button type="submit"
-            class="btn btn-primary">
-        Register
-    </button>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Back
-    </a>
-
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

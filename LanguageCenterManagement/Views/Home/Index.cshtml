@@ -1,8 +1,95 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome to Language Center";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Khối Banner (Hero Section) -->
+<div class="container-fluid px-0 mb-5">
+    <div class="bg-primary text-white text-center py-5 shadow-sm position-relative overflow-hidden">
+        
+        <!-- Các icon trang trí chìm ở background -->
+        <i class="bi bi-globe2 position-absolute opacity-25" style="font-size: 15rem; right: -2rem; top: -3rem;"></i>
+        <i class="bi bi-chat-quote-fill position-absolute opacity-25" style="font-size: 12rem; left: -2rem; bottom: -2rem;"></i>
+
+        <div class="container py-5 position-relative z-1">
+            <h1 class="display-4 fw-bold mb-3">Welcome to Language Center</h1>
+            <p class="lead mb-4 fw-light text-white-50 mx-auto" style="max-width: 600px;">
+                Empowering your future through language learning and professional education management.
+            </p>
+            
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <!-- Tự động đổi nút dựa trên trạng thái đăng nhập -->
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary shadow-sm">
+                        Go to Dashboard
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary shadow-sm">
+                        Login to Portal
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Khối Giới thiệu Điểm nổi bật (Features Section) -->
+<div class="container mb-5 pb-4">
+    <div class="row g-4 text-center">
+        
+        <!-- Feature 1 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-effect">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-journal-check" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Diverse Courses</h4>
+                    <p class="text-muted mb-0">From beginner to advanced levels, offering a wide range of language programs tailored to your needs.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-effect">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-workspace" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Expert Teachers</h4>
+                    <p class="text-muted mb-0">Learn from certified professionals and native speakers dedicated to your success.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-effect">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="bi bi-calendar2-check" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Smart Management</h4>
+                    <p class="text-muted mb-0">Easily track schedules, enrollments, and study progress through our modern system.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Hiệu ứng nổi lên mượt mà khi di chuột vào các khối Feature */
+        .hover-effect {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-effect:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+        }
+    </style>
+}
