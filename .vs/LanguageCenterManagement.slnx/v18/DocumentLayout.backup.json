@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "E:\\1_PRN211\\LanguageCenterManagement\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\teacherdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\teacherdashboard\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -39,10 +43,6 @@
       "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\questions\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|e:\\1_prn211\\languagecentermanagement\\languagecentermanagement\\views\\exams\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{6589B9BE-0940-A2AE-BEF9-99BCF32108EE}|LanguageCenterManagement\\LanguageCenterManagement.csproj|solutionrelative:languagecentermanagement\\views\\exams\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -62,7 +62,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 14,
           "Children": [
             {
               "$type": "Bookmark",
@@ -90,33 +90,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Index.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml*",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml*",
-              "ViewState": "AgIAAFIAAAAAAAAAAAAqwGUAAABDAAAAAAAAAA==",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\TeacherDashboard\\Index.cshtml",
+              "ViewState": "AgIAAFIAAAAAAAAAAAAqwGIAAAA3AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-09-18T15:02:38.238Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Delete.cshtml",
-              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
-              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
-              "ViewState": "AgIAACgAAAAAAAAAAAAqwD0AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-18T15:02:02.701Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Details.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Details.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Details.cshtml",
@@ -129,7 +116,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Edit.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Edit.cshtml",
@@ -142,7 +129,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "Create.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Create.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Create.cshtml",
@@ -155,7 +142,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "Index.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Index.cshtml",
@@ -168,7 +155,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "Index.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Index.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Exams\\Index.cshtml",
@@ -181,7 +168,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Details.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Details.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Exams\\Details.cshtml",
@@ -194,7 +181,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Edit.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Exams\\Edit.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Exams\\Edit.cshtml",
@@ -207,15 +194,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 0,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAL4AAAAAAAAAAAAawMoAAAA4AAAAAAAAAA==",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml*",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml*",
+              "ViewState": "AgIAAMkAAAAAAAAAAAAqwNYAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-09-18T14:49:42.665Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Delete.cshtml",
+              "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Questions\\Delete.cshtml",
+              "ViewState": "AgIAACgAAAAAAAAAAAAqwD0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-18T15:02:02.701Z",
               "EditorCaption": ""
             },
             {
