@@ -1,0 +1,147 @@
+﻿@model LanguageCenterManagement.ViewModels.MaterialFormViewModel
+
+@{
+    ViewData["Title"] = "Add Material";
+}
+
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">Add Material</h2>
+    <p class="text-muted">
+        Add a learning material to one of your classes.
+    </p>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="alert alert-danger"></div>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label asp-for="ClassId"
+                           class="form-label"></label>
+
+                    <select asp-for="ClassId"
+                            asp-items="ViewBag.Classes"
+                            class="form-select">
+                        <option value="">Select class</option>
+                    </select>
+
+                    <span asp-validation-for="ClassId"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MaterialType"
+                           class="form-label"></label>
+
+                    <select asp-for="MaterialType"
+                            class="form-select">
+
+                        <option value="Document">
+                            Document
+                        </option>
+
+                        <option value="Video">
+                            Video
+                        </option>
+
+                        <option value="Link">
+                            External Link
+                        </option>
+
+                        <option value="Audio">
+                            Audio
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+                    </select>
+
+                    <span asp-validation-for="MaterialType"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Title"
+                           class="form-label"></label>
+
+                    <input asp-for="Title"
+                           class="form-control"
+                           placeholder="e.g. Unit 3 Vocabulary" />
+
+                    <span asp-validation-for="Title"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Description"
+                           class="form-label"></label>
+
+                    <textarea asp-for="Description"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Optional description"></textarea>
+
+                    <span asp-validation-for="Description"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="FileUrl"
+                           class="form-label"></label>
+
+                    <input asp-for="FileUrl"
+                           class="form-control"
+                           placeholder="https://..." />
+
+                    <div class="form-text">
+                        Link to a PDF, document, audio file, etc.
+                    </div>
+
+                    <span asp-validation-for="FileUrl"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="ExternalUrl"
+                           class="form-label"></label>
+
+                    <input asp-for="ExternalUrl"
+                           class="form-control"
+                           placeholder="https://..." />
+
+                    <div class="form-text">
+                        Link to YouTube, Google Drive, website, etc.
+                    </div>
+
+                    <span asp-validation-for="ExternalUrl"
+                          class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+                <button type="submit"
+                        class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>
+                    Save Material
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary ms-2">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

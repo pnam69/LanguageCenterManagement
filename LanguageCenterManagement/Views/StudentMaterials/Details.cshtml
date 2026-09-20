@@ -1,0 +1,75 @@
+﻿@model LanguageCenterManagement.Models.Material
+
+@{
+    ViewData["Title"] = "Material";
+}
+
+<div class="mb-4">
+    <a asp-action="Index"
+       class="text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i>
+        Back to My Materials
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+
+        <div class="mb-3">
+            <span class="badge bg-primary">
+                @Model.MaterialType
+            </span>
+        </div>
+
+        <h2 class="fw-bold">
+            @Model.Title
+        </h2>
+
+        <p class="text-muted">
+            @Model.Class?.ClassCode -
+            @Model.Class?.ClassName
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="mb-4">
+                <h6 class="fw-bold">Description</h6>
+
+                <p class="text-muted">
+                    @Model.Description
+                </p>
+            </div>
+        }
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            @if (!string.IsNullOrWhiteSpace(Model.FileUrl))
+            {
+                <a href="@Model.FileUrl"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-primary">
+                    <i class="bi bi-file-earmark me-1"></i>
+                    Open File
+                </a>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.ExternalUrl))
+            {
+                <a href="@Model.ExternalUrl"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>
+                    Open External Link
+                </a>
+            }
+
+        </div>
+
+        <div class="mt-4 pt-3 border-top text-muted small">
+            Added on @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+        </div>
+
+    </div>
+</div>

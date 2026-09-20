@@ -298,6 +298,14 @@
                                     Exam Results
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link px-3 rounded hover-bg-light"
+                                   asp-controller="Materials"
+                                   asp-action="Index">
+                                    <i class="bi bi-award me-1"></i>
+                                    Materials
+                                </a>
+                            </li>
 
                         }
 
@@ -309,6 +317,15 @@
                                    asp-action="Index">
                                     <i class="bi bi-award me-1"></i>
                                     Learning Results
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link px-3 rounded hover-bg-light"
+                                   asp-controller="Materials"
+                                   asp-action="Index">
+                                    <i class="bi bi-award me-1"></i>
+                                    Materials
                                 </a>
                             </li>
                         }
@@ -336,11 +353,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
-                            <li class="nav-item">
+                            @* <li class="nav-item">
                                 <a class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm" asp-controller="Account" asp-action="Register">
                                     Get Started
                                 </a>
-                            </li>
+                            </li> *@
                         }
                     </ul>
                 </div>
