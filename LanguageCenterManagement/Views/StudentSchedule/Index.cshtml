@@ -1,0 +1,146 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.Schedule>
+
+@{
+	ViewData["Title"] = "My Schedule";
+
+	DateTime weekStart = ViewBag.WeekStart;
+	DateTime weekEnd = ViewBag.WeekEnd;
+}
+
+<div class="container">
+
+	<div class="d-flex justify-content-between align-items-center mb-4">
+
+		<div>
+			<h1>My Schedule</h1>
+
+			<p class="text-muted mb-0">
+				@weekStart.ToString("dd/MM/yyyy")
+				-
+				@weekEnd.ToString("dd/MM/yyyy")
+			</p>
+		</div>
+
+		<div class="d-flex gap-2">
+
+			<a asp-action="Index"
+			   asp-route-weekStart="@weekStart.AddDays(-7).ToString("yyyy-MM-dd")"
+			   class="btn btn-outline-primary">
+				Previous Week
+			</a>
+
+			<a asp-action="Index"
+			   asp-route-weekStart="@DateTime.Today.ToString("yyyy-MM-dd")"
+			   class="btn btn-outline-secondary">
+				This Week
+			</a>
+
+			<a asp-action="Index"
+			   asp-route-weekStart="@weekStart.AddDays(7).ToString("yyyy-MM-dd")"
+			   class="btn btn-outline-primary">
+				Next Week
+			</a>
+
+		</div>
+
+	</div>
+
+	@if (!Model.Any())
+	{
+		<div class="alert alert-info">
+			You have no classes scheduled for this week.
+		</div>
+	}
+	else
+	{
+		<div class="table-responsive">
+
+			<table class="table table-bordered table-hover align-middle">
+
+				<thead class="table-light">
+					<tr>
+						<th>Date</th>
+						<th>Day</th>
+						<th>Time</th>
+						<th>Class</th>
+						<th>Course</th>
+						<th>Teacher</th>
+						<th>Room</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+
+				<tbody>
+
+					@foreach (var schedule in Model)
+					{
+						<tr>
+
+							<td>
+								@schedule.StudyDate.ToString("dd/MM/yyyy")
+							</td>
+
+							<td>
+								@schedule.StudyDate.ToString("dddd")
+							</td>
+
+							<td>
+								@schedule.StartTime.ToString(@"hh\:mm")
+								-
+								@schedule.EndTime.ToString(@"hh\:mm")
+							</td>
+
+							<td>
+								@schedule.Class?.ClassName
+							</td>
+
+							<td>
+								@schedule.Class?.Course?.CourseName
+							</td>
+
+							<td>
+								@schedule.Class?.Teacher?.FullName
+							</td>
+
+							<td>
+								@schedule.Room?.RoomName
+							</td>
+
+							<td>
+								@if (schedule.Status == "Scheduled")
+								{
+									<span class="badge bg-success">
+										Scheduled
+									</span>
+								}
+								else if (schedule.Status == "TeacherLeave")
+								{
+									<span class="badge bg-warning text-dark">
+										Teacher Leave
+									</span>
+								}
+								else if (schedule.Status == "MakeUp")
+								{
+									<span class="badge bg-info text-dark">
+										Make-up
+									</span>
+								}
+								else
+								{
+									<span class="badge bg-secondary">
+										@schedule.Status
+									</span>
+								}
+							</td>
+
+						</tr>
+					}
+
+				</tbody>
+
+			</table>
+
+		</div>
+	}
+
+</div>

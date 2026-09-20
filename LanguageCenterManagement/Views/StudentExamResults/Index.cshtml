@@ -1,99 +1,106 @@
 ﻿@model IEnumerable<LanguageCenterManagement.Models.ExamResult>
 
 @{
-	ViewData["Title"] = "My Exam Results";
+    ViewData["Title"] = "Exam Results";
 }
 
-<div class="container">
+<div class="container py-4">
 
-	<div class="d-flex justify-content-between align-items-center mb-4">
-		<div>
-			<h1>My Exam Results</h1>
-			<p class="text-muted mb-0">
-				View your exam scores and results.
-			</p>
-		</div>
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">My Exam Results</h2>
+        <p class="text-muted mb-0">
+            View your completed exams and scores.
+        </p>
+    </div>
 
-		<a asp-controller="StudentDashboard"
-		   asp-action="Index"
-		   class="btn btn-outline-secondary">
-			Back to Dashboard
-		</a>
-	</div>
+    <div class="card border-0 shadow-sm">
 
-	@if (!Model.Any())
-	{
-		<div class="alert alert-info">
-			No exam results are available yet.
-		</div>
-	}
-	else
-	{
-		<div class="table-responsive">
+        <div class="card-body p-0">
 
-			<table class="table table-bordered table-hover align-middle">
+            <div class="table-responsive">
 
-				<thead class="table-light">
-					<tr>
-						<th>Exam</th>
-						<th>Score</th>
-						<th>Status</th>
-						<th>Submitted</th>
-						<th>Note</th>
-					</tr>
-				</thead>
+                <table class="table table-hover align-middle mb-0">
 
-				<tbody>
+                    <thead class="table-light">
 
-					@foreach (var result in Model)
-					{
-						<tr>
+                        <tr>
+                            <th>Exam</th>
+                            <th>Class</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th></th>
+                        </tr>
 
-							<td>
-								@result.Exam?.ExamName
-							</td>
+                    </thead>
 
-							<td>
-								<strong>
-									@result.Score.ToString("0.##") / 10
-								</strong>
-							</td>
+                    <tbody>
 
-							<td>
-								@if (result.Status == "Completed")
-								{
-									<span class="badge bg-success">
-										Completed
-									</span>
-								}
-								else
-								{
-									<span class="badge bg-secondary">
-										@result.Status
-									</span>
-								}
-							</td>
+                        @foreach (var result in Model)
+                        {
+                            <tr>
 
-							<td>
-								@(result.SubmittedAt.HasValue
-									? result.SubmittedAt.Value.ToString("dd/MM/yyyy HH:mm")
-									: "-")
-							</td>
+                                <td>
+                                    <strong>
+                                        @result.Exam?.ExamName
+                                    </strong>
+                                </td>
 
-							<td>
-								@(string.IsNullOrWhiteSpace(result.Note)
-									? "-"
-									: result.Note)
-							</td>
+                                <td>
+                                    @result.Exam?.Class?.ClassName
+                                </td>
 
-						</tr>
-					}
+                                <td>
+                                    <strong>
+                                        @result.Score
+                                    </strong>
+                                    /
+                                    @result.Exam?.MaxScore
+                                </td>
 
-				</tbody>
+                                <td>
+                                    <span class="badge bg-success">
+                                        @result.Status
+                                    </span>
+                                </td>
 
-			</table>
+                                <td>
+                                    @(result.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")
+                                        ?? "-")
+                                </td>
 
-		</div>
-	}
+                                <td class="text-end">
+
+                                    <a asp-controller="StudentExams"
+                                       asp-action="Result"
+                                       asp-route-id="@result.ExamResultId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6"
+                                    class="text-center text-muted py-4">
+                                    You have no exam results yet.
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>

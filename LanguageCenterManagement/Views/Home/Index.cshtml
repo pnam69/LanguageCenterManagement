@@ -20,9 +20,24 @@
                 <!-- Tự động đổi nút dựa trên trạng thái đăng nhập -->
                 @if (User.Identity?.IsAuthenticated == true)
                 {
+                    if(User.IsInRole("Admin"))
+                    {
                     <a asp-controller="Dashboard" asp-action="Index" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary shadow-sm">
                         Go to Dashboard
                     </a>
+                    }
+                    else if(User.IsInRole("Teacher"))
+                    {
+                    <a asp-controller="TeacherDashboard" asp-action="Index" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary shadow-sm">
+                        Go to Dashboard
+                    </a>
+                    }
+                    else if(User.IsInRole("Student"))
+                    {
+                    <a asp-controller="StudentDashboard" asp-action="Index" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary shadow-sm">
+                        Go to Dashboard
+                    </a>
+                    }
                 }
                 else
                 {

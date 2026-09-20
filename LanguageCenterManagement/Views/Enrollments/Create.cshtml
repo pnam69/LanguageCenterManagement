@@ -1,72 +1,187 @@
-﻿@model LanguageCenterManagement.Models.Enrollment
+﻿@model LanguageCenterManagement.ViewModels.ExamFormViewModel
 
 @{
-    ViewData["Title"] = "Register Student";
+    ViewData["Title"] = "Create Exam";
 }
 
-<div class="container mt-4 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
-                    <h4 class="mb-0 fw-bold">
-                        <i class="bi bi-person-plus-fill me-2"></i>Register Student
-                    </h4>
-                </div>
-                
-                <div class="card-body p-4 p-md-5">
-                    <form asp-action="Create" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
+<div class="container py-4">
 
-                        <!-- Khối chọn Học viên (Student) -->
-                        <div class="form-floating mb-3">
-                            <select asp-for="StudentId" asp-items="ViewBag.StudentId" class="form-select" id="studentSelect">
-                                <option value="">-- Select Student --</option>
-                            </select>
-                            <label asp-for="StudentId">Student</label>
-                            <span asp-validation-for="StudentId" class="text-danger small"></span>
-                        </div>
+    <div class="mb-4">
+        <h2 class="fw-bold">Create Exam</h2>
+        <p class="text-muted">Create an exam and select its questions.</p>
+    </div>
 
-                        <!-- Khối chọn Lớp học (Class) -->
-                        <div class="form-floating mb-3">
-                            <select asp-for="ClassId" asp-items="ViewBag.ClassId" class="form-select" id="classSelect">
-                                <option value="">-- Select Class --</option>
-                            </select>
-                            <label asp-for="ClassId">Class</label>
-                            <span asp-validation-for="ClassId" class="text-danger small"></span>
-                        </div>
+    <form asp-action="Create" method="post">
 
-                        <!-- Khối trạng thái đăng ký (Status) -->
-                        <div class="form-floating mb-4">
-                            <select asp-for="Status" class="form-select" id="statusSelect">
-                                <option value="Pending">Pending</option>
-                                <option value="Confirmed">Confirmed</option>
-                                <option value="Studying">Studying</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Cancelled">Cancelled</option>
-                            </select>
-                            <label asp-for="Status">Registration Status</label>
-                            <span asp-validation-for="Status" class="text-danger small"></span>
-                        </div>
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
 
-                        <hr class="text-muted mb-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
 
-                        <!-- Các nút hành động -->
-                        <div class="d-flex justify-content-end gap-2">
-                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
-                                Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm">
-                                Register
-                            </button>
-                        </div>
-                    </form>
+                <h5 class="fw-bold mb-3">Exam Information</h5>
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label asp-for="ExamName" class="form-label"></label>
+                        <input asp-for="ExamName" class="form-control" />
+                        <span asp-validation-for="ExamName"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ClassId" class="form-label"></label>
+                        <select asp-for="ClassId"
+                                asp-items="ViewBag.Classes"
+                                class="form-select">
+                            <option value="">-- Select Class --</option>
+                        </select>
+
+                        <span asp-validation-for="ClassId"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="ExamType" class="form-label"></label>
+                        <select asp-for="ExamType" class="form-select">
+                            <option value="Test">Test</option>
+                            <option value="Midterm">Midterm</option>
+                            <option value="Final">Final</option>
+                            <option value="Quiz">Quiz</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="ExamDate" class="form-label"></label>
+                        <input asp-for="ExamDate"
+                               type="datetime-local"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Duration" class="form-label"></label>
+                        <input asp-for="Duration"
+                               type="number"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="MaxScore" class="form-label"></label>
+                        <input asp-for="MaxScore"
+                               type="number"
+                               step="0.1"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Status" class="form-label"></label>
+                        <select asp-for="Status" class="form-select">
+                            <option value="Draft">Draft</option>
+                            <option value="Published">Published</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="3"></textarea>
+                    </div>
+
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">Questions</h5>
+                        <small class="text-muted">
+                            Select the questions included in this exam.
+                        </small>
+                    </div>
+                </div>
+
+                @if (Model.Questions.Any())
+                {
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        <div class="border rounded p-3 mb-2">
+
+                            <input type="hidden"
+                                   asp-for="Questions[i].QuestionId" />
+
+                            <input type="hidden"
+                                   asp-for="Questions[i].QuestionText" />
+
+                            <input type="hidden"
+                                   asp-for="Questions[i].QuestionType" />
+
+                            <input type="hidden"
+                                   asp-for="Questions[i].Score" />
+
+                            <div class="form-check">
+
+                                <input asp-for="Questions[i].Selected"
+                                       class="form-check-input" />
+
+                                <label asp-for="Questions[i].Selected"
+                                       class="form-check-label">
+
+                                    <strong>
+                                        Question @(i + 1)
+                                    </strong>
+
+                                    <br />
+
+                                    @Model.Questions[i].QuestionText
+
+                                    <span class="text-muted">
+                                        (@Model.Questions[i].Score point)
+                                    </span>
+
+                                </label>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        No questions exist yet.
+                        Create questions first.
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg"></i>
+                Create Exam
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

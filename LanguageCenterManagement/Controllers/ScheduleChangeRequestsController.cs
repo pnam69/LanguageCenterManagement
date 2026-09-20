@@ -36,6 +36,8 @@ namespace LanguageCenterManagement.Controllers
                     .ThenInclude(s => s!.Class)
                 .Include(r => r.Schedule)
                     .ThenInclude(s => s!.Room)
+                .Include(r => r.MakeUpSchedule)
+                    .ThenInclude(ms => ms!.Room)
                 .Where(r => r.TeacherId == user.TeacherId.Value)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();

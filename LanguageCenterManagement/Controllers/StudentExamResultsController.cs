@@ -32,6 +32,7 @@ namespace LanguageCenterManagement.Controllers
 
             var results = await _context.ExamResults
                 .Include(r => r.Exam)
+                    .ThenInclude(e => e!.Class)
                 .Where(r => r.StudentId == user.StudentId.Value)
                 .OrderByDescending(r => r.SubmittedAt)
                 .ToListAsync();

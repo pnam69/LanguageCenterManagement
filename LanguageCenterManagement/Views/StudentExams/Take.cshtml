@@ -1,0 +1,141 @@
+﻿@model LanguageCenterManagement.ViewModels.StudentExamViewModel
+
+@{
+    ViewData["Title"] = "Take Exam";
+}
+
+<div class="container py-4">
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        @Model.ExamName
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        @Model.ClassName
+                    </p>
+                </div>
+
+                <div class="text-end">
+                    <div class="text-muted small">
+                        Duration
+                    </div>
+
+                    <strong>
+                        @Model.Duration minutes
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+
+        Once you submit the exam, you cannot submit it again.
+        Make sure you have answered all questions before submitting.
+    </div>
+
+    <form asp-action="Take"
+          method="post"
+          id="examForm">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="ExamId"
+               value="@Model.ExamId" />
+
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var question = Model.Questions[i];
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <h5 class="fw-bold">
+                            Question @question.QuestionOrder
+                        </h5>
+
+                        <span class="badge bg-secondary">
+                            @question.Score point
+                        </span>
+
+                    </div>
+
+                    <p class="fs-5 mt-3">
+                        @question.QuestionText
+                    </p>
+
+                    <input type="hidden"
+                           name="Answers[@i].QuestionId"
+                           value="@question.QuestionId" />
+
+                    @foreach (var answer in question.Answers)
+                    {
+                        <div class="form-check border rounded p-3 mb-2">
+
+                            <input class="form-check-input ms-0 me-2"
+                                   type="radio"
+                                   name="Answers[@i].AnswerId"
+                                   value="@answer.AnswerId"
+                                   id="answer_@answer.AnswerId" />
+
+                            <label class="form-check-label"
+                                   for="answer_@answer.AnswerId">
+
+                                @answer.AnswerText
+
+                            </label>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+        }
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body text-center">
+
+                <h5 class="fw-bold">
+                    Ready to submit?
+                </h5>
+
+                <p class="text-muted">
+                    Check your answers before submitting.
+                </p>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg"
+                        onclick="return confirm('Are you sure you want to submit this exam? You cannot retake it afterwards.');">
+                    <i class="bi bi-send me-1"></i>
+                    Submit Exam
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary btn-lg ms-2">
+                    Exit
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>

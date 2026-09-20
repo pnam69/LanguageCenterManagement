@@ -63,10 +63,28 @@
                     <ul class="navbar-nav flex-grow-1 ms-lg-4 fw-medium gap-1">
 
                         <!-- Home -->
+                        @{
+                            string controller = "Home";
+                            string action = "Index";
+
+                            if (User.IsInRole("Admin"))
+                            {
+                                controller = "Dashboard";
+                            }
+                            else if (User.IsInRole("Teacher"))
+                            {
+                                controller = "TeacherDashboard";
+                            }
+                            else if (User.IsInRole("Student"))
+                            {
+                                controller = "StudentDashboard";
+                            }
+                        }
+
                         <li class="nav-item">
                             <a class="nav-link px-3 rounded hover-bg-light"
-                               asp-controller="Home"
-                               asp-action="Index">
+                               asp-controller="@controller"
+                               asp-action="@action">
                                 <i class="bi bi-house me-1"></i>
                                 Home
                             </a>
@@ -172,17 +190,26 @@
                                             Accounts
                                         </a>
                                     </li>
+                                    <li>
+                                        <a class="dropdown-item py-2"
+                                           asp-controller="StudentLearningResults"
+                                           asp-action="Index">
+                                            <i class="bi bi-bar-chart-line me-2"></i>
+                                            My Results
+                                        </a>
+                                    </li>
 
                                 </ul>
                             </li>
                         }
+
 
                         @if (User.IsInRole("Teacher"))
                         {
                             <!-- Teacher Menu -->
                             <li class="nav-item">
                                 <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="TeacherSchedule"
+                                   asp-controller="TeacherSchedules"
                                    asp-action="Index">
                                     <i class="bi bi-calendar3-week me-1"></i>
                                     My Schedule
@@ -192,7 +219,7 @@
                             <li class="nav-item">
                                 <a class="nav-link px-3 rounded hover-bg-light"
                                    asp-controller="ScheduleChangeRequests"
-                                   asp-action="Index">
+                                   asp-action="Create">
                                     <i class="bi bi-arrow-repeat me-1"></i>
                                     Schedule Requests
                                 </a>
@@ -255,13 +282,33 @@
                                     Attendance
                                 </a>
                             </li>
-
+                            <li class="nav-item">
+                                <a class="nav-link px-3 rounded hover-bg-light"
+                                   asp-controller="StudentExams"
+                                   asp-action="Index">
+                                    <i class="bi bi-file-earmark-text me-2"></i>
+                                    My Exams
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link px-3 rounded hover-bg-light"
                                    asp-controller="StudentExamResults"
                                    asp-action="Index">
                                     <i class="bi bi-award me-1"></i>
                                     Exam Results
+                                </a>
+                            </li>
+
+                        }
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link px-3 rounded hover-bg-light"
+                                   asp-controller="LearningResults"
+                                   asp-action="Index">
+                                    <i class="bi bi-award me-1"></i>
+                                    Learning Results
                                 </a>
                             </li>
                         }

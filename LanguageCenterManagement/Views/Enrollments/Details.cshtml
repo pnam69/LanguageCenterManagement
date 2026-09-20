@@ -1,89 +1,250 @@
-﻿@model LanguageCenterManagement.Models.Enrollment
+﻿@model LanguageCenterManagement.Models.Exam
 
 @{
-    ViewData["Title"] = "Enrollment Details";
+    ViewData["Title"] = "Exam Details";
 }
 
-<div class="container mt-4 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-lg border-0 rounded-3">
-                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
-                    <h4 class="mb-0 fw-bold">
-                        <i class="bi bi-card-checklist me-2"></i>Enrollment Details
-                    </h4>
-                </div>
-                
-                <div class="card-body p-4 p-md-5">
-                    
-                    <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Registration Information</h5>
-                    
-                    <!-- Khối thông tin đăng ký -->
-                    <div class="bg-light p-4 rounded-3 border mb-4">
-                        <dl class="row mb-0">
-                            <!-- Student & Date -->
-                            <div class="col-md-6 mb-3">
-                                <dt class="text-muted mb-1">Student</dt>
-                                <dd class="fw-bold text-primary fs-6 mb-0">@Model.Student?.FullName</dd>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <dt class="text-muted mb-1">Registration Date</dt>
-                                <dd class="fw-bold fs-6 mb-0">@Model.RegistrationDate.ToString("dd/MM/yyyy")</dd>
-                            </div>
+<div class="container py-4">
 
-                            <!-- Class & Course -->
-                            <div class="col-md-6 mb-3">
-                                <dt class="text-muted mb-1">Class</dt>
-                                <dd class="fw-bold fs-6 mb-0">@Model.Class?.ClassName</dd>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <dt class="text-muted mb-1">Course</dt>
-                                <dd class="fw-bold fs-6 mb-0">@Model.Class?.Course?.CourseName</dd>
-                            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-                            <!-- Status -->
-                            <div class="col-md-12 mb-0 mt-2">
-                                <dt class="text-muted mb-2">Status</dt>
-                                <dd class="mb-0">
-                                    @if (Model.Status == "Confirmed" || Model.Status == "Studying")
-                                    {
-                                        <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
-                                    }
-                                    else if (Model.Status == "Cancelled")
-                                    {
-                                        <span class="badge bg-danger px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
-                                    }
-                                    else if (Model.Status == "Pending")
-                                    {
-                                        <span class="badge bg-warning text-dark px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
-                                    }
-                                    else if (Model.Status == "Completed")
-                                    {
-                                        <span class="badge bg-info text-dark px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
-                                    }
-                                </dd>
-                            </div>
-                        </dl>
-                    </div>
+        <div>
+            <h2 class="fw-bold mb-1">@Model.ExamName</h2>
 
-                    <hr class="text-muted my-4">
+            <p class="text-muted mb-0">
+                @Model.Class?.ClassName
+            </p>
+        </div>
 
-                    <!-- Các nút hành động -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <a asp-action="Index" class="btn btn-light btn-lg border px-4">
-                            <i class="bi bi-arrow-left me-1"></i> Back to List
-                        </a>
-                        <a asp-action="Edit" asp-route-id="@Model.EnrollmentId" class="btn btn-warning btn-lg fw-bold px-4 shadow-sm text-dark">
-                            <i class="bi bi-pencil-square me-1"></i> Edit Enrollment
-                        </a>
-                    </div>
-                    
+        <div class="d-flex gap-2">
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.ExamId"
+               class="btn btn-primary">
+                <i class="bi bi-pencil"></i>
+                Edit
+            </a>
+
+            <a asp-action="Delete"
+               asp-route-id="@Model.ExamId"
+               class="btn btn-outline-danger">
+                Delete
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <h5 class="fw-bold mb-3">Exam Information</h5>
+
+                    <p>
+                        <strong>Class:</strong>
+                        @Model.Class?.ClassName
+                    </p>
+
+                    <p>
+                        <strong>Course:</strong>
+                        @Model.Class?.Course?.CourseName
+                    </p>
+
+                    <p>
+                        <strong>Teacher:</strong>
+                        @Model.Class?.Teacher?.FullName
+                    </p>
+
+                    <p>
+                        <strong>Type:</strong>
+                        @Model.ExamType
+                    </p>
+
+                    <p>
+                        <strong>Date:</strong>
+                        @Model.ExamDate.ToString("dd/MM/yyyy HH:mm")
+                    </p>
+
+                    <p>
+                        <strong>Duration:</strong>
+                        @Model.Duration minutes
+                    </p>
+
+                    <p>
+                        <strong>Maximum Score:</strong>
+                        @Model.MaxScore
+                    </p>
+
+                    <p>
+                        <strong>Status:</strong>
+                        @Model.Status
+                    </p>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <hr />
+
+                        <strong>Description</strong>
+
+                        <p class="text-muted">
+                            @Model.Description
+                        </p>
+                    }
+
                 </div>
             </div>
+
+        </div>
+
+        <div class="col-md-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <h5 class="fw-bold mb-0">
+                            Questions
+                        </h5>
+
+                        <span class="badge bg-primary">
+                            @Model.ExamQuestions.Count questions
+                        </span>
+
+                    </div>
+
+                    @if (Model.ExamQuestions.Any())
+                    {
+                        @foreach (var examQuestion in Model.ExamQuestions
+                            .OrderBy(eq => eq.QuestionOrder))
+                        {
+                            <div class="border rounded p-3 mb-3">
+
+                                <div class="d-flex justify-content-between">
+
+                                    <strong>
+                                        Question @examQuestion.QuestionOrder
+                                    </strong>
+
+                                    <span class="text-muted">
+                                        @examQuestion.Question?.Score point
+                                    </span>
+
+                                </div>
+
+                                <p class="mt-2 mb-2">
+                                    @examQuestion.Question?.QuestionText
+                                </p>
+
+                                @if (examQuestion.Question?.Answers != null &&
+                                    examQuestion.Question.Answers.Any())
+                                {
+                                    <ul class="mb-0">
+
+                                        @foreach (var answer in examQuestion.Question.Answers)
+                                        {
+                                            <li>
+                                                @answer.AnswerText
+
+                                                @if (answer.IsCorrect)
+                                                {
+                                                    <span class="badge bg-success ms-2">
+                                                        Correct
+                                                    </span>
+                                                }
+                                            </li>
+                                        }
+
+                                    </ul>
+                                }
+
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            This exam does not have any questions yet.
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                Student Results
+            </h5>
+
+            @if (Model.ExamResults.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Submitted</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var result in Model.ExamResults)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @result.Student?.FullName
+                                    </td>
+
+                                    <td>
+                                        <strong>
+                                            @result.Score / @Model.MaxScore
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @result.Status
+                                    </td>
+
+                                    <td>
+                                        @(result.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            ?? "-")
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    No student results yet.
+                </p>
+            }
+
         </div>
     </div>
+
 </div>

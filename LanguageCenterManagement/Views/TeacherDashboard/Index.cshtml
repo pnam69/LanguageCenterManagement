@@ -65,6 +65,28 @@
             </div>
         </div>
 
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-calendar3 fs-2 text-primary"></i>
+                    </div>
+
+                    <h5 class="fw-bold">My Schedule</h5>
+
+                    <p class="text-muted">
+                        View your weekly teaching schedule and classroom assignments.
+                    </p>
+
+                    <a asp-controller="TeacherSchedules"
+                       asp-action="Index"
+                       class="btn btn-outline-primary">
+                        View Schedule
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Exams -->
         <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-3 border-start border-warning border-4 h-100">
@@ -78,8 +100,7 @@
                     <p class="text-muted mb-4 flex-grow-1">
                         Manage exam schedules, grade student submissions, and update academic results.
                     </p>
-                    <!-- Nút bấm chờ gắn link -->
-                    <a asp-controller="Exam" asp-action="Create" class="btn btn-outline-warning fw-medium w-100 shadow-sm text-dark">
+                    <a asp-controller="Exams" asp-action="Index" class="btn btn-outline-warning fw-medium w-100 shadow-sm text-dark">
                         Manage Exams <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -93,12 +114,31 @@
                         <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
                             <i class="bi bi-file-earmark-text-fill fs-3"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">Exams</h5>
+                        <h5 class="fw-bold text-dark mb-0">Exam Results</h5>
                     </div>
                     <p class="text-muted mb-4 flex-grow-1">
-                        Manage questions, create exams.
+                        Manage exam results, view student performance, and generate reports for your classes.
                     </p>
-                    <!-- Nút bấm chờ gắn link -->
+                    <a asp-controller="TeacherExamResults" asp-action="Index" class="btn btn-outline-warning fw-medium w-100 shadow-sm text-dark">
+                        Manage Exam Results <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 border-start border-warning border-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
+                            <i class="bi bi-file-earmark-text-fill fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">Questions</h5>
+                    </div>
+                    <p class="text-muted mb-4 flex-grow-1">
+                        Manage questions.
+                    </p>
                     <a asp-controller="Questions" asp-action="Index" class="btn btn-outline-warning fw-medium w-100 shadow-sm text-dark">
                         Manage Questions <i class="bi bi-arrow-right ms-1"></i>
                     </a>

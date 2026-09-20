@@ -1,79 +1,80 @@
-﻿@model LanguageCenterManagement.Models.Enrollment
+﻿@model LanguageCenterManagement.Models.Exam
 
 @{
-    ViewData["Title"] = "Delete Enrollment";
+    ViewData["Title"] = "Delete Exam";
 }
 
-<div class="container mt-4 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg border-0 rounded-3">
-                <!-- Header màu đỏ cảnh báo -->
-                <div class="card-header bg-danger text-white text-center py-3 rounded-top">
-                    <h4 class="mb-0 fw-bold">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Enrollment
-                    </h4>
-                </div>
-                
-                <div class="card-body p-4 p-md-5">
-                    <div class="alert alert-warning border-warning d-flex align-items-center mb-4" role="alert">
-                        <i class="bi bi-info-circle-fill me-3 fs-4 text-warning"></i>
-                        <div>
-                            <strong>Are you sure?</strong><br />
-                            You are about to permanently delete this enrollment record. This action cannot be undone.
-                        </div>
-                    </div>
+<div class="container py-4">
 
-                    <!-- Khối hiển thị thông tin đăng ký học -->
-                    <div class="bg-light p-4 rounded-3 mb-4 border">
-                        <dl class="row mb-0">
-                            <dt class="col-sm-5 text-muted mb-3">Student</dt>
-                            <dd class="col-sm-7 fw-bold text-primary mb-3">@Model.Student?.FullName</dd>
+    <div class="card border-0 shadow-sm">
 
-                            <dt class="col-sm-5 text-muted mb-3">Class</dt>
-                            <dd class="col-sm-7 fw-bold mb-3">@Model.Class?.ClassName</dd>
+        <div class="card-body">
 
-                            <dt class="col-sm-5 text-muted mb-3">Registration Date</dt>
-                            <dd class="col-sm-7 fw-bold mb-3">@Model.RegistrationDate.ToString("dd/MM/yyyy")</dd>
+            <h2 class="fw-bold text-danger mb-3">
+                Delete Exam
+            </h2>
 
-                            <dt class="col-sm-5 text-muted mb-0">Status</dt>
-                            <dd class="col-sm-7 fw-bold mb-0">
-                                @if (Model.Status == "Confirmed" || Model.Status == "Studying")
-                                {
-                                    <span class="text-success">@Model.Status</span>
-                                }
-                                else if (Model.Status == "Cancelled")
-                                {
-                                    <span class="text-danger">@Model.Status</span>
-                                }
-                                else if (Model.Status == "Pending")
-                                {
-                                    <span class="text-warning text-dark">@Model.Status</span>
-                                }
-                                else
-                                {
-                                    <span class="text-secondary">@Model.Status</span>
-                                }
-                            </dd>
-                        </dl>
-                    </div>
-
-                    <form asp-action="Delete" method="post">
-                        <input type="hidden" asp-for="EnrollmentId" />
-                        
-                        <hr class="text-muted mb-4">
-
-                        <div class="d-flex justify-content-end gap-2">
-                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
-                                Cancel
-                            </a>
-                            <button type="submit" class="btn btn-danger btn-lg fw-bold px-4 shadow-sm">
-                                <i class="bi bi-trash3-fill me-1"></i> Delete Confirm
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div class="alert alert-warning">
+                Are you sure you want to delete this exam?
+                Its questions assigned through ExamQuestions and its
+                recorded results will also be deleted.
             </div>
+
+            <dl class="row">
+
+                <dt class="col-sm-3">
+                    Exam Name
+                </dt>
+
+                <dd class="col-sm-9">
+                    @Model.ExamName
+                </dd>
+
+                <dt class="col-sm-3">
+                    Class
+                </dt>
+
+                <dd class="col-sm-9">
+                    @Model.Class?.ClassName
+                </dd>
+
+                <dt class="col-sm-3">
+                    Date
+                </dt>
+
+                <dd class="col-sm-9">
+                    @Model.ExamDate.ToString("dd/MM/yyyy HH:mm")
+                </dd>
+
+                <dt class="col-sm-3">
+                    Questions
+                </dt>
+
+                <dd class="col-sm-9">
+                    @Model.ExamQuestions.Count
+                </dd>
+
+            </dl>
+
+            <form asp-action="Delete" method="post">
+
+                <input type="hidden" asp-for="ExamId" />
+
+                <button type="submit"
+                        class="btn btn-danger">
+                    <i class="bi bi-trash"></i>
+                    Delete Exam
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+
+            </form>
+
         </div>
+
     </div>
+
 </div>

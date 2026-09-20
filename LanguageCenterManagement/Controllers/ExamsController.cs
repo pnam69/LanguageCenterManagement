@@ -2,6 +2,7 @@
 using LanguageCenterManagement.Models;
 using LanguageCenterManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +13,14 @@ namespace LanguageCenterManagement.Controllers
     public class ExamsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ExamsController(ApplicationDbContext context)
+        public ExamsController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Exams
@@ -27,14 +32,28 @@ namespace LanguageCenterManagement.Controllers
                 .Include(e => e.ExamQuestions)
                 .AsQueryable();
 
+            if (User.IsInRole("Teacher"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+
+                if (user == null || !user.TeacherId.HasValue)
+                {
+                    return Forbid();
+                }
+
+                query = query.Where(e =>
+                    e.Class != null &&
+                    e.Class.TeacherId == user.TeacherId.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(search))
             {
+                search = search.Trim();
+
                 query = query.Where(e =>
                     e.ExamName.Contains(search) ||
                     e.ExamType.Contains(search) ||
-                    (e.Class != null &&
-                        (e.Class.ClassCode.Contains(search) ||
-                         e.Class.ClassName.Contains(search))));
+                    (e.Class != null && e.Class.ClassName.Contains(search)));
             }
 
             var exams = await query
@@ -57,6 +76,8 @@ namespace LanguageCenterManagement.Controllers
             var exam = await _context.Exams
                 .Include(e => e.Class)
                     .ThenInclude(c => c!.Course)
+                .Include(e => e.Class)
+                    .ThenInclude(c => c!.Teacher)
                 .Include(e => e.ExamQuestions)
                     .ThenInclude(eq => eq.Question)
                         .ThenInclude(q => q!.Answers)
@@ -69,40 +90,49 @@ namespace LanguageCenterManagement.Controllers
                 return NotFound();
             }
 
+            if (!await CanAccessExam(exam))
+            {
+                return Forbid();
+            }
+
             return View(exam);
         }
 
         // GET: Exams/Create
         public async Task<IActionResult> Create()
         {
-            await LoadDropdowns();
+            if (!await CanCreateExam())
+            {
+                return Forbid();
+            }
 
-            return View(new ExamCreateViewModel
+            var model = new ExamFormViewModel
             {
                 ExamDate = DateTime.Now,
                 Duration = 60,
                 MaxScore = 10,
                 Status = "Draft",
                 ExamType = "Test"
-            });
+            };
+
+            await LoadFormData(model);
+
+            return View(model);
         }
 
         // POST: Exams/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ExamCreateViewModel model)
+        public async Task<IActionResult> Create(ExamFormViewModel model)
         {
-            if (model.SelectedQuestionIds == null ||
-                !model.SelectedQuestionIds.Any())
+            if (!await CanCreateClass(model.ClassId))
             {
-                ModelState.AddModelError(
-                    "SelectedQuestionIds",
-                    "Please select at least one question.");
+                ModelState.AddModelError("ClassId", "You cannot create an exam for this class.");
             }
 
             if (!ModelState.IsValid)
             {
-                await LoadDropdowns(model.ClassId, model.SelectedQuestionIds);
+                await LoadFormData(model);
                 return View(model);
             }
 
@@ -122,20 +152,9 @@ namespace LanguageCenterManagement.Controllers
 
             await _context.SaveChangesAsync();
 
-            for (int i = 0; i < model.SelectedQuestionIds.Count; i++)
-            {
-                _context.ExamQuestions.Add(new ExamQuestion
-                {
-                    ExamId = exam.ExamId,
-                    QuestionId = model.SelectedQuestionIds[i],
-                    QuestionOrder = i + 1
-                });
-            }
+            await SaveExamQuestions(exam.ExamId, model.Questions);
 
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] =
-                "Exam created successfully with selected questions.";
+            TempData["SuccessMessage"] = "Exam created successfully.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -157,8 +176,14 @@ namespace LanguageCenterManagement.Controllers
                 return NotFound();
             }
 
-            var model = new ExamCreateViewModel
+            if (!await CanAccessExam(exam))
             {
+                return Forbid();
+            }
+
+            var model = new ExamFormViewModel
+            {
+                ExamId = exam.ExamId,
                 ClassId = exam.ClassId,
                 ExamName = exam.ExamName,
                 ExamType = exam.ExamType,
@@ -166,18 +191,10 @@ namespace LanguageCenterManagement.Controllers
                 Duration = exam.Duration,
                 MaxScore = exam.MaxScore,
                 Status = exam.Status,
-                Description = exam.Description,
-                SelectedQuestionIds = exam.ExamQuestions
-                    .OrderBy(eq => eq.QuestionOrder)
-                    .Select(eq => eq.QuestionId)
-                    .ToList()
+                Description = exam.Description
             };
 
-            await LoadDropdowns(
-                model.ClassId,
-                model.SelectedQuestionIds);
-
-            ViewBag.ExamId = exam.ExamId;
+            await LoadFormData(model, exam.ExamQuestions);
 
             return View(model);
         }
@@ -187,19 +204,11 @@ namespace LanguageCenterManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            ExamCreateViewModel model)
+            ExamFormViewModel model)
         {
-            if (id <= 0)
+            if (id != model.ExamId)
             {
                 return NotFound();
-            }
-
-            if (model.SelectedQuestionIds == null ||
-                !model.SelectedQuestionIds.Any())
-            {
-                ModelState.AddModelError(
-                    "SelectedQuestionIds",
-                    "Please select at least one question.");
             }
 
             var exam = await _context.Exams
@@ -211,14 +220,19 @@ namespace LanguageCenterManagement.Controllers
                 return NotFound();
             }
 
+            if (!await CanAccessExam(exam))
+            {
+                return Forbid();
+            }
+
+            if (!await CanCreateClass(model.ClassId))
+            {
+                ModelState.AddModelError("ClassId", "You cannot use this class.");
+            }
+
             if (!ModelState.IsValid)
             {
-                await LoadDropdowns(
-                    model.ClassId,
-                    model.SelectedQuestionIds);
-
-                ViewBag.ExamId = id;
-
+                await LoadFormData(model, exam.ExamQuestions);
                 return View(model);
             }
 
@@ -233,19 +247,11 @@ namespace LanguageCenterManagement.Controllers
 
             _context.ExamQuestions.RemoveRange(exam.ExamQuestions);
 
-            for (int i = 0; i < model.SelectedQuestionIds.Count; i++)
-            {
-                _context.ExamQuestions.Add(new ExamQuestion
-                {
-                    ExamId = id,
-                    QuestionId = model.SelectedQuestionIds[i],
-                    QuestionOrder = i + 1
-                });
-            }
-
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Exam updated successfully.";
+            await SaveExamQuestions(exam.ExamId, model.Questions);
+
+            TempData["SuccessMessage"] = "Exam updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -260,12 +266,18 @@ namespace LanguageCenterManagement.Controllers
 
             var exam = await _context.Exams
                 .Include(e => e.Class)
+                    .ThenInclude(c => c!.Course)
                 .Include(e => e.ExamQuestions)
                 .FirstOrDefaultAsync(e => e.ExamId == id);
 
             if (exam == null)
             {
                 return NotFound();
+            }
+
+            if (!await CanAccessExam(exam))
+            {
+                return Forbid();
             }
 
             return View(exam);
@@ -286,43 +298,142 @@ namespace LanguageCenterManagement.Controllers
                 return NotFound();
             }
 
+            if (!await CanAccessExam(exam))
+            {
+                return Forbid();
+            }
+
             _context.ExamQuestions.RemoveRange(exam.ExamQuestions);
-
             _context.ExamResults.RemoveRange(exam.ExamResults);
-
             _context.Exams.Remove(exam);
 
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Exam deleted successfully.";
+            TempData["SuccessMessage"] = "Exam deleted successfully.";
 
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task LoadDropdowns(
-            int? selectedClassId = null,
-            List<int>? selectedQuestionIds = null)
+        private async Task LoadFormData(
+            ExamFormViewModel model,
+            ICollection<ExamQuestion>? existingQuestions = null)
         {
-            var classes = await _context.Classes
+            var classesQuery = _context.Classes
                 .Include(c => c.Course)
-                .OrderBy(c => c.ClassCode)
+                .AsQueryable();
+
+            if (User.IsInRole("Teacher"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+
+                if (user?.TeacherId != null)
+                {
+                    classesQuery = classesQuery.Where(c =>
+                        c.TeacherId == user.TeacherId.Value);
+                }
+            }
+
+            var classes = await classesQuery
+                .OrderBy(c => c.ClassName)
                 .ToListAsync();
 
-            var questions = await _context.Questions
-                .Include(q => q.Answers)
-                .OrderBy(q => q.QuestionId)
-                .ToListAsync();
-
-            ViewBag.ClassId = new SelectList(
+            ViewBag.Classes = new SelectList(
                 classes,
                 "LanguageClassId",
                 "ClassName",
-                selectedClassId);
+                model.ClassId);
 
-            ViewBag.Questions = questions;
+            var questions = await _context.Questions
+                .OrderBy(q => q.QuestionId)
+                .ToListAsync();
 
-            ViewBag.SelectedQuestionIds =
-                selectedQuestionIds ?? new List<int>();
+            var selectedIds = existingQuestions?
+                .Select(eq => eq.QuestionId)
+                .ToHashSet()
+                ?? new HashSet<int>();
+
+            model.Questions = questions
+                .Select(q => new QuestionSelectionViewModel
+                {
+                    QuestionId = q.QuestionId,
+                    QuestionText = q.QuestionText,
+                    QuestionType = q.QuestionType,
+                    Score = q.Score,
+                    Selected = selectedIds.Contains(q.QuestionId)
+                })
+                .ToList();
+        }
+
+        private async Task SaveExamQuestions(
+            int examId,
+            List<QuestionSelectionViewModel> questions)
+        {
+            var selectedQuestions = questions
+                .Where(q => q.Selected)
+                .ToList();
+
+            int order = 1;
+
+            foreach (var question in selectedQuestions)
+            {
+                _context.ExamQuestions.Add(new ExamQuestion
+                {
+                    ExamId = examId,
+                    QuestionId = question.QuestionId,
+                    QuestionOrder = order++
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private async Task<bool> CanAccessExam(Exam exam)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            if (!User.IsInRole("Teacher"))
+            {
+                return false;
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            return user?.TeacherId != null &&
+                   exam.Class != null &&
+                   exam.Class.TeacherId == user.TeacherId.Value;
+        }
+
+        private async Task<bool> CanCreateClass(int classId)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return await _context.Classes
+                    .AnyAsync(c => c.LanguageClassId == classId);
+            }
+
+            if (!User.IsInRole("Teacher"))
+            {
+                return false;
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user?.TeacherId == null)
+            {
+                return false;
+            }
+
+            return await _context.Classes.AnyAsync(c =>
+                c.LanguageClassId == classId &&
+                c.TeacherId == user.TeacherId.Value);
+        }
+
+        private async Task<bool> CanCreateExam()
+        {
+            return User.IsInRole("Admin") || User.IsInRole("Teacher");
         }
     }
 }

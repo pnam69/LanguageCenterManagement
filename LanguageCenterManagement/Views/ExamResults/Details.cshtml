@@ -1,0 +1,95 @@
+﻿@model LanguageCenterManagement.Models.ExamResult
+
+@{
+    ViewData["Title"] = "Exam Result Details";
+}
+
+<div class="container py-4">
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body">
+
+            <h2 class="fw-bold mb-4">
+                Exam Result
+            </h2>
+
+            <dl class="row">
+
+                <dt class="col-md-3">
+                    Exam
+                </dt>
+
+                <dd class="col-md-9">
+                    @Model.Exam?.ExamName
+                </dd>
+
+                <dt class="col-md-3">
+                    Student
+                </dt>
+
+                <dd class="col-md-9">
+                    @Model.Student?.FullName
+                </dd>
+
+                <dt class="col-md-3">
+                    Class
+                </dt>
+
+                <dd class="col-md-9">
+                    @Model.Exam?.Class?.ClassName
+                </dd>
+
+                <dt class="col-md-3">
+                    Score
+                </dt>
+
+                <dd class="col-md-9">
+                    <strong>
+                        @Model.Score / @Model.Exam?.MaxScore
+                    </strong>
+                </dd>
+
+                <dt class="col-md-3">
+                    Status
+                </dt>
+
+                <dd class="col-md-9">
+                    @Model.Status
+                </dd>
+
+                <dt class="col-md-3">
+                    Submitted
+                </dt>
+
+                <dd class="col-md-9">
+                    @(Model.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")
+                        ?? "-")
+                </dd>
+
+                <dt class="col-md-3">
+                    Note
+                </dt>
+
+                <dd class="col-md-9">
+                    @(Model.Note ?? "-")
+                </dd>
+
+            </dl>
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.ExamResultId"
+               class="btn btn-primary">
+                Edit
+            </a>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Back
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
