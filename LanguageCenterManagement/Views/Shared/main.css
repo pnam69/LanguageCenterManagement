@@ -97,9 +97,6 @@ header {
     margin: 0.4rem 0;
 }
 
-/* =========================
-           MAIN CONTENT
-           ========================= */
 
 main {
     flex: 1 0 auto;
@@ -112,17 +109,12 @@ main {
         padding-top: 2rem;
     }
 
-/* =========================
-           PAGE HEADINGS
-           ========================= */
-
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-    color: FFFFFF;
     font-weight: 600;
     letter-spacing: -0.3px;
 }
@@ -145,9 +137,6 @@ h1, h2 {
     color: var(--text-muted) !important;
 }
 
-/* =========================
-           CARDS
-           ========================= */
 
 .card {
     border: 1px solid var(--border);
@@ -173,10 +162,6 @@ h1, h2 {
     background: #fafafa;
     border-top: 1px solid var(--border);
 }
-
-/* =========================
-           FORMS
-           ========================= */
 
 .form-label {
     font-weight: 600;
@@ -209,10 +194,6 @@ textarea.form-control {
     color: #6b7280;
     font-size: 0.82rem;
 }
-
-/* =========================
-           BUTTONS
-           ========================= */
 
 .btn {
     border-radius: 8px;
@@ -254,9 +235,6 @@ textarea.form-control {
     transform: translateY(-1px);
 }
 
-/* =========================
-           TABLES
-           ========================= */
 
 .table {
     margin-bottom: 0;
@@ -289,9 +267,6 @@ textarea.form-control {
             background-color: #f8fafc;
         }
 
-/* =========================
-           ALERTS
-           ========================= */
 
 .alert {
     border-radius: 10px;
@@ -299,19 +274,12 @@ textarea.form-control {
     padding: 0.85rem 1rem;
 }
 
-/* =========================
-           BADGES
-           ========================= */
-
 .badge {
     border-radius: 6px;
     font-weight: 500;
     padding: 0.4em 0.65em;
 }
 
-/* =========================
-           FOOTER
-           ========================= */
 
 footer {
     flex-shrink: 0;
@@ -326,10 +294,6 @@ footer {
     footer strong {
         color: #374151;
     }
-
-/* =========================
-           LOGIN / ACCOUNT BUTTON
-           ========================= */
 
 .btn-outline-danger {
     transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
