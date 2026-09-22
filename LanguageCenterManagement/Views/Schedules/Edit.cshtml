@@ -16,12 +16,10 @@
                 
                 <div class="card-body p-4 p-md-5">
                     <form asp-action="Edit" method="post">
-                        <!-- Trường ID ẩn quan trọng để hệ thống biết đang cập nhật bản ghi nào -->
                         <input type="hidden" asp-for="ScheduleId" />
 
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-                        <!-- Khối 1: Lớp & Phòng học -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <div class="form-floating">
@@ -43,7 +41,6 @@
                             </div>
                         </div>
 
-                        <!-- Khối 2: Ngày học & Trạng thái -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <div class="form-floating">
@@ -65,7 +62,6 @@
                             </div>
                         </div>
 
-                        <!-- Khối 3: Khung giờ -->
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <div class="form-floating">
@@ -85,7 +81,6 @@
 
                         <hr class="text-muted mb-4">
 
-                        <!-- Các nút hành động -->
                         <div class="d-flex justify-content-end gap-2 flex-wrap">
                             <a asp-action="Index" class="btn btn-light btn-lg border px-4">
                                 Cancel

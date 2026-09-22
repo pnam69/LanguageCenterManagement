@@ -1,52 +1,26 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="~/css/main.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Language Center</title>
     <script type="importmap"></script>
-    
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    
-    <!-- Bootstrap Icons (Bắt buộc phải có để hiển thị icon cho toàn bộ hệ thống) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <!-- Google Fonts: Inter (Cho font chữ hiện đại, dễ đọc hơn) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LanguageCenterManagement.styles.css" asp-append-version="true" />
 
-    <style>
-        /* Ép toàn bộ web dùng font Inter */
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        /* Style cho Dropdown mượt mà hơn */
-        .dropdown-menu {
-            border-radius: 0.5rem;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        }
-        main {
-            flex: 1;
-        }
-    </style>
 </head>
-<!-- Đổi nền thành bg-light (xám nhạt) để các khối thẻ Card màu trắng nổi bật lên -->
 <body class="bg-light">
     
-    <!-- Thanh Điều hướng (Navbar) -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm sticky-top py-3">
             <div class="container-fluid px-lg-5">
                 
-                <!-- Logo & Brand -->
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-globe-americas fs-3 text-primary me-2"></i>
                     <span class="fw-bold text-primary mb-0 fs-4">LC<span class="text-dark">Manager</span></span>
@@ -59,10 +33,8 @@
                 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     
-                    <!-- Left Navigation -->
                     <ul class="navbar-nav flex-grow-1 ms-lg-4 fw-medium gap-1">
 
-                        <!-- Home -->
                         @{
                             string controller = "Home";
                             string action = "Index";
@@ -175,19 +147,18 @@
 
                                     <li>
                                         <a class="dropdown-item py-2"
-                                           asp-controller="ScheduleChangeRequests"
-                                           asp-action="AdminIndex">
-                                            <i class="bi bi-arrow-repeat me-2 text-danger"></i>
-                                            Schedule Change Requests
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item py-2"
                                            asp-controller="Account"
                                            asp-action="Create">
                                             <i class="bi bi-person-plus me-2 text-secondary"></i>
                                             Accounts
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2"
+                                           asp-controller="ScheduleChangeRequests"
+                                           asp-action="AdminIndex">
+                                            <i class="bi bi-file-earmark-text me-2 text-secondary"></i>
+                                            Schedule Change Requests
                                         </a>
                                     </li>
                                     <li>
@@ -206,7 +177,6 @@
 
                         @if (User.IsInRole("Teacher"))
                         {
-                            <!-- Teacher Menu -->
                             <li class="nav-item">
                                 <a class="nav-link px-3 rounded hover-bg-light"
                                    asp-controller="TeacherSchedules"
@@ -332,7 +302,6 @@
 
                     </ul>
 
-                    <!-- Nhóm Menu Phải (Tài khoản) -->
                     <ul class="navbar-nav fw-medium gap-2 mt-3 mt-lg-0 align-items-lg-center">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
@@ -365,25 +334,23 @@
         </nav>
     </header>
     
-    <!-- RenderBody không còn bị bọc bởi class="container" cứng ngắc -->
     <main role="main">
         @RenderBody()
     </main>
 
-    <!-- Footer hiện đại -->
-    <footer class="border-top footer text-muted bg-white py-4 mt-auto">
-        <div class="container-fluid px-lg-5 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <footer class="border-top footer text-muted bg-white py-3 mt-auto">
+        <div class="container-fluid px-lg-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-1">
             <div>
                 &copy; 2026 - <strong>Language Center Management</strong>. All rights reserved.
             </div>
-            <div>
+            @* <div>
                 <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted me-3 hover-primary">
                     <i class="bi bi-shield-check me-1"></i>Privacy Policy
                 </a>
                 <a href="#" class="text-decoration-none text-muted hover-primary">
                     <i class="bi bi-headset me-1"></i>Support
                 </a>
-            </div>
+            </div> *@
         </div>
     </footer>
 

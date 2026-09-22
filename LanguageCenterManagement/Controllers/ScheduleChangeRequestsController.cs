@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LanguageCenterManagement.Controllers
 {
-    [Authorize(Roles = "Teacher")]
+    [Authorize]
     public class ScheduleChangeRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -26,11 +26,47 @@ namespace LanguageCenterManagement.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user == null || !user.TeacherId.HasValue)
+            if (user == null)
             {
                 return Forbid();
             }
 
+            var query = _context.ScheduleChangeRequests
+                .Include(r => r.Schedule)
+                    .ThenInclude(s => s!.Class)
+                .Include(r => r.Schedule)
+                    .ThenInclude(s => s!.Room)
+                .Include(r => r.MakeUpSchedule)
+                    .ThenInclude(ms => ms!.Room)
+                .AsQueryable();
+
+            // Admin can see all requests
+            if (User.IsInRole("Admin"))
+            {
+                var requests = await query
+                    .OrderByDescending(r => r.RequestDate)
+                    .ToListAsync();
+
+                return View(requests);
+            }
+
+            // Teacher can only see their own requests
+            if (User.IsInRole("Teacher") && user.TeacherId.HasValue)
+            {
+                var requests = await query
+                    .Where(r => r.TeacherId == user.TeacherId.Value)
+                    .OrderByDescending(r => r.RequestDate)
+                    .ToListAsync();
+
+                return View(requests);
+            }
+
+            return Forbid();
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminIndex()
+        {
             var requests = await _context.ScheduleChangeRequests
                 .Include(r => r.Schedule)
                     .ThenInclude(s => s!.Class)
@@ -38,11 +74,31 @@ namespace LanguageCenterManagement.Controllers
                     .ThenInclude(s => s!.Room)
                 .Include(r => r.MakeUpSchedule)
                     .ThenInclude(ms => ms!.Room)
-                .Where(r => r.TeacherId == user.TeacherId.Value)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
             return View(requests);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Review(int id)
+        {
+            var request = await _context.ScheduleChangeRequests
+                .Include(r => r.Schedule)
+                    .ThenInclude(s => s!.Class)
+                .Include(r => r.Schedule)
+                    .ThenInclude(s => s!.Room)
+                .Include(r => r.MakeUpSchedule)
+                    .ThenInclude(ms => ms!.Room)
+                .FirstOrDefaultAsync(r => r.ScheduleChangeRequestId == id);
+
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            return View(request);
         }
 
         [HttpGet]
@@ -50,7 +106,7 @@ namespace LanguageCenterManagement.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user == null || !user.TeacherId.HasValue)
+            if (user == null || !User.IsInRole("Teacher") || !user.TeacherId.HasValue)
             {
                 return Forbid();
             }

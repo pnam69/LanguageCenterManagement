@@ -4,16 +4,14 @@
 
 <div class="container-fluid mt-4 mb-5 px-lg-5">
     
-    <!-- Banner Chào mừng -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4 bg-primary text-white overflow-hidden position-relative">
-                <!-- Icon background mờ ở góc phải -->
                 <i class="bi bi-mortarboard-fill position-absolute text-white opacity-25" style="font-size: 10rem; right: -1rem; top: -2rem;"></i>
                 
                 <div class="card-body p-4 p-md-5 position-relative z-1">
                     <h2 class="fw-bold mb-3">
-                        Welcome back, @(User.Identity?.Name ?? "User")! 👋
+                        Welcome back, @(User.Identity?.Name ?? "User")!
                     </h2>
                     <p class="fs-5 mb-0 text-white-50">
                         You are logged in successfully. Here is what's happening at your Language Center today.
@@ -23,11 +21,9 @@
         </div>
     </div>
 
-    <!-- Khối truy cập nhanh (Quick Access) -->
     <h5 class="fw-bold text-secondary mb-3 mt-2">Quick Access</h5>
     <div class="row g-4">
         
-        <!-- Widget Courses -->
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 hover-effect">
                 <div class="card-body p-4 d-flex flex-column text-center align-items-center">
@@ -43,7 +39,6 @@
             </div>
         </div>
 
-        <!-- Widget Students -->
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 hover-effect">
                 <div class="card-body p-4 d-flex flex-column text-center align-items-center">
@@ -59,7 +54,6 @@
             </div>
         </div>
         
-        <!-- Widget Schedules -->
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 hover-effect">
                 <div class="card-body p-4 d-flex flex-column text-center align-items-center">
@@ -90,7 +84,6 @@
             </div>
         </div>
 
-        <!-- Widget System Users -->
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 hover-effect">
                 <div class="card-body p-4 d-flex flex-column text-center align-items-center">
@@ -111,7 +104,6 @@
 
 @section Scripts {
     <style>
-        /* Thêm hiệu ứng nổi lên khi di chuột vào các thẻ card */
         .hover-effect {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }

@@ -1,0 +1,336 @@
+﻿:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --background: #f5f7fb;
+    --card-radius: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    background: var(--background);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+/* =========================
+           NAVBAR
+           ========================= */
+
+header {
+    position: relative;
+    z-index: 1000;
+}
+
+.navbar {
+    min-height: 72px;
+    background: rgba(255, 255, 255, 0.97) !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+.navbar-brand {
+    letter-spacing: -0.3px;
+}
+
+    .navbar-brand i {
+        transition: transform 0.2s ease;
+    }
+
+    .navbar-brand:hover i {
+        transform: rotate(-8deg) scale(1.05);
+    }
+
+.nav-link {
+    color: #4b5563 !important;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+    .nav-link:hover {
+        color: var(--primary) !important;
+        background-color: #eff6ff;
+    }
+
+    .nav-link.active {
+        color: var(--primary) !important;
+        background-color: #eff6ff;
+        font-weight: 600;
+    }
+
+.dropdown-menu {
+    min-width: 220px;
+    padding: 0.5rem;
+    margin-top: 0.5rem !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+}
+
+.dropdown-item {
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+    .dropdown-item:hover {
+        background-color: #eff6ff;
+        color: var(--primary);
+    }
+
+.dropdown-divider {
+    margin: 0.4rem 0;
+}
+
+/* =========================
+           MAIN CONTENT
+           ========================= */
+
+main {
+    flex: 1 0 auto;
+    width: 100%;
+    padding-bottom: 3rem;
+}
+
+    main > .container,
+    main > .container-fluid {
+        padding-top: 2rem;
+    }
+
+/* =========================
+           PAGE HEADINGS
+           ========================= */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: FFFFFF;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+}
+
+h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+}
+
+h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1.4rem;
+}
+
+h1, h2 {
+    color: black;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* =========================
+           CARDS
+           ========================= */
+
+.card {
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+}
+
+.card-header {
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-footer {
+    background: #fafafa;
+    border-top: 1px solid var(--border);
+}
+
+/* =========================
+           FORMS
+           ========================= */
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin-bottom: 0.45rem;
+}
+
+.form-control,
+.form-select {
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    padding: 0.65rem 0.8rem;
+    color: #1f2937;
+    background-color: #ffffff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+    }
+
+textarea.form-control {
+    resize: vertical;
+}
+
+.form-text {
+    color: #6b7280;
+    font-size: 0.82rem;
+}
+
+/* =========================
+           BUTTONS
+           ========================= */
+
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.55rem 1rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.20);
+    }
+
+.btn-success:hover {
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.18);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 4px 10px rgba(220, 53, 69, 0.18);
+}
+
+.btn-secondary {
+    background-color: #6b7280;
+    border-color: #6b7280;
+}
+
+.btn-outline-danger:hover,
+.btn-outline-primary:hover {
+    transform: translateY(-1px);
+}
+
+/* =========================
+           TABLES
+           ========================= */
+
+.table {
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+    .table thead th {
+        background-color: #f8fafc;
+        color: #4b5563;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-bottom: 1px solid var(--border);
+        padding: 0.9rem 1rem;
+        white-space: nowrap;
+    }
+
+    .table tbody td {
+        padding: 0.9rem 1rem;
+        border-color: #eef0f3;
+        color: #374151;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.15s ease;
+    }
+
+        .table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+/* =========================
+           ALERTS
+           ========================= */
+
+.alert {
+    border-radius: 10px;
+    border-width: 1px;
+    padding: 0.85rem 1rem;
+}
+
+/* =========================
+           BADGES
+           ========================= */
+
+.badge {
+    border-radius: 6px;
+    font-weight: 500;
+    padding: 0.4em 0.65em;
+}
+
+/* =========================
+           FOOTER
+           ========================= */
+
+footer {
+    flex-shrink: 0;
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    color: #6b7280;
+    padding: 1.25rem 0;
+    margin-top: auto;
+    font-size: 0.85rem;
+}
+
+    footer strong {
+        color: #374151;
+    }
+
+/* =========================
+           LOGIN / ACCOUNT BUTTON
+           ========================= */
+
+.btn-outline-danger {
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}

@@ -2,11 +2,9 @@
     ViewData["Title"] = "Welcome to Language Center";
 }
 
-<!-- Khối Banner (Hero Section) -->
 <div class="container-fluid px-0 mb-5">
     <div class="bg-primary text-white text-center py-5 shadow-sm position-relative overflow-hidden">
         
-        <!-- Các icon trang trí chìm ở background -->
         <i class="bi bi-globe2 position-absolute opacity-25" style="font-size: 15rem; right: -2rem; top: -3rem;"></i>
         <i class="bi bi-chat-quote-fill position-absolute opacity-25" style="font-size: 12rem; left: -2rem; bottom: -2rem;"></i>
 
@@ -17,7 +15,6 @@
             </p>
             
             <div class="d-flex justify-content-center gap-3 mt-4">
-                <!-- Tự động đổi nút dựa trên trạng thái đăng nhập -->
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     if(User.IsInRole("Admin"))
@@ -50,11 +47,9 @@
     </div>
 </div>
 
-<!-- Khối Giới thiệu Điểm nổi bật (Features Section) -->
 <div class="container mb-5 pb-4">
     <div class="row g-4 text-center">
         
-        <!-- Feature 1 -->
         <div class="col-md-4">
             <div class="card h-100 border-0 shadow-sm rounded-4 hover-effect">
                 <div class="card-body p-4 p-lg-5">
@@ -67,7 +62,6 @@
             </div>
         </div>
         
-        <!-- Feature 2 -->
         <div class="col-md-4">
             <div class="card h-100 border-0 shadow-sm rounded-4 hover-effect">
                 <div class="card-body p-4 p-lg-5">
@@ -80,7 +74,6 @@
             </div>
         </div>
 
-        <!-- Feature 3 -->
         <div class="col-md-4">
             <div class="card h-100 border-0 shadow-sm rounded-4 hover-effect">
                 <div class="card-body p-4 p-lg-5">
@@ -98,7 +91,6 @@
 
 @section Scripts {
     <style>
-        /* Hiệu ứng nổi lên mượt mà khi di chuột vào các khối Feature */
         .hover-effect {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
