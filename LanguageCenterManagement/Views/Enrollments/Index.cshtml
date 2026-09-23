@@ -4,106 +4,133 @@
     ViewData["Title"] = "Enrollments";
 }
 
-<h1>Enrollment Management</h1>
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
-    </div>
-}
-
-<p>
-    @if (User.IsInRole("Admin"))
+<div class="container-fluid mt-4 mb-5 px-lg-5">
+    
+    <!-- Cụm thông báo (Alerts) -->
+    @if (TempData["Success"] != null)
     {
-        <a asp-action="Create" class="btn btn-primary">
-            Register Student
-        </a>
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     }
-</p>
 
-<form asp-action="Index" method="get" class="mb-3">
-    <div class="input-group">
+    <!-- Khung Card chính -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <!-- Header: Tiêu đề & Nút Thêm mới -->
+        <div class="card-header bg-white border-bottom py-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <h4 class="mb-0 fw-bold text-primary">
+                <i class="bi bi-card-checklist me-2"></i>Enrollment Management
+            </h4>
+            
+            <!-- Chỉ Admin mới thấy nút Đăng ký học viên -->
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Create" class="btn btn-primary shadow-sm fw-medium">
+                    <i class="bi bi-person-plus-fill me-1"></i> Register Student
+                </a>
+            }
+        </div>
 
-        <input type="text"
-               name="search"
-               value="@ViewBag.Search"
-               class="form-control"
-               placeholder="Search student or class..." />
+        <div class="card-body p-4">
+            
+            <!-- Thanh tìm kiếm -->
+            <div class="row mb-4">
+                <div class="col-md-8 col-lg-5">
+                    <form asp-action="Index" method="get">
+                        <div class="input-group shadow-sm">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" name="search" value="@ViewBag.Search" class="form-control border-start-0 ps-0" placeholder="Search student or class..." />
+                            <button type="submit" class="btn btn-primary px-4">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-        <button type="submit"
-                class="btn btn-secondary">
-            Search
-        </button>
-
+            <!-- Bảng dữ liệu -->
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive border rounded-3">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light border-bottom">
+                            <tr>
+                                <th class="ps-4 py-3">Student</th>
+                                <th class="py-3">Class</th>
+                                <th class="py-3">Course</th>
+                                <th class="py-3">Registration Date</th>
+                                <th class="py-3">Status</th>
+                                <th class="text-center pe-4 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-primary">@item.Student?.FullName</td>
+                                    <td class="fw-medium">@item.Class?.ClassName</td>
+                                    <td class="text-muted">@item.Class?.Course?.CourseName</td>
+                                    <td>@item.RegistrationDate.ToString("dd/MM/yyyy")</td>
+                                    
+                                    <!-- Badges trạng thái động -->
+                                    <td>
+                                        @if (item.Status == "Confirmed" || item.Status == "Studying")
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1">@item.Status</span>
+                                        }
+                                        else if (item.Status == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1">@item.Status</span>
+                                        }
+                                        else if (item.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-2 py-1 text-dark">@item.Status</span>
+                                        }
+                                        else if (item.Status == "Completed")
+                                        {
+                                            <span class="badge bg-info bg-opacity-10 text-info border border-info px-2 py-1 text-dark">@item.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-2 py-1">@item.Status</span>
+                                        }
+                                    </td>
+                                    
+                                    <!-- Nhóm nút thao tác dạng icon -->
+                                    <td class="text-center pe-4">
+                                        <div class="btn-group shadow-sm" role="group">
+                                            <a asp-action="Details" asp-route-id="@item.EnrollmentId" class="btn btn-sm btn-outline-info" title="Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            
+                                            <!-- Chỉ Admin mới có quyền Sửa/Xóa -->
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <a asp-action="Edit" asp-route-id="@item.EnrollmentId" class="btn btn-sm btn-outline-warning" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.EnrollmentId" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                    <i class="bi bi-trash3"></i>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <!-- Thông báo khi không có dữ liệu -->
+                <div class="alert alert-light text-center border p-5 mb-0" role="alert">
+                    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No enrollments found.</h5>
+                    <p class="text-muted mb-0">Try adjusting your search or register a new student.</p>
+                </div>
+            }
+        </div>
     </div>
-</form>
-
-<table class="table table-bordered table-striped">
-
-    <thead>
-        <tr>
-            <th>Student</th>
-            <th>Class</th>
-            <th>Course</th>
-            <th>Registration Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-
-                <td>
-                    @item.Student?.FullName
-                </td>
-
-                <td>
-                    @item.Class?.ClassName
-                </td>
-
-                <td>
-                    @item.Class?.Course?.CourseName
-                </td>
-
-                <td>
-                    @item.RegistrationDate.ToString("dd/MM/yyyy")
-                </td>
-
-                <td>
-                    @item.Status
-                </td>
-
-                <td>
-
-                    <a asp-action="Details"
-                       asp-route-id="@item.EnrollmentId"
-                       class="btn btn-info btn-sm">
-                        Details
-                    </a>
-
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <a asp-action="Edit"
-                           asp-route-id="@item.EnrollmentId"
-                           class="btn btn-warning btn-sm">
-                            Edit
-                        </a>
-
-                        <a asp-action="Delete"
-                           asp-route-id="@item.EnrollmentId"
-                           class="btn btn-danger btn-sm">
-                            Delete
-                        </a>
-                    }
-
-                </td>
-
-            </tr>
-        }
-    </tbody>
-
-</table>
+</div>

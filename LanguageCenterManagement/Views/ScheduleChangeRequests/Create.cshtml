@@ -2,355 +2,178 @@
 
 @{
     ViewData["Title"] = "Submit Schedule Change Request";
-
-    var schedules =
-        ViewBag.Schedules as IEnumerable<LanguageCenterManagement.Models.Schedule>;
+    var schedules = ViewBag.Schedules as IEnumerable<LanguageCenterManagement.Models.Schedule>;
 }
 
-<h1>Submit Schedule Change Request</h1>
-
-<div asp-validation-summary="ModelOnly"
-     class="text-danger mb-3"></div>
-
-<form asp-action="Create" method="post">
-
-    <div class="mb-3">
-        <label asp-for="ScheduleId" class="form-label">
-            Schedule
-        </label>
-
-        <select asp-for="ScheduleId"
-                class="form-select"
-                id="ScheduleId">
-
-            <option value="0">-- Select Schedule --</option>
-
-            @if (schedules != null)
-            {
-                foreach (var schedule in schedules)
-                {
-                    <option value="@schedule.ScheduleId">
-                        @schedule.Class?.ClassName -
-                        @schedule.StudyDate.ToString("dd/MM/yyyy") -
-                        @schedule.StartTime.ToString(@"hh\:mm") -
-                        @schedule.EndTime.ToString(@"hh\:mm") -
-                        @schedule.Room?.RoomName
-                    </option>
-                }
-            }
-        </select>
-
-        <span asp-validation-for="ScheduleId"
-              class="text-danger"></span>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-header">
-            <strong>Selected Schedule</strong>
-        </div>
-
-        <div class="card-body">
-            <div class="row">
-
-                <div class="col-md-6 mb-2">
-                    <strong>Class:</strong>
-                    <span id="className">
-                        @(Model.ClassName ?? "-")
-                    </span>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-arrow-left-right me-2"></i>Submit Schedule Change Request
+                    </h4>
                 </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-                <div class="col-md-6 mb-2">
-                    <strong>Room:</strong>
-                    <span id="roomName">
-                        @(Model.RoomName ?? "-")
-                    </span>
+                        <!-- Khối 1: Chọn lịch cần đổi -->
+                        <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Select Current Schedule</h5>
+                        
+                        <div class="form-floating mb-4">
+                            <select asp-for="ScheduleId" class="form-select" id="ScheduleId">
+                                <option value="0">-- Select Schedule --</option>
+                                @if (schedules != null)
+                                {
+                                    foreach (var schedule in schedules)
+                                    {
+                                        <option value="@schedule.ScheduleId">
+                                            @schedule.Class?.ClassName - 
+                                            @schedule.StudyDate.ToString("dd/MM/yyyy") - 
+                                            @schedule.StartTime.ToString(@"hh\:mm") to @schedule.EndTime.ToString(@"hh\:mm")
+                                        </option>
+                                    }
+                                }
+                            </select>
+                            <label asp-for="ScheduleId">Schedule to Change</label>
+                            <span asp-validation-for="ScheduleId" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Thẻ hiển thị thông tin chi tiết của lịch đã chọn -->
+                        <div class="card bg-light border border-secondary border-opacity-25 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold text-secondary mb-3">
+                                    <i class="bi bi-info-circle-fill me-1"></i> Selected Schedule Details
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="text-muted small mb-1">Class</div>
+                                        <div class="fw-bold text-dark fs-6" id="className">@(Model?.ClassName ?? "-")</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted small mb-1">Room</div>
+                                        <div class="fw-bold text-dark fs-6" id="roomName">@(Model?.RoomName ?? "-")</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted small mb-1">Date</div>
+                                        <div class="fw-bold text-primary fs-6" id="studyDate">
+                                            @(Model?.StudyDate == default ? "-" : Model.StudyDate.ToString("dd/MM/yyyy"))
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted small mb-1">Time</div>
+                                        <div class="fw-bold text-primary fs-6" id="studyTime">
+                                            @(Model?.StudyDate == default ? "-" : $"{Model.StartTime:hh\\:mm} - {Model.EndTime:hh\\:mm}")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Reason" class="form-control" style="height: 120px" placeholder="Explain why you need to change this schedule."></textarea>
+                            <label asp-for="Reason">Reason for Change</label>
+                            <span asp-validation-for="Reason" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Khối 2: Đề xuất lịch học bù -->
+                        <h5 class="fw-bold text-primary mb-3 mt-5 border-bottom pb-2">2. Proposed Make-up Schedule</h5>
+                        
+                        <div class="alert alert-secondary border-0 bg-light shadow-sm d-flex align-items-center mb-4 py-2" role="alert">
+                            <i class="bi bi-lightbulb-fill text-warning fs-4 me-3"></i>
+                            <div class="small text-muted">
+                                <strong>Optional Fields:</strong> Leave these empty if you want the administrator to arrange the make-up schedule for you.
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="ProposedDate" class="form-control" type="date" />
+                                    <label asp-for="ProposedDate">Proposed Date</label>
+                                    <span asp-validation-for="ProposedDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="ProposedStartTime" class="form-control" type="time" />
+                                    <label asp-for="ProposedStartTime">Start Time</label>
+                                    <span asp-validation-for="ProposedStartTime" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="ProposedEndTime" class="form-control" type="time" />
+                                    <label asp-for="ProposedEndTime">End Time</label>
+                                    <span asp-validation-for="ProposedEndTime" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="text-muted my-4">
+
+                        <!-- Các nút hành động -->
+                        <div class="d-flex justify-content-end gap-2 flex-wrap">
+                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm">
+                                <i class="bi bi-send-fill me-1"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="col-md-6 mb-2">
-                    <strong>Date:</strong>
-                    <span id="studyDate">
-                        @(Model.StudyDate == default
-                            ? "-"
-                            : Model.StudyDate.ToString("dd/MM/yyyy"))
-                    </span>
-                </div>
-
-                <div class="col-md-6 mb-2">
-                    <strong>Time:</strong>
-                    <span id="studyTime">
-                        @(Model.StudyDate == default
-                            ? "-"
-                            : $"{Model.StartTime:hh\\:mm} - {Model.EndTime:hh\\:mm}")
-                    </span>
-                </div>
-
             </div>
         </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Reason" class="form-label"></label>
-
-        <textarea asp-for="Reason"
-                  class="form-control"
-                  rows="4"
-                  placeholder="Explain why you need to change this schedule."></textarea>
-
-        <span asp-validation-for="Reason"
-              class="text-danger"></span>
-    </div>
-
-    <hr />
-
-    <h4>Proposed Make-up Schedule</h4>
-
-    <p class="text-muted">
-        These fields are optional. Leave them empty if you want the
-        administrator to arrange the make-up schedule.
-    </p>
-
-    <div class="mb-3">
-        <label asp-for="ProposedDate" class="form-label"></label>
-
-        <input asp-for="ProposedDate"
-               class="form-control"
-               type="date"
-               id="proposedDate" />
-
-        <span asp-validation-for="ProposedDate"
-              class="text-danger"></span>
-    </div>
-
-    <div class="row">
-
-        <div class="col-md-6 mb-3">
-            <label asp-for="ProposedStartTime" class="form-label"></label>
-
-            <input asp-for="ProposedStartTime"
-                   class="form-control"
-                   type="time"
-                   id="proposedStartTime" />
-
-            <span asp-validation-for="ProposedStartTime"
-                  class="text-danger"></span>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label asp-for="ProposedEndTime" class="form-label"></label>
-
-            <input asp-for="ProposedEndTime"
-                   class="form-control"
-                   type="time"
-                   id="proposedEndTime" />
-
-            <span asp-validation-for="ProposedEndTime"
-                  class="text-danger"></span>
-        </div>
-
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="RoomId" class="form-label">
-            Proposed Room
-        </label>
-
-        @* <select asp-for="RoomId"
-                asp-items="ViewBag.RoomId"
-                class="form-select"
-                id="roomId">
-
-            <option value="">-- Select Room --</option>
-
-        </select> *@
-
-        <select asp-for="RoomId"
-                class="form-select"
-                id="roomId">
-            <option value="">-- Select Room --</option>
-        </select>
-
-        <span asp-validation-for="RoomId"
-              class="text-danger"></span>
-
-        <div class="form-text">
-            Only rooms available at the proposed date and time will be shown.
-        </div>
-    </div>
-
-    <button type="submit"
-            class="btn btn-primary">
-        Submit Request
-    </button>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Cancel
-    </a>
-
-</form>
+</div>
 
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        const schedules = @Html.Raw(
-                    System.Text.Json.JsonSerializer.Serialize(
-                            schedules?.Select(s => new
-                            {
-                                    id = s.ScheduleId,
-                                    className = s.Class?.ClassName,
-                                    studyDate = s.StudyDate.ToString("dd/MM/yyyy"),
-                                    startTime = s.StartTime.ToString(@"hh\:mm"),
-                                    endTime = s.EndTime.ToString(@"hh\:mm"),
-                                    roomName = s.Room?.RoomName
-                            }) ?? Enumerable.Empty<object>()
-                    )
-            );
+        // Data truyền từ Controller sang JS vẫn được giữ nguyên
+        const schedules = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            schedules?.Select(s => new
+            {
+                id = s.ScheduleId,
+                className = s.Class?.ClassName,
+                studyDate = s.StudyDate.ToString("dd/MM/yyyy"),
+                startTime = s.StartTime.ToString(@"hh\:mm"),
+                endTime = s.EndTime.ToString(@"hh\:mm"),
+                roomName = s.Room?.RoomName
+            }) ?? Enumerable.Empty<object>()
+        ));
 
-        const scheduleSelect =
-            document.getElementById("ScheduleId");
-
-        const className =
-            document.getElementById("className");
-
-        const roomName =
-            document.getElementById("roomName");
-
-        const studyDate =
-            document.getElementById("studyDate");
-
-        const studyTime =
-            document.getElementById("studyTime");
+        const scheduleSelect = document.getElementById("ScheduleId");
+        const className = document.getElementById("className");
+        const roomName = document.getElementById("roomName");
+        const studyDate = document.getElementById("studyDate");
+        const studyTime = document.getElementById("studyTime");
 
         function updateScheduleInformation() {
-
-            const selectedId =
-                parseInt(scheduleSelect.value);
-
-            const schedule =
-                schedules.find(x => x.id === selectedId);
+            const selectedId = parseInt(scheduleSelect.value);
+            const schedule = schedules.find(x => x.id === selectedId);
 
             if (!schedule) {
-
                 className.textContent = "-";
                 roomName.textContent = "-";
                 studyDate.textContent = "-";
                 studyTime.textContent = "-";
-
                 return;
             }
 
-            className.textContent =
-                schedule.className ?? "-";
-
-            roomName.textContent =
-                schedule.roomName ?? "-";
-
-            studyDate.textContent =
-                schedule.studyDate;
-
-            studyTime.textContent =
-                `${schedule.startTime} - ${schedule.endTime}`;
+            className.textContent = schedule.className ?? "-";
+            roomName.textContent = schedule.roomName ?? "-";
+            studyDate.textContent = schedule.studyDate;
+            studyTime.textContent = `${schedule.startTime} - ${schedule.endTime}`;
         }
 
-        scheduleSelect.addEventListener(
-            "change",
-            updateScheduleInformation
-        );
-
+        scheduleSelect.addEventListener("change", updateScheduleInformation);
+        
+        // Cập nhật khi trang vừa tải xong
         updateScheduleInformation();
-
-
-        async function loadAvailableRooms() {
-
-            const date =
-                document.getElementById("proposedDate").value;
-
-            const startTime =
-                document.getElementById("proposedStartTime").value;
-
-            const endTime =
-                document.getElementById("proposedEndTime").value;
-
-            const roomSelect =
-                document.getElementById("roomId");
-
-            if (!date || !startTime || !endTime) {
-
-                roomSelect.innerHTML =
-                    '<option value="">-- Select date and time first --</option>';
-
-                return;
-            }
-
-            if (endTime <= startTime) {
-
-                roomSelect.innerHTML =
-                    '<option value="">-- End time must be later than start time --</option>';
-
-                return;
-            }
-
-            try {
-
-                const response = await fetch(
-                    `/Schedules/GetAvailableRooms?studyDate=${encodeURIComponent(date)}&startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}`
-                );
-
-                if (!response.ok) {
-                    return;
-                }
-
-                const rooms = await response.json();
-
-                roomSelect.innerHTML =
-                    '<option value="">-- Select Room --</option>';
-
-                rooms.forEach(room => {
-
-                    const option =
-                        document.createElement("option");
-
-                    option.value = room.id;
-                    option.textContent = room.text;
-
-                    roomSelect.appendChild(option);
-                });
-
-                if (rooms.length === 0) {
-
-                    roomSelect.innerHTML =
-                        '<option value="">-- No rooms available --</option>';
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to load available rooms:",
-                    error
-                );
-            }
-        }
-
-        document.getElementById("proposedDate")
-            .addEventListener(
-                "change",
-                loadAvailableRooms
-            );
-
-        document.getElementById("proposedStartTime")
-            .addEventListener(
-                "change",
-                loadAvailableRooms
-            );
-
-        document.getElementById("proposedEndTime")
-            .addEventListener(
-                "change",
-                loadAvailableRooms
-            );
-
-        loadAvailableRooms();
     </script>
 }

@@ -4,143 +4,150 @@
     ViewData["Title"] = "Create Account";
 }
 
-<h1>Create Account</h1>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">Create New Account</h4>
+                </div>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["SuccessMessage"]
-    </div>
-}
+                <div class="card-body p-4 p-md-5">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
 
-<form asp-action="Create" method="post">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-    <div asp-validation-summary="ModelOnly"
-         class="text-danger mb-3"></div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" type="email" placeholder="name@example.com" />
+                            <label asp-for="Email"></label>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email"
-               class="form-control"
-               type="email" />
-        <span asp-validation-for="Email"
-              class="text-danger"></span>
-    </div>
+                        <!-- Trường Password có nút ẩn/hiện -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <div class="form-floating flex-grow-1">
+                                    <input asp-for="Password" class="form-control" type="password" id="passwordInput" placeholder="Password" />
+                                    <label asp-for="Password"></label>
+                                </div>
+                                <button class="btn btn-outline-secondary d-flex align-items-center" type="button" onclick="togglePassword('passwordInput', 'passwordIcon')">
+                                    <i class="bi bi-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small d-block mt-1"></span>
+                            <div class="form-text small mt-1">
+                                Password must contain at least 6 characters, including an uppercase letter, lowercase letter, and number.
+                            </div>
+                        </div>
 
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password"
-               class="form-control"
-               type="password" />
-        <span asp-validation-for="Password"
-              class="text-danger"></span>
-        <div class="form-text">
-            Password must contain at least 6 characters,
-            including an uppercase letter, lowercase letter,
-            and number.
+                        <!-- Trường Confirm Password có nút ẩn/hiện -->
+                        <div class="mb-4">
+                            <div class="input-group">
+                                <div class="form-floating flex-grow-1">
+                                    <input asp-for="ConfirmPassword" class="form-control" type="password" id="confirmPasswordInput" placeholder="Confirm Password" />
+                                    <label asp-for="ConfirmPassword"></label>
+                                </div>
+                                <button class="btn btn-outline-secondary d-flex align-items-center" type="button" onclick="togglePassword('confirmPasswordInput', 'confirmPasswordIcon')">
+                                    <i class="bi bi-eye" id="confirmPasswordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small d-block mt-1"></span>
+                        </div>
+
+                        <hr class="text-muted mb-4">
+
+                        <div class="form-floating mb-3">
+                            <select asp-for="Role" class="form-select" id="roleSelect">
+                                <option value="Admin">Admin</option>
+                                <option value="Teacher">Teacher</option>
+                                <option value="Student">Student</option>
+                            </select>
+                            <label asp-for="Role"></label>
+                            <span asp-validation-for="Role" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-floating mb-3" id="teacherGroup">
+                            <select asp-for="TeacherId" asp-items="ViewBag.TeacherId" class="form-select">
+                                <option value="">-- Select Teacher --</option>
+                            </select>
+                            <label asp-for="TeacherId">Teacher Assignment</label>
+                            <span asp-validation-for="TeacherId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-floating mb-3" id="studentGroup">
+                            <select asp-for="StudentId" asp-items="ViewBag.StudentId" class="form-select">
+                                <option value="">-- Select Student --</option>
+                            </select>
+                            <label asp-for="StudentId">Student Assignment</label>
+                            <span asp-validation-for="StudentId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                                Create Account
+                            </button>
+                            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-light btn-lg border">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="ConfirmPassword"
-               class="form-label"></label>
-        <input asp-for="ConfirmPassword"
-               class="form-control"
-               type="password" />
-        <span asp-validation-for="ConfirmPassword"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Role" class="form-label"></label>
-
-        <select asp-for="Role"
-                class="form-select"
-                id="roleSelect">
-            <option value="Admin">Admin</option>
-            <option value="Teacher">Teacher</option>
-            <option value="Student">Student</option>
-        </select>
-
-        <span asp-validation-for="Role"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mb-3" id="teacherGroup">
-        <label asp-for="TeacherId"
-               class="form-label">
-            Teacher
-        </label>
-
-        <select asp-for="TeacherId"
-                asp-items="ViewBag.TeacherId"
-                class="form-select">
-            <option value="">-- Select Teacher --</option>
-        </select>
-
-        <span asp-validation-for="TeacherId"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mb-3" id="studentGroup">
-        <label asp-for="StudentId"
-               class="form-label">
-            Student
-        </label>
-
-        <select asp-for="StudentId"
-                asp-items="ViewBag.StudentId"
-                class="form-select">
-            <option value="">-- Select Student --</option>
-        </select>
-
-        <span asp-validation-for="StudentId"
-              class="text-danger"></span>
-    </div>
-
-    <button type="submit"
-            class="btn btn-primary">
-        Create Account
-    </button>
-
-    <a asp-controller="Dashboard"
-       asp-action="Index"
-       class="btn btn-secondary">
-        Cancel
-    </a>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+        // 1. Hàm cập nhật trạng thái hiển thị của form chọn Teacher/Student dựa trên Role
         function updateRoleFields() {
             const role = document.getElementById("roleSelect").value;
-
-            const teacherGroup =
-                document.getElementById("teacherGroup");
-
-            const studentGroup =
-                document.getElementById("studentGroup");
+            const teacherGroup = document.getElementById("teacherGroup");
+            const studentGroup = document.getElementById("studentGroup");
 
             if (role === "Teacher") {
-                teacherGroup.style.display = "block";
-                studentGroup.style.display = "none";
+                teacherGroup.classList.remove("d-none");
+                studentGroup.classList.add("d-none");
             }
             else if (role === "Student") {
-                teacherGroup.style.display = "none";
-                studentGroup.style.display = "block";
+                teacherGroup.classList.add("d-none");
+                studentGroup.classList.remove("d-none");
             }
             else {
-                teacherGroup.style.display = "none";
-                studentGroup.style.display = "none";
+                teacherGroup.classList.add("d-none");
+                studentGroup.classList.add("d-none");
             }
         }
 
-        document
-            .getElementById("roleSelect")
-            .addEventListener("change", updateRoleFields);
+        // 2. Hàm xử lý ẩn/hiện mật khẩu
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
 
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            }
+        }
+
+        // Lắng nghe sự kiện khi thay đổi Role
+        document.getElementById("roleSelect").addEventListener("change", updateRoleFields);
+
+        // Chạy hàm lần đầu khi load trang để ẩn/hiện đúng form
         updateRoleFields();
     </script>
 }

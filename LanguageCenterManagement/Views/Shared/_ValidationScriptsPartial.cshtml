@@ -1,2 +1,34 @@
 ﻿<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
 <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+
+<!-- Tích hợp jQuery Validation với Bootstrap 5 UI -->
+<script>
+    $(document).ready(function () {
+        // Cấu hình mặc định cho Validator để sử dụng class is-invalid / is-valid của Bootstrap 5
+        var defaultOptions = {
+            highlight: function (element, errorClass, validClass) {
+                $(element).addClass("is-invalid").removeClass("is-valid");
+                
+                // (Tùy chọn) Tìm label của form-floating để đổi màu theo nếu cần
+                $(element).closest('.form-floating').find('label').addClass('text-danger');
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                $(element).removeClass("is-invalid").addClass("is-valid");
+                
+                // Khôi phục label
+                $(element).closest('.form-floating').find('label').removeClass('text-danger');
+            }
+        };
+
+        $.validator.setDefaults(defaultOptions);
+
+        // Cập nhật lại các form hiện tại trên trang (vì unobtrusive parse form rất sớm)
+        $("form").each(function () {
+            var validator = $(this).data("validator");
+            if (validator) {
+                validator.settings.highlight = defaultOptions.highlight;
+                validator.settings.unhighlight = defaultOptions.unhighlight;
+            }
+        });
+    });
+</script>

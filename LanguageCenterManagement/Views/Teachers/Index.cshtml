@@ -4,101 +4,138 @@
     ViewData["Title"] = "Teachers";
 }
 
-<h1>Teacher Management</h1>
-<form asp-controller="Account"
-      asp-action="Logout"
-      method="post"
-      class="d-inline">
-    @Html.AntiForgeryToken()
+<div class="container-fluid mt-4 mb-5 px-lg-5">
+    
+    <!-- Cụm thông báo (Alerts) -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-    <button type="submit"
-            class="btn btn-outline-danger">
-        Log Out
-    </button>
-</form>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">
-        @TempData["Success"]
+    <!-- Khung Card chính -->
+    <div class="card shadow-sm border-0 rounded-3">
+        <!-- Header: Tiêu đề, Thanh tìm kiếm & Nút Thêm mới -->
+        <div class="card-header bg-white border-bottom py-3 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <h4 class="mb-0 fw-bold text-primary">
+                <i class="bi bi-person-badge-fill me-2"></i>Teacher Management
+            </h4>
+            
+            <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center">
+                <!-- Thanh tìm kiếm -->
+                <form asp-action="Index" method="get" class="mb-0">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="search" value="@ViewBag.Search" class="form-control border-start-0 ps-0" placeholder="Code, name, phone, email..." style="min-width: 260px;" />
+                        <button type="submit" class="btn btn-secondary fw-medium px-3">
+                            Search
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Nút Add Teacher -->
+                <a asp-action="Create" class="btn btn-primary shadow-sm fw-bold text-nowrap">
+                    <i class="bi bi-plus-lg me-1"></i> Add Teacher
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <!-- Bảng dữ liệu -->
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light border-bottom">
+                            <tr>
+                                <th class="ps-4 py-3">Code</th>
+                                <th class="py-3">Full Name</th>
+                                <th class="py-3">Date of Birth</th>
+                                <th class="py-3">Phone</th>
+                                <th class="py-3">Email</th>
+                                <th class="py-3">Specialization</th>
+                                <th class="py-3 text-center">Status</th>
+                                <th class="text-center pe-4 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var teacher in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-primary">@teacher.TeacherCode</td>
+                                    <td class="fw-bold text-dark">@teacher.FullName</td>
+                                    <td>
+                                        <i class="bi bi-calendar-event text-muted me-1 small"></i>
+                                        @(teacher.DateOfBirth?.ToString("dd/MM/yyyy") ?? "-")
+                                    </td>
+                                    <td>@teacher.Phone</td>
+                                    <td class="text-muted">@teacher.Email</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(teacher.Specialization))
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-2 py-1">
+                                                <i class="bi bi-bookmark-star text-warning me-1"></i>@teacher.Specialization
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    
+                                    <!-- Badges trạng thái động -->
+                                    <td class="text-center">
+                                        @if (teacher.Status == "Active")
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1">@teacher.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary px-2 py-1">@teacher.Status</span>
+                                        }
+                                    </td>
+                                    
+                                    <!-- Nhóm nút thao tác dạng icon -->
+                                    <td class="text-center pe-4">
+                                        <div class="btn-group shadow-sm" role="group">
+                                            <a asp-action="Details" asp-route-id="@teacher.TeacherId" class="btn btn-sm btn-outline-info" title="Details">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@teacher.TeacherId" class="btn btn-sm btn-outline-warning" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@teacher.TeacherId" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                <i class="bi bi-trash3"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <!-- Trạng thái khi không có dữ liệu -->
+                <div class="alert alert-light text-center border-0 p-5 mb-0">
+                    <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3 text-muted">No teachers found.</h5>
+                    <p class="text-muted mb-0">Try adjusting your search keyword or add a new teacher.</p>
+                </div>
+            }
+        </div>
     </div>
-}
-
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
-}
-
-<p>
-    <a asp-action="Create" class="btn btn-primary">
-        Add Teacher
-    </a>
-</p>
-
-<form asp-action="Index" method="get" class="mb-3">
-    <div class="input-group">
-        <input type="text"
-               name="search"
-               value="@ViewBag.Search"
-               class="form-control"
-               placeholder="Search by code, name, phone, email or specialization" />
-
-        <button type="submit"
-                class="btn btn-secondary">
-            Search
-        </button>
-    </div>
-</form>
-
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Full Name</th>
-            <th>Date of Birth</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Specialization</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        @foreach (var teacher in Model)
-        {
-            <tr>
-                <td>@teacher.TeacherCode</td>
-                <td>@teacher.FullName</td>
-                <td>
-                    @(teacher.DateOfBirth?.ToString("dd/MM/yyyy"))
-                </td>
-                <td>@teacher.Phone</td>
-                <td>@teacher.Email</td>
-                <td>@teacher.Specialization</td>
-                <td>@teacher.Status</td>
-                <td>
-                    <a asp-action="Details"
-                       asp-route-id="@teacher.TeacherId"
-                       class="btn btn-info btn-sm">
-                        Details
-                    </a>
-
-                    <a asp-action="Edit"
-                       asp-route-id="@teacher.TeacherId"
-                       class="btn btn-warning btn-sm">
-                        Edit
-                    </a>
-
-                    <a asp-action="Delete"
-                       asp-route-id="@teacher.TeacherId"
-                       class="btn btn-danger btn-sm">
-                        Delete
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+</div>

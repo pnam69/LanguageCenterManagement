@@ -1,0 +1,106 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.ExamResult>
+
+@{
+    ViewData["Title"] = "Exam Results";
+}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">My Exam Results</h2>
+        <p class="text-muted mb-0">
+            View your completed exams and scores.
+        </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Exam</th>
+                            <th>Class</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var result in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        @result.Exam?.ExamName
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @result.Exam?.Class?.ClassName
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @result.Score
+                                    </strong>
+                                    /
+                                    @result.Exam?.MaxScore
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-success">
+                                        @result.Status
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @(result.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")
+                                        ?? "-")
+                                </td>
+
+                                <td class="text-end">
+
+                                    <a asp-controller="StudentExams"
+                                       asp-action="Result"
+                                       asp-route-id="@result.ExamResultId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6"
+                                    class="text-center text-muted py-4">
+                                    You have no exam results yet.
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

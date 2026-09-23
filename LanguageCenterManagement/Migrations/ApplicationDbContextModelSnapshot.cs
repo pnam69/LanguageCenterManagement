@@ -625,17 +625,11 @@ namespace LanguageCenterManagement.Migrations
                     b.Property<DateTime?>("DecisionDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("MakeUpScheduleId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("ProposedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<TimeSpan?>("ProposedEndTime")
                         .HasColumnType("time");
-
-                    b.Property<int?>("ProposedRoomId")
-                        .HasColumnType("int");
 
                     b.Property<TimeSpan?>("ProposedStartTime")
                         .HasColumnType("time");
@@ -660,10 +654,6 @@ namespace LanguageCenterManagement.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ScheduleChangeRequestId");
-
-                    b.HasIndex("MakeUpScheduleId");
-
-                    b.HasIndex("ProposedRoomId");
 
                     b.HasIndex("ScheduleId");
 
@@ -1152,16 +1142,6 @@ namespace LanguageCenterManagement.Migrations
 
             modelBuilder.Entity("LanguageCenterManagement.Models.ScheduleChangeRequest", b =>
                 {
-                    b.HasOne("LanguageCenterManagement.Models.Schedule", "MakeUpSchedule")
-                        .WithMany()
-                        .HasForeignKey("MakeUpScheduleId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("LanguageCenterManagement.Models.Room", "ProposedRoom")
-                        .WithMany()
-                        .HasForeignKey("ProposedRoomId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("LanguageCenterManagement.Models.Schedule", "Schedule")
                         .WithMany()
                         .HasForeignKey("ScheduleId")
@@ -1173,10 +1153,6 @@ namespace LanguageCenterManagement.Migrations
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("MakeUpSchedule");
-
-                    b.Navigation("ProposedRoom");
 
                     b.Navigation("Schedule");
 

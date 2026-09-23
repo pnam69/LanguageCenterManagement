@@ -1,0 +1,200 @@
+﻿@model LanguageCenterManagement.ViewModels.TeacherAttendanceViewModel
+
+@{
+    ViewData["Title"] = "Take Attendance";
+}
+
+<div class="container-fluid mt-4 mb-5 px-lg-5">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+
+        <div>
+            <h3 class="fw-bold text-primary mb-1">
+                <i class="bi bi-calendar2-check-fill me-2"></i>
+                Take Attendance
+            </h3>
+
+            <p class="text-muted mb-0">
+                @Model.ClassName
+            </p>
+        </div>
+
+        <a asp-controller="TeacherAttendance"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Classes
+
+        </a>
+
+    </div>
+
+    <form asp-action="Take" method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               asp-for="ClassId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+
+            <div class="card-body p-4">
+
+                <div class="row align-items-end">
+
+                    <div class="col-md-4">
+
+                        <label asp-for="AttendanceDate"
+                               class="form-label fw-semibold">
+                            Attendance Date
+                        </label>
+
+                        <input asp-for="AttendanceDate"
+                               type="date"
+                               class="form-control" />
+
+                        <span asp-validation-for="AttendanceDate"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3">
+
+            <div class="card-body p-0">
+
+                @if (!Model.Students.Any())
+                {
+                    <div class="p-5 text-center">
+
+                        <i class="bi bi-people fs-1 text-muted"></i>
+
+                        <h5 class="fw-bold mt-3">
+                            No Students Enrolled
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            There are currently no students enrolled in this class.
+                        </p>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+                                    <th class="px-4">#</th>
+                                    <th>Student</th>
+                                    <th>Status</th>
+                                    <th>Note</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                @for (int i = 0; i < Model.Students.Count; i++)
+                                {
+                                    <tr>
+
+                                        <td class="px-4">
+                                            @(i + 1)
+                                        </td>
+
+                                        <td>
+                                            <div class="fw-semibold">
+                                                @Model.Students[i].FullName
+                                            </div>
+
+                                            <small class="text-muted">
+                                                @Model.Students[i].StudentCode
+                                            </small>
+
+                                            <input type="hidden"
+                                                   asp-for="Students[i].StudentId" />
+
+                                            <input type="hidden"
+                                                   asp-for="Students[i].StudentCode" />
+
+                                            <input type="hidden"
+                                                   asp-for="Students[i].FullName" />
+                                        </td>
+
+                                        <td style="min-width: 160px;">
+
+                                            <select asp-for="Students[i].Status"
+                                                    class="form-select">
+
+                                                <option value="Present">
+                                                    Present
+                                                </option>
+
+                                                <option value="Absent">
+                                                    Absent
+                                                </option>
+
+                                                <option value="Late">
+                                                    Late
+                                                </option>
+
+                                            </select>
+
+                                        </td>
+
+                                        <td style="min-width: 250px;">
+
+                                            <input asp-for="Students[i].Note"
+                                                   class="form-control"
+                                                   placeholder="Optional note" />
+
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="p-4 border-top d-flex justify-content-end">
+
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+
+                            <i class="bi bi-check2-circle me-1"></i>
+                            Save Attendance
+
+                        </button>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

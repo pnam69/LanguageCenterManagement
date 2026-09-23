@@ -4,44 +4,77 @@
     ViewData["Title"] = "Login";
 }
 
-<h1>Login</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-person-circle me-2"></i>Login</h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Login" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-<form asp-action="Login" method="post">
+                        <!-- Trường Email -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Email" class="form-control" placeholder="name@example.com" />
+                            <label asp-for="Email"></label>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
 
-    <div asp-validation-summary="ModelOnly"
-         class="text-danger"></div>
+                        <!-- Trường Password có nút ẩn/hiện -->
+                        <div class="mb-4">
+                            <div class="input-group">
+                                <div class="form-floating flex-grow-1">
+                                    <input asp-for="Password" class="form-control" type="password" id="passwordInput" placeholder="Password" />
+                                    <label asp-for="Password"></label>
+                                </div>
+                                <button class="btn btn-outline-secondary d-flex align-items-center" type="button" onclick="togglePassword('passwordInput', 'passwordIcon')">
+                                    <i class="bi bi-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small d-block mt-1"></span>
+                        </div>
 
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email"
-              class="text-danger"></span>
+                        <!-- Nút Remember Me (Sử dụng form-switch để trông hiện đại hơn) -->
+                        <div class="form-check form-switch mb-4">
+                            <input asp-for="RememberMe" class="form-check-input" type="checkbox" role="switch" id="rememberMeSwitch" />
+                            <label asp-for="RememberMe" class="form-check-label" for="rememberMeSwitch">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm">
+                                Login
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password"
-              class="text-danger"></span>
-    </div>
-
-    <div class="form-check mb-3">
-        <input asp-for="RememberMe"
-               class="form-check-input" />
-
-        <label asp-for="RememberMe"
-               class="form-check-label">
-            Remember me
-        </label>
-    </div>
-
-    <button type="submit"
-            class="btn btn-primary">
-        Login
-    </button>
-
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Hàm xử lý ẩn/hiện mật khẩu
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            }
+        }
+    </script>
 }

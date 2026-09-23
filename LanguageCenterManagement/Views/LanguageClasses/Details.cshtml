@@ -4,69 +4,88 @@
     ViewData["Title"] = "Class Details";
 }
 
-<h1>Class Details</h1>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-info-circle-fill me-2"></i>Class Details
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    
+                    <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">Class Information</h5>
+                    
+                    <!-- Khối thông tin chi tiết lớp học -->
+                    <div class="bg-light p-4 rounded-3 border mb-4">
+                        <dl class="row mb-0">
+                            <!-- Mã lớp & Tên lớp -->
+                            <div class="col-md-6 mb-3">
+                                <dt class="text-muted mb-1">Class Code</dt>
+                                <dd class="fw-bold fs-6 mb-0">@Model.ClassCode</dd>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <dt class="text-muted mb-1">Class Name</dt>
+                                <dd class="fw-bold text-primary fs-6 mb-0">@Model.ClassName</dd>
+                            </div>
 
-<dl class="row">
+                            <!-- Khóa học & Giáo viên -->
+                            <div class="col-md-6 mb-3">
+                                <dt class="text-muted mb-1">Course</dt>
+                                <dd class="fw-bold fs-6 mb-0">@Model.Course?.CourseName</dd>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <dt class="text-muted mb-1">Teacher</dt>
+                                <dd class="fw-bold fs-6 mb-0">@Model.Teacher?.FullName</dd>
+                            </div>
 
-    <dt class="col-sm-3">
-        Class Code
-    </dt>
+                            <!-- Sĩ số & Trạng thái -->
+                            <div class="col-md-6 mb-0 mt-2">
+                                <dt class="text-muted mb-1">Maximum Students</dt>
+                                <dd class="fw-bold fs-6 mb-0">
+                                    <i class="bi bi-people-fill text-secondary me-1"></i> @Model.MaxStudents
+                                </dd>
+                            </div>
+                            <div class="col-md-6 mb-0 mt-2">
+                                <dt class="text-muted mb-2">Status</dt>
+                                <dd class="mb-0">
+                                    @if (Model.Status == "Active")
+                                    {
+                                        <span class="badge bg-success px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
+                                    }
+                                    else if (Model.Status == "Completed")
+                                    {
+                                        <span class="badge bg-info text-dark px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
+                                    }
+                                    else if (Model.Status == "Cancelled")
+                                    {
+                                        <span class="badge bg-danger px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2 fs-6 shadow-sm">@Model.Status</span>
+                                    }
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
 
-    <dd class="col-sm-9">
-        @Model.ClassCode
-    </dd>
+                    <hr class="text-muted my-4">
 
-    <dt class="col-sm-3">
-        Class Name
-    </dt>
-
-    <dd class="col-sm-9">
-        @Model.ClassName
-    </dd>
-
-    <dt class="col-sm-3">
-        Course
-    </dt>
-
-    <dd class="col-sm-9">
-        @Model.Course?.CourseName
-    </dd>
-
-    <dt class="col-sm-3">
-        Teacher
-    </dt>
-
-    <dd class="col-sm-9">
-        @Model.Teacher?.FullName
-    </dd>
-
-    <dt class="col-sm-3">
-        Maximum Students
-    </dt>
-
-    <dd class="col-sm-9">
-        @Model.MaxStudents
-    </dd>
-
-    <dt class="col-sm-3">
-        Status
-    </dt>
-
-    <dd class="col-sm-9">
-        @Model.Status
-    </dd>
-
-</dl>
-
-<div>
-    <a asp-action="Edit"
-       asp-route-id="@Model.LanguageClassId"
-       class="btn btn-warning">
-        Edit
-    </a>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Back
-    </a>
+                    <!-- Các nút hành động -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-light btn-lg border px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Back to List
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@Model.LanguageClassId" class="btn btn-warning btn-lg fw-bold px-4 shadow-sm text-dark">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Class
+                        </a>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

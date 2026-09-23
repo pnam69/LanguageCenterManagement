@@ -4,226 +4,98 @@
     ViewData["Title"] = "Edit Schedule";
 }
 
-<h1>Edit Schedule</h1>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Schedule
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="ScheduleId" />
 
-<hr />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-<form asp-action="Edit" method="post">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="ClassId" class="form-select" asp-items="ViewBag.ClassId">
+                                        <option value="">-- Select Class --</option>
+                                    </select>
+                                    <label asp-for="ClassId">Class</label>
+                                    <span asp-validation-for="ClassId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="RoomId" class="form-select" asp-items="ViewBag.RoomId">
+                                        <option value="">-- Select Room --</option>
+                                    </select>
+                                    <label asp-for="RoomId">Room</label>
+                                    <span asp-validation-for="RoomId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <input type="hidden"
-           asp-for="ScheduleId" />
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="StudyDate" type="date" class="form-control" />
+                                    <label asp-for="StudyDate">Study Date</label>
+                                    <span asp-validation-for="StudyDate" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="Status" class="form-select">
+                                        <option value="Scheduled">Scheduled</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                    <label asp-for="Status">Status</label>
+                                    <span asp-validation-for="Status" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <div asp-validation-summary="ModelOnly"
-         class="text-danger mb-3"></div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="StartTime" type="time" class="form-control" />
+                                    <label asp-for="StartTime">Start Time</label>
+                                    <span asp-validation-for="StartTime" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="EndTime" type="time" class="form-control" />
+                                    <label asp-for="EndTime">End Time</label>
+                                    <span asp-validation-for="EndTime" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <div class="mb-3">
-        <label asp-for="ClassId" class="form-label">
-            Class
-        </label>
+                        <hr class="text-muted mb-4">
 
-        <select asp-for="ClassId"
-                class="form-select"
-                asp-items="ViewBag.ClassId">
-            <option value="">-- Select Class --</option>
-        </select>
-
-        <span asp-validation-for="ClassId"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="RoomId" class="form-label">
-            Room
-        </label>
-
-        <select asp-for="RoomId"
-                class="form-select"
-                asp-items="ViewBag.RoomId"
-                id="roomId">
-            <option value="">-- Select Room --</option>
-        </select>
-
-        <span asp-validation-for="RoomId"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="StudyDate" class="form-label">
-            Study Date
-        </label>
-
-        <input asp-for="StudyDate"
-               type="date"
-               class="form-control"
-               id="studyDate" />
-
-        <span asp-validation-for="StudyDate"
-              class="text-danger"></span>
-    </div>
-
-    <div class="row">
-
-        <div class="col-md-6 mb-3">
-            <label asp-for="StartTime" class="form-label">
-                Start Time
-            </label>
-
-            <input asp-for="StartTime"
-                   type="time"
-                   class="form-control"
-                   id="startTime" />
-
-            <span asp-validation-for="StartTime"
-                  class="text-danger"></span>
+                        <div class="d-flex justify-content-end gap-2 flex-wrap">
+                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <div class="col-md-6 mb-3">
-            <label asp-for="EndTime" class="form-label">
-                End Time
-            </label>
-
-            <input asp-for="EndTime"
-                   type="time"
-                   class="form-control"
-                   id="endTime" />
-
-            <span asp-validation-for="EndTime"
-                  class="text-danger"></span>
-        </div>
-
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Status" class="form-label">
-            Status
-        </label>
-
-        <select asp-for="Status" class="form-select">
-            <option value="Scheduled">Scheduled</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-        </select>
-
-        <span asp-validation-for="Status"
-              class="text-danger"></span>
-    </div>
-
-    <div class="mt-3">
-        <button type="submit" class="btn btn-primary">
-            Save Changes
-        </button>
-
-        <a asp-action="Index"
-           class="btn btn-secondary">
-            Back to List
-        </a>
-    </div>
-
-</form>
+</div>
 
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        async function loadAvailableRooms() {
-
-            const date =
-                document.getElementById("studyDate").value;
-
-            const startTime =
-                document.getElementById("startTime").value;
-
-            const endTime =
-                document.getElementById("endTime").value;
-
-            const roomSelect =
-                document.getElementById("roomId");
-
-            if (!date || !startTime || !endTime) {
-                return;
-            }
-
-            if (endTime <= startTime) {
-
-                roomSelect.innerHTML =
-                    '<option value="">-- End time must be later than start time --</option>';
-
-                return;
-            }
-
-            const currentRoomId =
-                roomSelect.value;
-
-            const scheduleId =
-                document.querySelector(
-                    'input[name="ScheduleId"]'
-                ).value;
-
-            try {
-
-                const response = await fetch(
-                    `/Schedules/GetAvailableRooms?studyDate=${encodeURIComponent(date)}&startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}&excludeScheduleId=${scheduleId}`
-                );
-
-                if (!response.ok) {
-                    return;
-                }
-
-                const rooms = await response.json();
-
-                roomSelect.innerHTML =
-                    '<option value="">-- Select Room --</option>';
-
-                rooms.forEach(room => {
-
-                    const option =
-                        document.createElement("option");
-
-                    option.value = room.id;
-                    option.textContent = room.text;
-
-                    if (
-                        currentRoomId &&
-                        currentRoomId == room.id
-                    ) {
-                        option.selected = true;
-                    }
-
-                    roomSelect.appendChild(option);
-                });
-
-                if (rooms.length === 0) {
-
-                    roomSelect.innerHTML =
-                        '<option value="">-- No rooms available --</option>';
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Failed to load available rooms:",
-                    error
-                );
-            }
-        }
-
-        document.getElementById("studyDate")
-            .addEventListener(
-                "change",
-                loadAvailableRooms
-            );
-
-        document.getElementById("startTime")
-            .addEventListener(
-                "change",
-                loadAvailableRooms
-            );
-
-        document.getElementById("endTime")
-            .addEventListener(
-                "change",
-                loadAvailableRooms
-            );
-    </script>
 }

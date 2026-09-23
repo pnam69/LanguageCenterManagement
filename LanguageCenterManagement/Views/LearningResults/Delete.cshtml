@@ -1,0 +1,62 @@
+﻿@model LanguageCenterManagement.Models.LearningResult
+
+@{
+    ViewData["Title"] = "Delete Learning Result";
+}
+
+<div class="mb-4">
+    <h2 class="fw-bold">Delete Learning Result</h2>
+    <p class="text-muted">
+        Are you sure you want to delete this result?
+    </p>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <div class="alert alert-warning">
+            This action cannot be undone.
+        </div>
+
+        <dl class="row">
+            <dt class="col-sm-3">Student</dt>
+            <dd class="col-sm-9">
+                @Model.Student?.FullName
+            </dd>
+
+            <dt class="col-sm-3">Class</dt>
+            <dd class="col-sm-9">
+                @Model.Class?.ClassCode -
+                @Model.Class?.ClassName
+            </dd>
+
+            <dt class="col-sm-3">Average Score</dt>
+            <dd class="col-sm-9">
+                @Model.AverageScore.ToString("0.00") / 10
+            </dd>
+
+            <dt class="col-sm-3">Result</dt>
+            <dd class="col-sm-9">
+                @Model.Result
+            </dd>
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.LearningResultId" />
+
+            <button type="submit"
+                    class="btn btn-danger">
+                <i class="bi bi-trash me-1"></i>
+                Delete
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary ms-2">
+                Cancel
+            </a>
+        </form>
+    </div>
+</div>

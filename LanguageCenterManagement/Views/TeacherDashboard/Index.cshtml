@@ -2,136 +2,149 @@
     ViewData["Title"] = "Teacher Dashboard";
 }
 
-<div class="container">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid mt-4 mb-5 px-lg-5">
+    
+    <!-- Lời chào & Tiêu đề -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
         <div>
-            <h1>Teacher Dashboard</h1>
-
-            <p class="text-muted mb-0">
-                Welcome, @User.Identity?.Name
+            <h3 class="fw-bold text-primary mb-1">
+                <i class="bi bi-person-workspace me-2"></i>Teacher Dashboard
+            </h3>
+            <p class="text-muted mb-0 fs-6">
+                Welcome back, <strong class="text-dark fs-5">@User.Identity?.Name</strong>! Here is your teaching overview.
             </p>
         </div>
-
         <div>
-            <form asp-controller="Account"
-                  asp-action="Logout"
-                  method="post"
-                  class="d-inline">
-
-                @Html.AntiForgeryToken()
-
-                <button type="submit"
-                        class="btn btn-outline-danger">
-                    Log Out
-                </button>
-
-            </form>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2 fs-6 shadow-sm">
+                <i class="bi bi-person-video3 me-1"></i> Teacher Account
+            </span>
         </div>
     </div>
 
-    <div class="row">
-
-        <!-- My Schedule -->
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        My Schedule
-                    </h5>
-
-                    <p class="card-text">
-                        View your classes, teaching times, and assigned rooms.
+    <!-- Khối thẻ chức năng (Dashboard Widgets) -->
+    <div class="row g-4">
+        
+        <!-- My Classes -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 border-start border-primary border-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
+                            <i class="bi bi-easel2-fill fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">My Classes</h5>
+                    </div>
+                    <p class="text-muted mb-4 flex-grow-1">
+                        View and manage your assigned classes, check teaching schedules, and organize lesson plans.
                     </p>
-
-                    <a asp-controller="TeacherSchedule"
-                       asp-action="Index"
-                       class="btn btn-primary">
-                        View Schedule
+                    <!-- Nút bấm chờ gắn link -->
+                    <a href="#" class="btn btn-outline-primary fw-medium w-100 shadow-sm">
+                        Manage Classes <i class="bi bi-arrow-right ms-1"></i>
                     </a>
-
                 </div>
             </div>
         </div>
 
         <!-- Attendance -->
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 border-start border-info border-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
+                            <i class="bi bi-ui-checks fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">Attendance</h5>
+                    </div>
+                    <p class="text-muted mb-4 flex-grow-1">
+                        Record daily student attendance, track absences, and manage class participation.
+                    </p>
+                    <a asp-controller="TeacherAttendance" asp-action="Index" class="btn btn-outline-info fw-medium w-100 shadow-sm text-dark">
+                        Record Attendance <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-calendar3 fs-2 text-primary"></i>
+                    </div>
 
-                    <h5 class="card-title">
-                        Attendance
-                    </h5>
+                    <h5 class="fw-bold">My Schedule</h5>
 
-                    <p class="card-text">
-                        Record and manage student attendance.
+                    <p class="text-muted">
+                        View your weekly teaching schedule and classroom assignments.
                     </p>
 
-                    <a href="#"
-                       class="btn btn-primary">
-                        Attendance
+                    <a asp-controller="TeacherSchedules"
+                       asp-action="Index"
+                       class="btn btn-outline-primary">
+                        View Schedule
                     </a>
-
                 </div>
             </div>
         </div>
 
         <!-- Exams -->
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Exams
-                    </h5>
-
-                    <p class="card-text">
-                        Manage exams and student results.
-                    </p>
-
-                    <a href="#"
-                       class="btn btn-primary">
-                        Manage Exams
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Schedule Change Requests -->
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Schedule Change Requests
-                    </h5>
-
-                    <p class="card-text">
-                        Submit and track requests for
-                        schedule changes or make-up classes.
-                    </p>
-
-                    <div class="d-flex gap-2">
-
-                        <a asp-controller="ScheduleChangeRequests"
-                           asp-action="Index"
-                           class="btn btn-primary">
-                            My Requests
-                        </a>
-
-                        <a asp-controller="ScheduleChangeRequests"
-                           asp-action="Create"
-                           class="btn btn-outline-primary">
-                            New Request
-                        </a>
-
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 border-start border-warning border-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
+                            <i class="bi bi-file-earmark-text-fill fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">Exams</h5>
                     </div>
-
+                    <p class="text-muted mb-4 flex-grow-1">
+                        Manage exam schedules, grade student submissions, and update academic results.
+                    </p>
+                    <a asp-controller="Exams" asp-action="Index" class="btn btn-outline-warning fw-medium w-100 shadow-sm text-dark">
+                        Manage Exams <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
                 </div>
             </div>
         </div>
 
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 border-start border-warning border-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
+                            <i class="bi bi-file-earmark-text-fill fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">Exam Results</h5>
+                    </div>
+                    <p class="text-muted mb-4 flex-grow-1">
+                        Manage exam results, view student performance, and generate reports for your classes.
+                    </p>
+                    <a asp-controller="TeacherExamResults" asp-action="Index" class="btn btn-outline-warning fw-medium w-100 shadow-sm text-dark">
+                        Manage Exam Results <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 border-start border-warning border-4 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
+                            <i class="bi bi-file-earmark-text-fill fs-3"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-0">Questions</h5>
+                    </div>
+                    <p class="text-muted mb-4 flex-grow-1">
+                        Manage questions.
+                    </p>
+                    <a asp-controller="Questions" asp-action="Index" class="btn btn-outline-warning fw-medium w-100 shadow-sm text-dark">
+                        Manage Questions <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
     </div>
 </div>

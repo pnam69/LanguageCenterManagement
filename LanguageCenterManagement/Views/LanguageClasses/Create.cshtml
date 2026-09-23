@@ -4,119 +4,100 @@
     ViewData["Title"] = "Add Class";
 }
 
-<h1>Add Language Class</h1>
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="bi bi-easel-fill me-2"></i>Add Language Class
+                    </h4>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-medium"></div>
 
-<form asp-action="Create" method="post">
+                        <!-- Hàng 1: Mã lớp & Tên lớp -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <div class="form-floating">
+                                    <input asp-for="ClassCode" class="form-control" placeholder="Class Code" />
+                                    <label asp-for="ClassCode"></label>
+                                    <span asp-validation-for="ClassCode" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-floating">
+                                    <input asp-for="ClassName" class="form-control" placeholder="Class Name" />
+                                    <label asp-for="ClassName"></label>
+                                    <span asp-validation-for="ClassName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <div asp-validation-summary="ModelOnly"
-         class="text-danger"></div>
+                        <!-- Hàng 2: Khóa học & Giáo viên -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="CourseId" asp-items="ViewBag.CourseId" class="form-select">
+                                        <option value="">-- Select Course --</option>
+                                    </select>
+                                    <label asp-for="CourseId">Course</label>
+                                    <span asp-validation-for="CourseId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="TeacherId" asp-items="ViewBag.TeacherId" class="form-select">
+                                        <option value="">-- Select Teacher --</option>
+                                    </select>
+                                    <label asp-for="TeacherId">Teacher</label>
+                                    <span asp-validation-for="TeacherId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-    <div class="mb-3">
-        <label asp-for="ClassCode"
-               class="form-label">
-        </label>
+                        <!-- Hàng 3: Sĩ số tối đa & Trạng thái -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="MaxStudents" type="number" min="1" class="form-control" placeholder="Max Students" />
+                                    <label asp-for="MaxStudents">Max Students</label>
+                                    <span asp-validation-for="MaxStudents" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="Status" class="form-select">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Completed">Completed</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                    <label asp-for="Status">Status</label>
+                                    <span asp-validation-for="Status" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
 
-        <input asp-for="ClassCode"
-               class="form-control" />
+                        <hr class="text-muted mb-4">
 
-        <span asp-validation-for="ClassCode"
-              class="text-danger">
-        </span>
+                        <!-- Các nút hành động -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-light btn-lg border px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow-sm">
+                                Save Class
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="ClassName"
-               class="form-label">
-        </label>
-
-        <input asp-for="ClassName"
-               class="form-control" />
-
-        <span asp-validation-for="ClassName"
-              class="text-danger">
-        </span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="CourseId"
-               class="form-label">
-            Course
-        </label>
-
-        <select asp-for="CourseId"
-                asp-items="ViewBag.CourseId"
-                class="form-select">
-
-            <option value="">-- Select Course --</option>
-
-        </select>
-
-        <span asp-validation-for="CourseId"
-              class="text-danger">
-        </span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="TeacherId"
-               class="form-label">
-            Teacher
-        </label>
-
-        <select asp-for="TeacherId"
-                asp-items="ViewBag.TeacherId"
-                class="form-select">
-
-            <option value="">-- Select Teacher --</option>
-
-        </select>
-
-        <span asp-validation-for="TeacherId"
-              class="text-danger">
-        </span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="MaxStudents"
-               class="form-label">
-        </label>
-
-        <input asp-for="MaxStudents"
-               type="number"
-               min="1"
-               class="form-control" />
-
-        <span asp-validation-for="MaxStudents"
-              class="text-danger">
-        </span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Status"
-               class="form-label">
-        </label>
-
-        <select asp-for="Status"
-                class="form-select">
-
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-
-        </select>
-    </div>
-
-    <button type="submit"
-            class="btn btn-primary">
-        Save
-    </button>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Back
-    </a>
-
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

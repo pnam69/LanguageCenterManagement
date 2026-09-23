@@ -1,0 +1,147 @@
+﻿@model LanguageCenterManagement.ViewModels.TeacherScheduleViewModel
+
+@{
+    ViewData["Title"] = "My Schedule";
+
+    var previousWeek = Model.WeekStart.AddDays(-7);
+    var nextWeek = Model.WeekStart.AddDays(7);
+
+    var days = Enumerable.Range(0, 7)
+        .Select(i => Model.WeekStart.AddDays(i))
+        .ToList();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">My Schedule</h2>
+        <p class="text-muted mb-0">
+            View your weekly teaching schedule.
+        </p>
+    </div>
+
+    <div class="btn-group">
+        <a asp-action="Index"
+           asp-route-weekStart="@previousWeek.ToString("yyyy-MM-dd")"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-chevron-left"></i>
+            Previous
+        </a>
+
+        <a asp-action="Index"
+           asp-route-weekStart="@DateTime.Today.ToString("yyyy-MM-dd")"
+           class="btn btn-outline-primary">
+            This Week
+        </a>
+
+        <a asp-action="Index"
+           asp-route-weekStart="@nextWeek.ToString("yyyy-MM-dd")"
+           class="btn btn-outline-secondary">
+            Next
+            <i class="bi bi-chevron-right"></i>
+        </a>
+    </div>
+</div>
+
+<div class="mb-3">
+    <span class="fw-semibold">
+        @Model.WeekStart.ToString("dd/MM/yyyy")
+    </span>
+
+    <span class="text-muted"> - </span>
+
+    <span class="fw-semibold">
+        @Model.WeekStart.AddDays(6).ToString("dd/MM/yyyy")
+    </span>
+</div>
+
+<div class="row g-3">
+    @foreach (var day in days)
+    {
+        var daySchedules = Model.Schedules
+            .Where(s => s.StudyDate.Date == day.Date)
+            .OrderBy(s => s.StartTime)
+            .ToList();
+
+        <div class="col-md">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white text-center">
+                    <div class="fw-bold">
+                        @day.ToString("dddd")
+                    </div>
+
+                    <div class="small text-muted">
+                        @day.ToString("dd/MM")
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    @if (!daySchedules.Any())
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x fs-3"></i>
+
+                            <div class="small mt-2">
+                                No classes
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var schedule in daySchedules)
+                        {
+                            <div class="border rounded p-3 mb-3">
+                                <div class="fw-bold">
+                                    @schedule.ClassCode
+                                </div>
+
+                                <div class="small text-muted mb-2">
+                                    @schedule.ClassName
+                                </div>
+
+                                <div class="small mb-1">
+                                    <i class="bi bi-book me-1"></i>
+                                    @schedule.CourseName
+                                </div>
+
+                                <div class="small mb-1">
+                                    <i class="bi bi-clock me-1"></i>
+
+                                    @schedule.StartTime.ToString(@"hh\:mm")
+                                    -
+                                    @schedule.EndTime.ToString(@"hh\:mm")
+                                </div>
+
+                                <div class="small mb-1">
+                                    <i class="bi bi-door-open me-1"></i>
+
+                                    @schedule.RoomName
+                                </div>
+
+                                <div class="mt-2">
+                                    @if (schedule.Status == "Scheduled")
+                                    {
+                                        <span class="badge bg-success">
+                                            Scheduled
+                                        </span>
+                                    }
+                                    else if (schedule.Status == "Cancelled")
+                                    {
+                                        <span class="badge bg-danger">
+                                            Cancelled
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            @schedule.Status
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
