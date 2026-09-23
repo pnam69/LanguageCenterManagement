@@ -40,6 +40,11 @@ namespace LanguageCenterManagement.Data
         public DbSet<Material> Materials { get; set; }
         public DbSet<ScheduleChangeRequest> ScheduleChangeRequests { get; set; }
 
+        public DbSet<ReadingContent> ReadingContents { get; set; }
+        public DbSet<ListeningContent> ListeningContents { get; set; }
+        public DbSet<SpeakingContent> SpeakingContents { get; set; }
+        public DbSet<WritingContent> WritingContents { get; set; }
+        public DbSet<ReadingPassage> ReadingPassages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

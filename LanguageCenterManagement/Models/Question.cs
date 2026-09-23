@@ -22,5 +22,13 @@ namespace LanguageCenterManagement.Models
 
         public ICollection<ExamQuestion> ExamQuestions { get; set; }
             = new List<ExamQuestion>();
+
+        public ReadingContent? ReadingContent { get; set; }
+
+        public ListeningContent? ListeningContent { get; set; }
+
+        public SpeakingContent? SpeakingContent { get; set; }
+
+        public WritingContent? WritingContent { get; set; }
     }
 }
