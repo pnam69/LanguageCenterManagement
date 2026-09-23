@@ -1,5 +1,4 @@
-﻿@model LanguageCenterManagement.ViewModels.ExamCreateViewModel
-
+﻿@model LanguageCenterManagement.ViewModels.ExamFormViewModel
 @{
 	ViewData["Title"] = "Edit Exam";
 
@@ -11,7 +10,7 @@
 		ViewBag.SelectedQuestionIds as List<int>
 		?? new List<int>();
 
-	int examId = ViewBag.ExamId;
+	int examId = Model.ExamId;
 }
 
 <div class="container-fluid px-lg-5 py-4">
@@ -140,41 +139,44 @@
 					Exam Questions
 				</h5>
 
-				<span asp-validation-for="SelectedQuestionIds"
-					  class="text-danger"></span>
-
+				
 				<div class="list-group">
 
-					@foreach (var question in questions)
+					@foreach (var question in Model.Questions)
 					{
 						<div class="list-group-item">
-
 							<div class="form-check">
 
 								<input class="form-check-input"
 									   type="checkbox"
-									   name="SelectedQuestionIds"
-									   value="@question.QuestionId"
+									   name="Questions[@Model.Questions.IndexOf(question)].Selected"
+									   value="true"
 									   id="question_@question.QuestionId"
-									   @(selectedIds.Contains(question.QuestionId)
-											? "checked"
-											: "") />
+								@(question.Selected ? "checked" : "") />
+
+								<input type="hidden"
+									   name="Questions[@Model.Questions.IndexOf(question)].Selected"
+									   value="false" />
+
+								<input type="hidden"
+									   name="Questions[@Model.Questions.IndexOf(question)].QuestionId"
+									   value="@question.QuestionId" />
 
 								<label class="form-check-label"
 									   for="question_@question.QuestionId">
 
-									<strong>
-										Question @question.QuestionId
-									</strong>
+									<strong>Question @question.QuestionId</strong>
 
 									<span class="ms-2">
 										@question.QuestionText
 									</span>
 
+									<span class="badge bg-secondary ms-2">
+										@question.Score pt
+									</span>
+
 								</label>
-
 							</div>
-
 						</div>
 					}
 

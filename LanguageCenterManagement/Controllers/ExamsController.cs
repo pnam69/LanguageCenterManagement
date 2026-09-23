@@ -106,7 +106,7 @@ namespace LanguageCenterManagement.Controllers
                 return Forbid();
             }
 
-            var model = new ExamFormViewModel
+            var model = new ExamCreateViewModel
             {
                 ExamDate = DateTime.Now,
                 Duration = 60,
@@ -123,7 +123,7 @@ namespace LanguageCenterManagement.Controllers
         // POST: Exams/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ExamFormViewModel model)
+        public async Task<IActionResult> Create(ExamCreateViewModel model)
         {
             if (!await CanCreateClass(model.ClassId))
             {
@@ -152,7 +152,7 @@ namespace LanguageCenterManagement.Controllers
 
             await _context.SaveChangesAsync();
 
-            await SaveExamQuestions(exam.ExamId, model.Questions);
+            await SaveExamQuestions(exam.ExamId, model.SelectedQuestionIds);
 
             TempData["SuccessMessage"] = "Exam created successfully.";
 
@@ -364,27 +364,70 @@ namespace LanguageCenterManagement.Controllers
                 .ToList();
         }
 
-        private async Task SaveExamQuestions(
-            int examId,
-            List<QuestionSelectionViewModel> questions)
+        private async Task LoadFormData(ExamCreateViewModel model)
         {
-            var selectedQuestions = questions
-                .Where(q => q.Selected)
-                .ToList();
+            var classesQuery = _context.Classes
+                .Include(c => c.Course)
+                .AsQueryable();
 
+            if (User.IsInRole("Teacher"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+
+                if (user?.TeacherId != null)
+                {
+                    classesQuery = classesQuery.Where(c =>
+                        c.TeacherId == user.TeacherId.Value);
+                }
+            }
+
+            var classes = await classesQuery
+                .OrderBy(c => c.ClassName)
+                .ToListAsync();
+
+            ViewBag.Classes = new SelectList(
+                classes,
+                "LanguageClassId",
+                "ClassName",
+                model.ClassId);
+
+            var questions = await _context.Questions
+                .OrderBy(q => q.QuestionId)
+                .ToListAsync();
+
+            ViewBag.Questions = questions;
+            ViewBag.SelectedQuestionIds = model.SelectedQuestionIds;
+        }
+
+        private async Task SaveExamQuestions(
+    int examId,
+    List<int> selectedQuestionIds)
+        {
             int order = 1;
 
-            foreach (var question in selectedQuestions)
+            foreach (var questionId in selectedQuestionIds)
             {
                 _context.ExamQuestions.Add(new ExamQuestion
                 {
                     ExamId = examId,
-                    QuestionId = question.QuestionId,
+                    QuestionId = questionId,
                     QuestionOrder = order++
                 });
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        private async Task SaveExamQuestions(
+            int examId,
+            List<QuestionSelectionViewModel> questions)
+        {
+            var selectedQuestionIds = questions
+                .Where(q => q.Selected)
+                .Select(q => q.QuestionId)
+                .ToList();
+
+            await SaveExamQuestions(examId, selectedQuestionIds);
         }
 
         private async Task<bool> CanAccessExam(Exam exam)

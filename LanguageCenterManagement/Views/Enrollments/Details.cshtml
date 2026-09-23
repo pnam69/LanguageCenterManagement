@@ -1,250 +1,62 @@
-﻿@model LanguageCenterManagement.Models.Exam
+﻿@model LanguageCenterManagement.Models.Enrollment
 
 @{
-    ViewData["Title"] = "Exam Details";
+    ViewData["Title"] = "Enrollment Details";
 }
 
-<div class="container py-4">
+<h1>Enrollment Details</h1>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<dl class="row">
 
-        <div>
-            <h2 class="fw-bold mb-1">@Model.ExamName</h2>
+    <dt class="col-sm-3">
+        Student
+    </dt>
 
-            <p class="text-muted mb-0">
-                @Model.Class?.ClassName
-            </p>
-        </div>
+    <dd class="col-sm-9">
+        @Model.Student?.FullName
+    </dd>
 
-        <div class="d-flex gap-2">
+    <dt class="col-sm-3">
+        Class
+    </dt>
 
-            <a asp-action="Edit"
-               asp-route-id="@Model.ExamId"
-               class="btn btn-primary">
-                <i class="bi bi-pencil"></i>
-                Edit
-            </a>
+    <dd class="col-sm-9">
+        @Model.Class?.ClassName
+    </dd>
 
-            <a asp-action="Delete"
-               asp-route-id="@Model.ExamId"
-               class="btn btn-outline-danger">
-                Delete
-            </a>
+    <dt class="col-sm-3">
+        Course
+    </dt>
 
-        </div>
+    <dd class="col-sm-9">
+        @Model.Class?.Course?.CourseName
+    </dd>
 
-    </div>
+    <dt class="col-sm-3">
+        Registration Date
+    </dt>
 
-    <div class="row g-4">
+    <dd class="col-sm-9">
+        @Model.RegistrationDate.ToString("dd/MM/yyyy")
+    </dd>
 
-        <div class="col-md-4">
+    <dt class="col-sm-3">
+        Status
+    </dt>
 
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
+    <dd class="col-sm-9">
+        @Model.Status
+    </dd>
 
-                    <h5 class="fw-bold mb-3">Exam Information</h5>
+</dl>
 
-                    <p>
-                        <strong>Class:</strong>
-                        @Model.Class?.ClassName
-                    </p>
+<a asp-action="Edit"
+   asp-route-id="@Model.EnrollmentId"
+   class="btn btn-warning">
+    Edit
+</a>
 
-                    <p>
-                        <strong>Course:</strong>
-                        @Model.Class?.Course?.CourseName
-                    </p>
-
-                    <p>
-                        <strong>Teacher:</strong>
-                        @Model.Class?.Teacher?.FullName
-                    </p>
-
-                    <p>
-                        <strong>Type:</strong>
-                        @Model.ExamType
-                    </p>
-
-                    <p>
-                        <strong>Date:</strong>
-                        @Model.ExamDate.ToString("dd/MM/yyyy HH:mm")
-                    </p>
-
-                    <p>
-                        <strong>Duration:</strong>
-                        @Model.Duration minutes
-                    </p>
-
-                    <p>
-                        <strong>Maximum Score:</strong>
-                        @Model.MaxScore
-                    </p>
-
-                    <p>
-                        <strong>Status:</strong>
-                        @Model.Status
-                    </p>
-
-                    @if (!string.IsNullOrWhiteSpace(Model.Description))
-                    {
-                        <hr />
-
-                        <strong>Description</strong>
-
-                        <p class="text-muted">
-                            @Model.Description
-                        </p>
-                    }
-
-                </div>
-            </div>
-
-        </div>
-
-        <div class="col-md-8">
-
-            <div class="card border-0 shadow-sm">
-
-                <div class="card-body">
-
-                    <div class="d-flex justify-content-between mb-3">
-
-                        <h5 class="fw-bold mb-0">
-                            Questions
-                        </h5>
-
-                        <span class="badge bg-primary">
-                            @Model.ExamQuestions.Count questions
-                        </span>
-
-                    </div>
-
-                    @if (Model.ExamQuestions.Any())
-                    {
-                        @foreach (var examQuestion in Model.ExamQuestions
-                            .OrderBy(eq => eq.QuestionOrder))
-                        {
-                            <div class="border rounded p-3 mb-3">
-
-                                <div class="d-flex justify-content-between">
-
-                                    <strong>
-                                        Question @examQuestion.QuestionOrder
-                                    </strong>
-
-                                    <span class="text-muted">
-                                        @examQuestion.Question?.Score point
-                                    </span>
-
-                                </div>
-
-                                <p class="mt-2 mb-2">
-                                    @examQuestion.Question?.QuestionText
-                                </p>
-
-                                @if (examQuestion.Question?.Answers != null &&
-                                    examQuestion.Question.Answers.Any())
-                                {
-                                    <ul class="mb-0">
-
-                                        @foreach (var answer in examQuestion.Question.Answers)
-                                        {
-                                            <li>
-                                                @answer.AnswerText
-
-                                                @if (answer.IsCorrect)
-                                                {
-                                                    <span class="badge bg-success ms-2">
-                                                        Correct
-                                                    </span>
-                                                }
-                                            </li>
-                                        }
-
-                                    </ul>
-                                }
-
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="alert alert-warning">
-                            This exam does not have any questions yet.
-                        </div>
-                    }
-
-                </div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="card border-0 shadow-sm mt-4">
-
-        <div class="card-body">
-
-            <h5 class="fw-bold mb-3">
-                Student Results
-            </h5>
-
-            @if (Model.ExamResults.Any())
-            {
-                <div class="table-responsive">
-
-                    <table class="table align-middle">
-
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>Score</th>
-                                <th>Status</th>
-                                <th>Submitted</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @foreach (var result in Model.ExamResults)
-                            {
-                                <tr>
-
-                                    <td>
-                                        @result.Student?.FullName
-                                    </td>
-
-                                    <td>
-                                        <strong>
-                                            @result.Score / @Model.MaxScore
-                                        </strong>
-                                    </td>
-
-                                    <td>
-                                        @result.Status
-                                    </td>
-
-                                    <td>
-                                        @(result.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")
-                                            ?? "-")
-                                    </td>
-
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-            }
-            else
-            {
-                <p class="text-muted mb-0">
-                    No student results yet.
-                </p>
-            }
-
-        </div>
-    </div>
-
-</div>
+<a asp-action="Index"
+   class="btn btn-secondary">
+    Back
+</a>

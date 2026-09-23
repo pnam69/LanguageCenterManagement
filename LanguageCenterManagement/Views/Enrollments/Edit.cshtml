@@ -1,174 +1,106 @@
-﻿@model LanguageCenterManagement.ViewModels.ExamFormViewModel
+﻿@model LanguageCenterManagement.Models.Enrollment
 
 @{
-    ViewData["Title"] = "Edit Exam";
+    ViewData["Title"] = "Edit Enrollment";
 }
 
-<div class="container py-4">
+<h1>Edit Enrollment</h1>
 
-    <div class="mb-4">
-        <h2 class="fw-bold">Edit Exam</h2>
-        <p class="text-muted">Update exam information and questions.</p>
+<form asp-action="Edit" method="post">
+
+    <input type="hidden"
+           asp-for="EnrollmentId" />
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger">
     </div>
 
-    <form asp-action="Edit"
-          asp-route-id="@Model.ExamId"
-          method="post">
+    <div class="mb-3">
 
-        <input type="hidden" asp-for="ExamId" />
+        <label asp-for="StudentId"
+               class="form-label">
+            Student
+        </label>
 
-        <div asp-validation-summary="ModelOnly"
-             class="alert alert-danger"></div>
+        <select asp-for="StudentId"
+                asp-items="ViewBag.StudentId"
+                class="form-select">
+        </select>
 
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
+        <span asp-validation-for="StudentId"
+              class="text-danger">
+        </span>
 
-                <h5 class="fw-bold mb-3">Exam Information</h5>
+    </div>
 
-                <div class="row g-3">
+    <div class="mb-3">
 
-                    <div class="col-md-6">
-                        <label asp-for="ExamName" class="form-label"></label>
-                        <input asp-for="ExamName" class="form-control" />
-                        <span asp-validation-for="ExamName"
-                              class="text-danger"></span>
-                    </div>
+        <label asp-for="ClassId"
+               class="form-label">
+            Class
+        </label>
 
-                    <div class="col-md-6">
-                        <label asp-for="ClassId" class="form-label"></label>
-                        <select asp-for="ClassId"
-                                asp-items="ViewBag.Classes"
-                                class="form-select">
-                            <option value="">-- Select Class --</option>
-                        </select>
+        <select asp-for="ClassId"
+                asp-items="ViewBag.ClassId"
+                class="form-select">
+        </select>
 
-                        <span asp-validation-for="ClassId"
-                              class="text-danger"></span>
-                    </div>
+        <span asp-validation-for="ClassId"
+              class="text-danger">
+        </span>
 
-                    <div class="col-md-4">
-                        <label asp-for="ExamType" class="form-label"></label>
-                        <select asp-for="ExamType" class="form-select">
-                            <option value="Test">Test</option>
-                            <option value="Midterm">Midterm</option>
-                            <option value="Final">Final</option>
-                            <option value="Quiz">Quiz</option>
-                        </select>
-                    </div>
+    </div>
 
-                    <div class="col-md-4">
-                        <label asp-for="ExamDate" class="form-label"></label>
-                        <input asp-for="ExamDate"
-                               type="datetime-local"
-                               class="form-control" />
-                    </div>
+    <div class="mb-3">
 
-                    <div class="col-md-4">
-                        <label asp-for="Duration" class="form-label"></label>
-                        <input asp-for="Duration"
-                               type="number"
-                               class="form-control" />
-                    </div>
+        <label asp-for="Status"
+               class="form-label">
+            Status
+        </label>
 
-                    <div class="col-md-4">
-                        <label asp-for="MaxScore" class="form-label"></label>
-                        <input asp-for="MaxScore"
-                               type="number"
-                               step="0.1"
-                               class="form-control" />
-                    </div>
+        <select asp-for="Status"
+                class="form-select">
 
-                    <div class="col-md-4">
-                        <label asp-for="Status" class="form-label"></label>
-                        <select asp-for="Status" class="form-select">
-                            <option value="Draft">Draft</option>
-                            <option value="Published">Published</option>
-                            <option value="Closed">Closed</option>
-                        </select>
-                    </div>
+            <option value="Pending">
+                Pending
+            </option>
 
-                    <div class="col-md-12">
-                        <label asp-for="Description" class="form-label"></label>
-                        <textarea asp-for="Description"
-                                  class="form-control"
-                                  rows="3"></textarea>
-                    </div>
+            <option value="Confirmed">
+                Confirmed
+            </option>
 
-                </div>
-            </div>
-        </div>
+            <option value="Studying">
+                Studying
+            </option>
 
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body">
+            <option value="Completed">
+                Completed
+            </option>
 
-                <h5 class="fw-bold mb-3">Questions</h5>
+            <option value="Cancelled">
+                Cancelled
+            </option>
 
-                @for (int i = 0; i < Model.Questions.Count; i++)
-                {
-                    <div class="border rounded p-3 mb-2">
+        </select>
 
-                        <input type="hidden"
-                               asp-for="Questions[i].QuestionId" />
+        <span asp-validation-for="Status"
+              class="text-danger">
+        </span>
 
-                        <input type="hidden"
-                               asp-for="Questions[i].QuestionText" />
+    </div>
 
-                        <input type="hidden"
-                               asp-for="Questions[i].QuestionType" />
+    <button type="submit"
+            class="btn btn-primary">
+        Save Changes
+    </button>
 
-                        <input type="hidden"
-                               asp-for="Questions[i].Score" />
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back
+    </a>
 
-                        <div class="form-check">
-
-                            <input asp-for="Questions[i].Selected"
-                                   class="form-check-input" />
-
-                            <label asp-for="Questions[i].Selected"
-                                   class="form-check-label">
-
-                                <strong>
-                                    Question @(i + 1)
-                                </strong>
-
-                                <br />
-
-                                @Model.Questions[i].QuestionText
-
-                                <span class="text-muted">
-                                    (@Model.Questions[i].Score point)
-                                </span>
-
-                            </label>
-
-                        </div>
-
-                    </div>
-                }
-
-            </div>
-        </div>
-
-        <div class="d-flex gap-2">
-
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-save"></i>
-                Save Changes
-            </button>
-
-            <a asp-action="Details"
-               asp-route-id="@Model.ExamId"
-               class="btn btn-outline-secondary">
-                Cancel
-            </a>
-
-        </div>
-
-    </form>
-</div>
+</form>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }
