@@ -46,7 +46,7 @@
 						</label>
 
 						<select asp-for="ClassId"
-								asp-items="ViewBag.ClassId"
+								asp-items="ViewBag.Classes"
 								class="form-select">
 							<option value="">-- Select Class --</option>
 						</select>
@@ -191,6 +191,14 @@
 										<strong>
 											Question @question.QuestionId
 										</strong>
+
+										<span class="badge bg-primary ms-2">
+											@question.Skill
+										</span>
+
+										<span class="badge bg-secondary ms-1">
+											@question.QuestionType
+										</span>
 
 										<span class="ms-2">
 											@question.QuestionText

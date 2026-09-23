@@ -32,9 +32,6 @@ namespace LanguageCenterManagement.Models
         public DateTime RequestDate { get; set; } = DateTime.Now;
 
         public DateTime? DecisionDate { get; set; }
-
-        // When an admin approves a make-up schedule, link to the created Schedule record
-        // Nullable because the request may not yet have an associated make-up schedule.
         public int? MakeUpScheduleId { get; set; }
         public Schedule? MakeUpSchedule { get; set; }
     }

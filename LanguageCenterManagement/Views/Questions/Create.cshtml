@@ -31,6 +31,19 @@
 						  class="text-danger"></span>
 				</div>
 
+				<div class="mb-3">
+					<label asp-for="Skill" class="form-label">Skill</label>
+
+					<select asp-for="Skill" class="form-select">
+						<option value="Reading">Reading</option>
+						<option value="Listening">Listening</option>
+						<option value="Speaking">Speaking</option>
+						<option value="Writing">Writing</option>
+					</select>
+
+					<span asp-validation-for="Skill" class="text-danger"></span>
+				</div>
+
 				<div class="row">
 
 					<div class="col-md-6 mb-3">

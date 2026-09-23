@@ -27,7 +27,8 @@ namespace LanguageCenterManagement.Controllers
             {
                 query = query.Where(q =>
                     q.QuestionText.Contains(search) ||
-                    q.QuestionType.Contains(search));
+                    q.QuestionType.Contains(search) ||
+                    q.Skill.Contains(search));
             }
 
             var questions = await query
@@ -217,6 +218,7 @@ namespace LanguageCenterManagement.Controllers
             existingQuestion.QuestionText = question.QuestionText;
             existingQuestion.QuestionType = question.QuestionType;
             existingQuestion.Score = question.Score;
+            existingQuestion.Skill = question.Skill;
 
             _context.Answers.RemoveRange(existingQuestion.Answers);
 

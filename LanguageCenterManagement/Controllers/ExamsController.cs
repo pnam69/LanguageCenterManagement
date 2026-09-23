@@ -358,6 +358,7 @@ namespace LanguageCenterManagement.Controllers
                     QuestionId = q.QuestionId,
                     QuestionText = q.QuestionText,
                     QuestionType = q.QuestionType,
+                    Skill = q.Skill,
                     Score = q.Score,
                     Selected = selectedIds.Contains(q.QuestionId)
                 })
@@ -392,6 +393,7 @@ namespace LanguageCenterManagement.Controllers
                 model.ClassId);
 
             var questions = await _context.Questions
+                .Include(q => q.Answers)
                 .OrderBy(q => q.QuestionId)
                 .ToListAsync();
 

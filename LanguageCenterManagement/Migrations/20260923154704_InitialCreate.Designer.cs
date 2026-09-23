@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LanguageCenterManagement.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260827173214_InitialCreate")]
+    [Migration("20260923154704_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,31 @@ namespace LanguageCenterManagement.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Answer", b =>
+                {
+                    b.Property<int>("AnswerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AnswerId"));
+
+                    b.Property<string>("AnswerText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AnswerId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("Answers");
+                });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.ApplicationUser", b =>
                 {
@@ -98,6 +123,42 @@ namespace LanguageCenterManagement.Migrations
                     b.HasIndex("TeacherId");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Attendance", b =>
+                {
+                    b.Property<int>("AttendanceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AttendanceId"));
+
+                    b.Property<DateTime>("AttendanceDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AttendanceId");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("StudentId", "ClassId", "AttendanceDate")
+                        .IsUnique();
+
+                    b.ToTable("Attendances");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Course", b =>
@@ -178,6 +239,120 @@ namespace LanguageCenterManagement.Migrations
                     b.ToTable("Enrollments");
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.Exam", b =>
+                {
+                    b.Property<int>("ExamId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamId"));
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExamDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExamName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ExamType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("MaxScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ExamId");
+
+                    b.HasIndex("ClassId");
+
+                    b.ToTable("Exams");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ExamQuestion", b =>
+                {
+                    b.Property<int>("ExamQuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamQuestionId"));
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExamQuestionId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("ExamId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("ExamQuestions");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ExamResult", b =>
+                {
+                    b.Property<int>("ExamResultId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamResultId"));
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("Score")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ExamResultId");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("StudentId", "ExamId")
+                        .IsUnique();
+
+                    b.ToTable("ExamResults");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.LanguageClass", b =>
                 {
                     b.Property<int>("LanguageClassId")
@@ -220,6 +395,156 @@ namespace LanguageCenterManagement.Migrations
                     b.HasIndex("TeacherId");
 
                     b.ToTable("Classes");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.LearningResult", b =>
+                {
+                    b.Property<int>("LearningResultId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LearningResultId"));
+
+                    b.Property<decimal>("AverageScore")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Result")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TeacherComment")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("LearningResultId");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("LearningResults");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Material", b =>
+                {
+                    b.Property<int>("MaterialId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaterialId"));
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ExternalUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("MaterialType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("MaterialId");
+
+                    b.HasIndex("ClassId");
+
+                    b.ToTable("Materials");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Payment", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("TransactionCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TuitionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("TuitionId");
+
+                    b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Question", b =>
+                {
+                    b.Property<int>("QuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionId"));
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QuestionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Skill")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("QuestionId");
+
+                    b.ToTable("Questions");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Room", b =>
@@ -286,11 +611,68 @@ namespace LanguageCenterManagement.Migrations
 
                     b.HasKey("ScheduleId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex("ClassId", "StartTime");
 
-                    b.HasIndex("RoomId");
+                    b.HasIndex("RoomId", "StartTime");
 
                     b.ToTable("Schedules");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ScheduleChangeRequest", b =>
+                {
+                    b.Property<int>("ScheduleChangeRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ScheduleChangeRequestId"));
+
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DecisionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("MakeUpScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ProposedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan?>("ProposedEndTime")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan?>("ProposedStartTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ScheduleChangeRequestId");
+
+                    b.HasIndex("MakeUpScheduleId");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("ScheduleChangeRequests");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Student", b =>
@@ -401,6 +783,49 @@ namespace LanguageCenterManagement.Migrations
                         .IsUnique();
 
                     b.ToTable("Teachers");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Tuition", b =>
+                {
+                    b.Property<int>("TuitionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TuitionId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TuitionId");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Tuitions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -536,6 +961,17 @@ namespace LanguageCenterManagement.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.Answer", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.Question", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.ApplicationUser", b =>
                 {
                     b.HasOne("LanguageCenterManagement.Models.Student", "Student")
@@ -551,21 +987,89 @@ namespace LanguageCenterManagement.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.Attendance", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.LanguageClass", "Class")
+                        .WithMany("Attendances")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LanguageCenterManagement.Models.Student", "Student")
+                        .WithMany("Attendances")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.Enrollment", b =>
                 {
                     b.HasOne("LanguageCenterManagement.Models.LanguageClass", "Class")
                         .WithMany("Enrollments")
                         .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("LanguageCenterManagement.Models.Student", "Student")
                         .WithMany("Enrollments")
                         .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Exam", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.LanguageClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Class");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ExamQuestion", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.Exam", "Exam")
+                        .WithMany("ExamQuestions")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LanguageCenterManagement.Models.Question", "Question")
+                        .WithMany("ExamQuestions")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ExamResult", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.Exam", "Exam")
+                        .WithMany("ExamResults")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LanguageCenterManagement.Models.Student", "Student")
+                        .WithMany("ExamResults")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
 
                     b.Navigation("Student");
                 });
@@ -589,12 +1093,53 @@ namespace LanguageCenterManagement.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.LearningResult", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.LanguageClass", "Class")
+                        .WithMany("LearningResults")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LanguageCenterManagement.Models.Student", "Student")
+                        .WithMany("LearningResults")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Material", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.LanguageClass", "Class")
+                        .WithMany("Materials")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Payment", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.Tuition", "Tuition")
+                        .WithMany()
+                        .HasForeignKey("TuitionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tuition");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.Schedule", b =>
                 {
                     b.HasOne("LanguageCenterManagement.Models.LanguageClass", "Class")
                         .WithMany("Schedules")
                         .HasForeignKey("ClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("LanguageCenterManagement.Models.Room", "Room")
@@ -606,6 +1151,51 @@ namespace LanguageCenterManagement.Migrations
                     b.Navigation("Class");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ScheduleChangeRequest", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.Schedule", "MakeUpSchedule")
+                        .WithMany()
+                        .HasForeignKey("MakeUpScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LanguageCenterManagement.Models.Schedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LanguageCenterManagement.Models.Teacher", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MakeUpSchedule");
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Tuition", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.LanguageClass", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LanguageCenterManagement.Models.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Class");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -664,11 +1254,31 @@ namespace LanguageCenterManagement.Migrations
                     b.Navigation("Classes");
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.Exam", b =>
+                {
+                    b.Navigation("ExamQuestions");
+
+                    b.Navigation("ExamResults");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.LanguageClass", b =>
                 {
+                    b.Navigation("Attendances");
+
                     b.Navigation("Enrollments");
 
+                    b.Navigation("LearningResults");
+
+                    b.Navigation("Materials");
+
                     b.Navigation("Schedules");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.Question", b =>
+                {
+                    b.Navigation("Answers");
+
+                    b.Navigation("ExamQuestions");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Room", b =>
@@ -678,7 +1288,13 @@ namespace LanguageCenterManagement.Migrations
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Student", b =>
                 {
+                    b.Navigation("Attendances");
+
                     b.Navigation("Enrollments");
+
+                    b.Navigation("ExamResults");
+
+                    b.Navigation("LearningResults");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Teacher", b =>

@@ -334,5 +334,12 @@ namespace LanguageCenterManagement.Controllers
                 })
                 .ToList();
         }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied(string? returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
     }
 }

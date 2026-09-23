@@ -12,6 +12,9 @@ namespace LanguageCenterManagement.Models
         [StringLength(20)]
         public string QuestionType { get; set; } = "MultipleChoice";
 
+        [StringLength(20)]
+        public string Skill { get; set; } = "Reading";
+
         public int Score { get; set; } = 1;
 
         public ICollection<Answer> Answers { get; set; }

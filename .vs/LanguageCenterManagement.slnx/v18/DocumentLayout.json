@@ -116,9 +116,15 @@
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
+<<<<<<< Updated upstream
               "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
               "RelativeToolTip": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAAJoAAAAAAAAAAADgv6IAAAApAAAAAAAAAA==",
+=======
+              "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml*",
+              "RelativeToolTip": "LanguageCenterManagement\\Views\\Shared\\_Layout.cshtml*",
+              "ViewState": "AgIAAJoAAAAAAAAAAADgv6UAAABNAAAAAAAAAA==",
+>>>>>>> Stashed changes
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-09-23T15:53:28.151Z",
               "EditorCaption": ""
@@ -183,7 +189,11 @@
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Controllers\\AccountController.cs",
               "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Controllers\\AccountController.cs",
               "RelativeToolTip": "LanguageCenterManagement\\Controllers\\AccountController.cs",
+<<<<<<< Updated upstream
               "ViewState": "AgIAAEUBAAAAAAAAAAAcwFABAAAAAAAAAAAAAA==",
+=======
+              "ViewState": "AgIAAEUBAAAAAAAAAAAcwFYBAAAJAAAAAAAAAA==",
+>>>>>>> Stashed changes
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-23T15:49:39.891Z",
               "EditorCaption": ""
@@ -222,7 +232,11 @@
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Models\\ScheduleChangeRequest.cs",
               "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Models\\ScheduleChangeRequest.cs",
               "RelativeToolTip": "LanguageCenterManagement\\Models\\ScheduleChangeRequest.cs",
+<<<<<<< Updated upstream
               "ViewState": "AgIAABYAAAAAAAAAAADwvyUAAAAiAAAAAAAAAA==",
+=======
+              "ViewState": "AgIAABYAAAAAAAAAAADwvyIAAAAiAAAAAAAAAA==",
+>>>>>>> Stashed changes
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-23T15:37:51.215Z",
               "EditorCaption": ""
@@ -248,7 +262,11 @@
               "RelativeDocumentMoniker": "LanguageCenterManagement\\Models\\Question.cs",
               "ToolTip": "E:\\1_PRN211\\LanguageCenterManagement\\LanguageCenterManagement\\Models\\Question.cs",
               "RelativeToolTip": "LanguageCenterManagement\\Models\\Question.cs",
+<<<<<<< Updated upstream
               "ViewState": "AgIAAAUAAAAAAAAAAAAAwA4AAAAAAAAAAAAAAA==",
+=======
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAwA8AAAAIAAAAAAAAAA==",
+>>>>>>> Stashed changes
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-23T09:35:53.74Z",
               "EditorCaption": ""

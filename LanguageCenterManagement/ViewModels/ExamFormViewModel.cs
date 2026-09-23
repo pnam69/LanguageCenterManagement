@@ -48,6 +48,8 @@ namespace LanguageCenterManagement.ViewModels
 
         public string QuestionType { get; set; } = string.Empty;
 
+        public string Skill { get; set; } = string.Empty;
+
         public int Score { get; set; }
 
         public bool Selected { get; set; }
