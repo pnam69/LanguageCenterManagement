@@ -1,0 +1,91 @@
+﻿@model LanguageCenterManagement.ViewModels.ReadingContentViewModel
+
+@{
+	ViewData["Title"] = "Create Reading Content";
+}
+
+<div class="container mt-4">
+
+	<div class="mb-4">
+		<h2>Create Reading Content</h2>
+		<p class="text-muted">
+			Create a reading passage and its question.
+		</p>
+	</div>
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+
+			<form asp-action="Create" method="post">
+
+				<div asp-validation-summary="ModelOnly"
+					 class="text-danger mb-3">
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="QuestionText"
+						   class="form-label"></label>
+
+					<textarea asp-for="QuestionText"
+							  class="form-control"
+							  rows="3"
+							  placeholder="Enter the question..."></textarea>
+
+					<span asp-validation-for="QuestionText"
+						  class="text-danger">
+					</span>
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Passage"
+						   class="form-label"></label>
+
+					<textarea asp-for="Passage"
+							  class="form-control"
+							  rows="12"
+							  placeholder="Enter the reading passage..."></textarea>
+
+					<span asp-validation-for="Passage"
+						  class="text-danger">
+					</span>
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Score"
+						   class="form-label"></label>
+
+					<input asp-for="Score"
+						   type="number"
+						   class="form-control"
+						   min="1"
+						   max="100" />
+
+					<span asp-validation-for="Score"
+						  class="text-danger">
+					</span>
+				</div>
+
+				<div class="d-flex gap-2">
+					<button type="submit"
+							class="btn btn-primary">
+						Create
+					</button>
+
+					<a asp-action="Index"
+					   class="btn btn-secondary">
+						Cancel
+					</a>
+				</div>
+
+			</form>
+
+		</div>
+	</div>
+
+</div>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

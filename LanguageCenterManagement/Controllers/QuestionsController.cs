@@ -1,5 +1,6 @@
 ﻿using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
+using LanguageCenterManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,25 +18,31 @@ namespace LanguageCenterManagement.Controllers
         }
 
         // GET: Questions
-        public async Task<IActionResult> Index(string? search)
+        public async Task<IActionResult> Index(
+            string? search,
+            string? skill)
         {
             var query = _context.Questions
                 .Include(q => q.Answers)
+                .AsNoTracking()
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = query.Where(q =>
-                    q.QuestionText.Contains(search) ||
-                    q.QuestionType.Contains(search) ||
-                    q.Skill.Contains(search));
+                    q.QuestionText.Contains(search));
+            }
+
+            if (!string.IsNullOrWhiteSpace(skill))
+            {
+                query = query.Where(q =>
+                    q.Skill == skill);
             }
 
             var questions = await query
-                .OrderByDescending(q => q.QuestionId)
+                .OrderBy(q => q.Skill)
+                .ThenBy(q => q.QuestionId)
                 .ToListAsync();
-
-            ViewBag.Search = search;
 
             return View(questions);
         }
@@ -44,20 +51,15 @@ namespace LanguageCenterManagement.Controllers
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var question = await _context.Questions
                 .Include(q => q.Answers)
-                .Include(q => q.ExamQuestions)
-                    .ThenInclude(eq => eq.Exam)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(q => q.QuestionId == id);
 
             if (question == null)
-            {
                 return NotFound();
-            }
 
             return View(question);
         }
@@ -65,81 +67,72 @@ namespace LanguageCenterManagement.Controllers
         // GET: Questions/Create
         public IActionResult Create()
         {
-            return View();
+            var model = new QuestionManagementViewModel();
+
+            for (int i = 0; i < 4; i++)
+            {
+                model.Answers.Add(new AnswerManagementViewModel());
+            }
+
+            return View(model);
         }
 
         // POST: Questions/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            Question question,
-            string[]? answerTexts,
-            int? correctAnswer)
+            QuestionManagementViewModel model)
         {
-            if (question.QuestionType == "MultipleChoice")
+            if (!ModelState.IsValid)
+                return View(model);
+
+            if (model.QuestionType == "MultipleChoice")
             {
-                if (answerTexts == null || answerTexts.Length < 2)
+                var validAnswers = model.Answers
+                    .Where(a => !string.IsNullOrWhiteSpace(a.AnswerText))
+                    .ToList();
+
+                if (validAnswers.Count < 2)
                 {
                     ModelState.AddModelError(
-                        "",
-                        "Multiple choice questions need at least 2 answers.");
+                        "Answers",
+                        "Multiple choice questions must have at least 2 answers.");
+
+                    return View(model);
                 }
-                else
+
+                if (validAnswers.Count(a => a.IsCorrect) != 1)
                 {
-                    var validAnswers = answerTexts
-                        .Where(a => !string.IsNullOrWhiteSpace(a))
-                        .ToList();
+                    ModelState.AddModelError(
+                        "Answers",
+                        "Multiple choice questions must have exactly one correct answer.");
 
-                    if (validAnswers.Count < 2)
-                    {
-                        ModelState.AddModelError(
-                            "",
-                            "Please provide at least 2 answers.");
-                    }
-
-                    if (!correctAnswer.HasValue ||
-                        correctAnswer.Value < 0 ||
-                        correctAnswer.Value >= answerTexts.Length ||
-                        string.IsNullOrWhiteSpace(answerTexts[correctAnswer.Value]))
-                    {
-                        ModelState.AddModelError(
-                            "",
-                            "Please select the correct answer.");
-                    }
+                    return View(model);
                 }
             }
 
-            if (!ModelState.IsValid)
+            var question = new Question
             {
-                return View(question);
+                QuestionText = model.QuestionText,
+                QuestionType = model.QuestionType,
+                Skill = model.Skill,
+                Score = model.Score
+            };
+
+            foreach (var answerModel in model.Answers)
+            {
+                if (string.IsNullOrWhiteSpace(answerModel.AnswerText))
+                    continue;
+
+                question.Answers.Add(new Answer
+                {
+                    AnswerText = answerModel.AnswerText,
+                    IsCorrect = answerModel.IsCorrect
+                });
             }
 
             _context.Questions.Add(question);
-
             await _context.SaveChangesAsync();
-
-            if (question.QuestionType == "MultipleChoice" &&
-                answerTexts != null)
-            {
-                for (int i = 0; i < answerTexts.Length; i++)
-                {
-                    if (string.IsNullOrWhiteSpace(answerTexts[i]))
-                    {
-                        continue;
-                    }
-
-                    _context.Answers.Add(new Answer
-                    {
-                        QuestionId = question.QuestionId,
-                        AnswerText = answerTexts[i],
-                        IsCorrect = correctAnswer == i
-                    });
-                }
-
-                await _context.SaveChangesAsync();
-            }
-
-            TempData["Success"] = "Question created successfully.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -148,20 +141,37 @@ namespace LanguageCenterManagement.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var question = await _context.Questions
                 .Include(q => q.Answers)
                 .FirstOrDefaultAsync(q => q.QuestionId == id);
 
             if (question == null)
-            {
                 return NotFound();
+
+            var model = new QuestionManagementViewModel
+            {
+                QuestionId = question.QuestionId,
+                QuestionText = question.QuestionText,
+                QuestionType = question.QuestionType,
+                Skill = question.Skill,
+                Score = question.Score,
+                Answers = question.Answers.Select(a =>
+                    new AnswerManagementViewModel
+                    {
+                        AnswerId = a.AnswerId,
+                        AnswerText = a.AnswerText,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
+            };
+
+            while (model.Answers.Count < 4)
+            {
+                model.Answers.Add(new AnswerManagementViewModel());
             }
 
-            return View(question);
+            return View(model);
         }
 
         // POST: Questions/Edit/5
@@ -169,81 +179,69 @@ namespace LanguageCenterManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            Question question,
-            string[]? answerTexts,
-            int? correctAnswer)
+            QuestionManagementViewModel model)
         {
-            if (id != question.QuestionId)
-            {
+            if (id != model.QuestionId)
                 return NotFound();
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            if (model.QuestionType == "MultipleChoice")
+            {
+                var validAnswers = model.Answers
+                    .Where(a => !string.IsNullOrWhiteSpace(a.AnswerText))
+                    .ToList();
+
+                if (validAnswers.Count < 2)
+                {
+                    ModelState.AddModelError(
+                        "Answers",
+                        "Multiple choice questions must have at least 2 answers.");
+
+                    return View(model);
+                }
+
+                if (validAnswers.Count(a => a.IsCorrect) != 1)
+                {
+                    ModelState.AddModelError(
+                        "Answers",
+                        "Multiple choice questions must have exactly one correct answer.");
+
+                    return View(model);
+                }
             }
 
-            var existingQuestion = await _context.Questions
+            var question = await _context.Questions
                 .Include(q => q.Answers)
                 .FirstOrDefaultAsync(q => q.QuestionId == id);
 
-            if (existingQuestion == null)
-            {
+            if (question == null)
                 return NotFound();
-            }
 
-            if (question.QuestionType == "MultipleChoice")
+            question.QuestionText = model.QuestionText;
+            question.QuestionType = model.QuestionType;
+            question.Skill = model.Skill;
+            question.Score = model.Score;
+
+            _context.Answers.RemoveRange(question.Answers);
+
+            question.Answers.Clear();
+
+            foreach (var answerModel in model.Answers)
             {
-                if (answerTexts == null ||
-                    answerTexts.Count(a => !string.IsNullOrWhiteSpace(a)) < 2)
+                if (string.IsNullOrWhiteSpace(answerModel.AnswerText))
+                    continue;
+
+                question.Answers.Add(new Answer
                 {
-                    ModelState.AddModelError(
-                        "",
-                        "Multiple choice questions need at least 2 answers.");
-                }
-
-                if (!correctAnswer.HasValue ||
-                    answerTexts == null ||
-                    correctAnswer.Value < 0 ||
-                    correctAnswer.Value >= answerTexts.Length ||
-                    string.IsNullOrWhiteSpace(answerTexts[correctAnswer.Value]))
-                {
-                    ModelState.AddModelError(
-                        "",
-                        "Please select the correct answer.");
-                }
-            }
-
-            if (!ModelState.IsValid)
-            {
-                question.Answers = existingQuestion.Answers;
-                return View(question);
-            }
-
-            existingQuestion.QuestionText = question.QuestionText;
-            existingQuestion.QuestionType = question.QuestionType;
-            existingQuestion.Score = question.Score;
-            existingQuestion.Skill = question.Skill;
-
-            _context.Answers.RemoveRange(existingQuestion.Answers);
-
-            if (question.QuestionType == "MultipleChoice" &&
-                answerTexts != null)
-            {
-                for (int i = 0; i < answerTexts.Length; i++)
-                {
-                    if (string.IsNullOrWhiteSpace(answerTexts[i]))
-                    {
-                        continue;
-                    }
-
-                    _context.Answers.Add(new Answer
-                    {
-                        QuestionId = existingQuestion.QuestionId,
-                        AnswerText = answerTexts[i],
-                        IsCorrect = correctAnswer == i
-                    });
-                }
+                    QuestionId = question.QuestionId,
+                    AnswerText = answerModel.AnswerText,
+                    IsCorrect = answerModel.IsCorrect
+                });
             }
 
             await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Question updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -252,20 +250,15 @@ namespace LanguageCenterManagement.Controllers
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
             var question = await _context.Questions
                 .Include(q => q.Answers)
-                .Include(q => q.ExamQuestions)
-                    .ThenInclude(eq => eq.Exam)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(q => q.QuestionId == id);
 
             if (question == null)
-            {
                 return NotFound();
-            }
 
             return View(question);
         }
@@ -277,28 +270,27 @@ namespace LanguageCenterManagement.Controllers
         {
             var question = await _context.Questions
                 .Include(q => q.Answers)
-                .Include(q => q.ExamQuestions)
                 .FirstOrDefaultAsync(q => q.QuestionId == id);
 
             if (question == null)
-            {
                 return NotFound();
-            }
 
-            if (question.ExamQuestions.Any())
+            var usedInExam = await _context.ExamQuestions
+                .AnyAsync(eq => eq.QuestionId == id);
+
+            if (usedInExam)
             {
-                TempData["Error"] =
-                    "Cannot delete this question because it is being used in an exam.";
+                TempData["ErrorMessage"] =
+                    "This question cannot be deleted because it is already used in an exam.";
 
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.Answers.RemoveRange(question.Answers);
             _context.Questions.Remove(question);
 
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Question deleted successfully.";
+            TempData["SuccessMessage"] = "Question deleted successfully.";
 
             return RedirectToAction(nameof(Index));
         }

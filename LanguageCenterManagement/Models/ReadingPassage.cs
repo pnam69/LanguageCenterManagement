@@ -1,16 +1,15 @@
-﻿using LanguageCenterManagement.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class ReadingPassage
+namespace LanguageCenterManagement.Models
 {
-    public int ReadingPassageId { get; set; }
+    public class ReadingPassage
+    {
+        public int ReadingPassageId { get; set; }
 
-    [StringLength(200)]
-    public string Title { get; set; } = string.Empty;
+        [StringLength(200)]
+        public string Title { get; set; } = string.Empty;
 
-    [Required]
-    public string Passage { get; set; } = string.Empty;
-
-    public ICollection<Question> Questions { get; set; }
-        = new List<Question>();
+        [Required]
+        public string Passage { get; set; } = string.Empty;
+    }
 }

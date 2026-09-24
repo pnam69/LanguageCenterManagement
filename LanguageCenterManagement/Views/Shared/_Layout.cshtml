@@ -1,355 +1,640 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="~/css/main.css" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - Language Center</title>
-    <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/main.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LanguageCenterManagement.styles.css" asp-append-version="true" />
-
 </head>
-<body class="bg-light">
-    
+
+<body>
+
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm sticky-top py-3">
-            <div class="container-fluid px-lg-5">
-                
-                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-globe-americas fs-3 text-primary me-2"></i>
-                    <span class="fw-bold text-primary mb-0 fs-4">LC<span class="text-dark">Manager</span></span>
+        <nav class="navbar navbar-expand-xl lc-navbar sticky-top">
+
+            <div class="container-fluid px-4 px-xl-5">
+
+                <!-- BRAND -->
+                <a class="navbar-brand lc-brand"
+                   asp-controller="Home"
+                   asp-action="Index">
+
+                    <span class="lc-brand-icon">
+                        <i class="bi bi-globe2"></i>
+                    </span>
+
+                    <span class="lc-brand-text">
+                        <span class="lc-brand-primary">LC</span><span>Manager</span>
+                    </span>
+
                 </a>
-                
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+
+                <!-- MOBILE TOGGLE -->
+                <button class="navbar-toggler lc-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+
+                    <i class="bi bi-list"></i>
+
                 </button>
-                
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    
-                    <ul class="navbar-nav flex-grow-1 ms-lg-4 fw-medium gap-1">
 
-                        @{
-                            string controller = "Home";
-                            string action = "Index";
 
-                            if (User.IsInRole("Admin"))
-                            {
-                                controller = "Dashboard";
-                            }
-                            else if (User.IsInRole("Teacher"))
-                            {
-                                controller = "TeacherDashboard";
-                            }
-                            else if (User.IsInRole("Student"))
-                            {
-                                controller = "StudentDashboard";
-                            }
+                <div class="collapse navbar-collapse" id="mainNavbar">
+
+                    @{
+                        string homeController = "Home";
+
+                        if (User.IsInRole("Admin"))
+                        {
+                            homeController = "Dashboard";
                         }
+                        else if (User.IsInRole("Teacher"))
+                        {
+                            homeController = "TeacherDashboard";
+                        }
+                        else if (User.IsInRole("Student"))
+                        {
+                            homeController = "StudentDashboard";
+                        }
+                    }
 
+
+                    <!-- LEFT NAVIGATION -->
+                    <ul class="navbar-nav lc-main-nav me-auto">
+
+
+                        <!-- HOME -->
                         <li class="nav-item">
-                            <a class="nav-link px-3 rounded hover-bg-light"
-                               asp-controller="@controller"
-                               asp-action="@action">
-                                <i class="bi bi-house me-1"></i>
-                                Home
+                            <a class="nav-link lc-nav-link"
+                               asp-controller="@homeController"
+                               asp-action="Index">
+
+                                <i class="bi bi-house-door"></i>
+                                <span>Home</span>
+
                             </a>
                         </li>
 
+
+                        <!-- ================= ADMIN ================= -->
                         @if (User.IsInRole("Admin"))
                         {
-                            <!-- Admin Management -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle px-3 rounded hover-bg-light"
+
+                                <a class="nav-link dropdown-toggle lc-nav-link"
                                    href="#"
                                    role="button"
-                                   data-bs-toggle="dropdown"
-                                   aria-expanded="false">
+                                   data-bs-toggle="dropdown">
 
-                                    <i class="bi bi-grid me-1"></i>
-                                    Management
+                                    <i class="bi bi-grid"></i>
+                                    <span>Management</span>
+
                                 </a>
 
-                                <ul class="dropdown-menu border-0 shadow mt-2">
+                                <ul class="dropdown-menu lc-dropdown-menu">
+
+                                    <li class="dropdown-header">
+                                        PEOPLE
+                                    </li>
 
                                     <li>
-                                        <a class="dropdown-item py-2"
+                                        <a class="dropdown-item"
                                            asp-controller="Students"
                                            asp-action="Index">
-                                            <i class="bi bi-people me-2 text-primary"></i>
+
+                                            <i class="bi bi-people text-primary"></i>
                                             Students
+
                                         </a>
                                     </li>
 
                                     <li>
-                                        <a class="dropdown-item py-2"
+                                        <a class="dropdown-item"
                                            asp-controller="Teachers"
                                            asp-action="Index">
-                                            <i class="bi bi-person-workspace me-2 text-success"></i>
+
+                                            <i class="bi bi-person-workspace text-success"></i>
                                             Teachers
+
                                         </a>
                                     </li>
 
                                     <li>
-                                        <a class="dropdown-item py-2"
-                                           asp-controller="Courses"
-                                           asp-action="Index">
-                                            <i class="bi bi-journal-bookmark me-2 text-primary"></i>
-                                            Courses
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item py-2"
-                                           asp-controller="LanguageClasses"
-                                           asp-action="Index">
-                                            <i class="bi bi-easel me-2 text-success"></i>
-                                            Classes
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item py-2"
-                                           asp-controller="Enrollments"
-                                           asp-action="Index">
-                                            <i class="bi bi-card-checklist me-2 text-info"></i>
-                                            Enrollments
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item py-2"
-                                           asp-controller="Rooms"
-                                           asp-action="Index">
-                                            <i class="bi bi-door-open me-2 text-warning"></i>
-                                            Rooms
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item py-2"
-                                           asp-controller="Schedules"
-                                           asp-action="Index">
-                                            <i class="bi bi-calendar3-week me-2 text-danger"></i>
-                                            Schedules Timetable
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item py-2"
+                                        <a class="dropdown-item"
                                            asp-controller="Account"
                                            asp-action="Create">
-                                            <i class="bi bi-person-plus me-2 text-secondary"></i>
+
+                                            <i class="bi bi-person-plus text-secondary"></i>
                                             Accounts
+
                                         </a>
                                     </li>
+
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <li class="dropdown-header">
+                                        ACADEMIC
+                                    </li>
+
                                     <li>
-                                        <a class="dropdown-item py-2"
+                                        <a class="dropdown-item"
+                                           asp-controller="Courses"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-journal-bookmark text-primary"></i>
+                                            Courses
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="LanguageClasses"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-easel text-success"></i>
+                                            Classes
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Enrollments"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-card-checklist text-info"></i>
+                                            Enrollments
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Rooms"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-door-open text-warning"></i>
+                                            Rooms
+
+                                        </a>
+                                    </li>
+
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <li class="dropdown-header">
+                                        SCHEDULING
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Schedules"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-calendar3-week text-danger"></i>
+                                            Timetable
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
                                            asp-controller="ScheduleChangeRequests"
                                            asp-action="AdminIndex">
-                                            <i class="bi bi-file-earmark-text me-2 text-secondary"></i>
-                                            Schedule Change Requests
+
+                                            <i class="bi bi-arrow-repeat text-secondary"></i>
+                                            Schedule Requests
+
                                         </a>
                                     </li>
 
                                 </ul>
+
+                            </li>
+
+
+                            <!-- ADMIN ACADEMIC -->
+
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown">
+
+                                    <i class="bi bi-mortarboard"></i>
+                                    <span>Academic</span>
+
+                                </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="LearningResults"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-graph-up text-primary"></i>
+                                            Learning Results
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Materials"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-folder2-open text-warning"></i>
+                                            Materials
+
+                                        </a>
+                                    </li>
+
+                                </ul>
+
                             </li>
                         }
 
 
+                        <!-- ================= TEACHER ================= -->
                         @if (User.IsInRole("Teacher"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="TeacherSchedules"
-                                   asp-action="Index">
-                                    <i class="bi bi-calendar3-week me-1"></i>
-                                    My Schedule
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown">
+
+                                    <i class="bi bi-calendar3"></i>
+                                    <span>Teaching</span>
+
                                 </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="TeacherSchedules"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-calendar3-week text-primary"></i>
+                                            My Schedule
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="ScheduleChangeRequests"
+                                           asp-action="Create">
+
+                                            <i class="bi bi-arrow-repeat text-warning"></i>
+                                            Schedule Requests
+
+                                        </a>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Exams"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-file-earmark-text text-danger"></i>
+                                            Exams
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="TeacherExamResults"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-award text-success"></i>
+                                            Exam Results
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Questions"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-question-circle text-info"></i>
+                                            Questions
+
+                                        </a>
+                                    </li>
+
+                                </ul>
+
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="ScheduleChangeRequests"
-                                   asp-action="Create">
-                                    <i class="bi bi-arrow-repeat me-1"></i>
-                                    Schedule Requests
-                                </a>
-                            </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="Exams"
-                                   asp-action="Index">
-                                    <i class="bi bi-file-earmark-text me-1"></i>
-                                    Exams
-                                </a>
-                            </li>
+                            <li class="nav-item dropdown">
 
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="TeacherExamResults"
-                                   asp-action="Index">
-                                    <i class="bi bi-award me-1"></i>
-                                    Exam Results
-                                </a>
-                            </li>
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown">
 
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="Questions"
-                                   asp-action="Index">
-                                    <i class="bi bi-question-circle me-1"></i>
-                                    Questions
+                                    <i class="bi bi-book"></i>
+                                    <span>Academic</span>
+
                                 </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="LearningResults"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-graph-up text-primary"></i>
+                                            Learning Results
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Materials"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-folder2-open text-warning"></i>
+                                            Materials
+
+                                        </a>
+                                    </li>
+
+                                </ul>
+
                             </li>
                         }
 
+
+                        <!-- ================= STUDENT ================= -->
                         @if (User.IsInRole("Student"))
                         {
-                            <!-- Student Menu -->
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="StudentClasses"
-                                   asp-action="Index">
-                                    <i class="bi bi-journal-text me-1"></i>
-                                    My Classes
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown">
+
+                                    <i class="bi bi-person-workspace"></i>
+                                    <span>My Learning</span>
+
                                 </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="StudentClasses"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-journal-text text-primary"></i>
+                                            My Classes
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="StudentSchedule"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-calendar3-week text-success"></i>
+                                            My Schedule
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="StudentAttendance"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-calendar2-check text-info"></i>
+                                            Attendance
+
+                                        </a>
+                                    </li>
+
+                                </ul>
+
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="StudentSchedule"
-                                   asp-action="Index">
-                                    <i class="bi bi-calendar3-week me-1"></i>
-                                    My Schedule
-                                </a>
-                            </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="StudentAttendance"
-                                   asp-action="Index">
-                                    <i class="bi bi-calendar2-check me-1"></i>
-                                    Attendance
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="StudentExams"
-                                   asp-action="Index">
-                                    <i class="bi bi-file-earmark-text me-2"></i>
-                                    My Exams
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="StudentExamResults"
-                                   asp-action="Index">
-                                    <i class="bi bi-award me-1"></i>
-                                    Exam Results
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="Materials"
-                                   asp-action="Index">
-                                    <i class="bi bi-award me-1"></i>
-                                    Materials
-                                </a>
-                            </li>
+                            <li class="nav-item dropdown">
 
-                        }
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown">
 
-                        @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="LearningResults"
-                                   asp-action="Index">
-                                    <i class="bi bi-award me-1"></i>
-                                    Learning Results
-                                </a>
-                            </li>
+                                    <i class="bi bi-mortarboard"></i>
+                                    <span>Exams & Results</span>
 
-                            <li class="nav-item">
-                                <a class="nav-link px-3 rounded hover-bg-light"
-                                   asp-controller="Materials"
-                                   asp-action="Index">
-                                    <i class="bi bi-award me-1"></i>
-                                    Materials
                                 </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="StudentExams"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-file-earmark-text text-danger"></i>
+                                            My Exams
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="StudentExamResults"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-award text-success"></i>
+                                            Exam Results
+
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="StudentMaterials"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-folder2-open text-warning"></i>
+                                            Materials
+
+                                        </a>
+                                    </li>
+
+                                </ul>
+
                             </li>
                         }
 
                     </ul>
 
-                    <ul class="navbar-nav fw-medium gap-2 mt-3 mt-lg-0 align-items-lg-center">
+
+                    <!-- RIGHT SIDE -->
+                    <ul class="navbar-nav lc-account-nav align-items-xl-center">
+
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <span class="nav-link text-muted">
-                                    Welcome, <strong class="text-dark">@User.Identity.Name</strong>
-                                </span>
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link lc-user-menu dropdown-toggle"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown">
+
+                                    <span class="lc-user-avatar">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+
+                                    <span class="lc-user-info d-none d-xl-flex">
+
+                                        <span class="lc-user-name">
+                                            @User.Identity.Name
+                                        </span>
+
+                                        <span class="lc-user-role">
+                                            @(
+                                                User.IsInRole("Admin") ? "Administrator" :
+                                                User.IsInRole("Teacher") ? "Teacher" :
+                                                User.IsInRole("Student") ? "Student" :
+                                                "User"
+                                            )
+                                        </span>
+
+                                    </span>
+
+                                </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end lc-dropdown-menu">
+
+                                    <li class="dropdown-header">
+                                        ACCOUNT
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Home"
+                                           asp-action="Privacy">
+
+                                            <i class="bi bi-person-circle"></i>
+                                            Profile
+
+                                        </a>
+                                    </li>
+
+                                    <li><hr class="dropdown-divider"></li>
+
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                           asp-controller="Account"
+                                           asp-action="LogoutConfirmation">
+
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            Logout
+
+                                        </a>
+                                    </li>
+
+                                </ul>
+
                             </li>
-                            <a class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold shadow-sm"
-                               asp-controller="Account"
-                               asp-action="LogoutConfirmation">
-                                <i class="bi bi-box-arrow-right me-1"></i>
-                                Logout
-                            </a>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
-                            </li>
-                            @* <li class="nav-item">
-                                <a class="btn btn-primary btn-sm rounded-pill px-4 fw-bold shadow-sm" asp-controller="Account" asp-action="Register">
-                                    Get Started
+                                <a class="btn lc-login-btn"
+                                   asp-controller="Account"
+                                   asp-action="Login">
+
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                                    Login
+
                                 </a>
-                            </li> *@
+                            </li>
                         }
+
                     </ul>
+
                 </div>
+
             </div>
+
         </nav>
     </header>
-    
-    <main role="main">
+
+
+    <main role="main" class="lc-main">
         @RenderBody()
     </main>
 
-    <footer class="border-top footer text-muted bg-white py-3 mt-auto">
-        <div class="container-fluid px-lg-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-1">
-            <div>
-                &copy; 2026 - <strong>Language Center Management</strong>. All rights reserved.
+
+    <footer class="lc-footer">
+
+        <div class="container-fluid px-4 px-xl-5">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+
+                <div>
+                    <span class="fw-semibold">
+                        Language Center Management
+                    </span>
+
+                    <span class="text-muted ms-2">
+                        © 2026
+                    </span>
+                </div>
+
+                <div class="text-muted small">
+                    Language learning management system
+                </div>
+
             </div>
-            @* <div>
-                <a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted me-3 hover-primary">
-                    <i class="bi bi-shield-check me-1"></i>Privacy Policy
-                </a>
-                <a href="#" class="text-decoration-none text-muted hover-primary">
-                    <i class="bi bi-headset me-1"></i>Support
-                </a>
-            </div> *@
+
         </div>
+
     </footer>
+
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

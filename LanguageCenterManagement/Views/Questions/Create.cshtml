@@ -1,132 +1,139 @@
-﻿@model LanguageCenterManagement.Models.Question
+﻿@model LanguageCenterManagement.ViewModels.QuestionManagementViewModel
 
 @{
 	ViewData["Title"] = "Create Question";
 }
 
-<div class="container-fluid px-lg-5 py-4">
-
-	<h2 class="fw-bold mb-4">Create Question</h2>
-
-	<form asp-action="Create" method="post">
-
-		<div asp-validation-summary="ModelOnly"
-			 class="text-danger mb-3"></div>
-
-		<div class="card border-0 shadow-sm">
-
-			<div class="card-body p-4">
-
-				<div class="mb-3">
-					<label asp-for="QuestionText"
-						   class="form-label">
-						Question
-					</label>
-
-					<textarea asp-for="QuestionText"
-							  class="form-control"
-							  rows="3"></textarea>
-
-					<span asp-validation-for="QuestionText"
-						  class="text-danger"></span>
+<div class="container mt-4 mb-5">
+	<div class="row justify-content-center">
+		<div class="col-xl-9">
+			<div class="card shadow-sm">
+				<div class="card-header">
+					<h4 class="mb-0">Create Question</h4>
 				</div>
 
-				<div class="mb-3">
-					<label asp-for="Skill" class="form-label">Skill</label>
+				<div class="card-body">
+					<form asp-action="Create" method="post">
 
-					<select asp-for="Skill" class="form-select">
-						<option value="Reading">Reading</option>
-						<option value="Listening">Listening</option>
-						<option value="Speaking">Speaking</option>
-						<option value="Writing">Writing</option>
-					</select>
+						<div asp-validation-summary="ModelOnly"
+							 class="alert alert-danger"></div>
 
-					<span asp-validation-for="Skill" class="text-danger"></span>
-				</div>
+						<div class="mb-3">
+							<label asp-for="QuestionText"
+								   class="form-label"></label>
 
-				<div class="row">
+							<textarea asp-for="QuestionText"
+									  class="form-control"
+									  rows="4"
+									  placeholder="Enter the question..."></textarea>
 
-					<div class="col-md-6 mb-3">
-
-						<label asp-for="QuestionType"
-							   class="form-label">
-							Type
-						</label>
-
-						<select asp-for="QuestionType"
-								class="form-select">
-							<option value="MultipleChoice">
-								Multiple Choice
-							</option>
-						</select>
-
-					</div>
-
-					<div class="col-md-6 mb-3">
-
-						<label asp-for="Score"
-							   class="form-label">
-							Score
-						</label>
-
-						<input asp-for="Score"
-							   type="number"
-							   min="1"
-							   class="form-control" />
-
-					</div>
-
-				</div>
-
-				<hr />
-
-				<h5 class="fw-bold mb-3">
-					Answers
-				</h5>
-
-				<p class="text-muted">
-					Add at least two answers and select the correct one.
-				</p>
-
-				@for (int i = 0; i < 4; i++)
-				{
-					<div class="input-group mb-2">
-
-						<div class="input-group-text">
-							<input type="radio"
-								   name="correctAnswer"
-								   value="@i" />
+							<span asp-validation-for="QuestionText"
+								  class="text-danger"></span>
 						</div>
 
-						<input name="answerTexts"
-							   class="form-control"
-							   placeholder="Answer @(i + 1)" />
+						<div class="row">
+							<div class="col-md-4 mb-3">
+								<label asp-for="Skill"
+									   class="form-label"></label>
 
-					</div>
-				}
+								<select asp-for="Skill"
+										class="form-select">
+									<option value="Reading">Reading</option>
+									<option value="Listening">Listening</option>
+									<option value="Speaking">Speaking</option>
+									<option value="Writing">Writing</option>
+								</select>
 
-				<div class="mt-4">
+								<span asp-validation-for="Skill"
+									  class="text-danger"></span>
+							</div>
 
-					<button type="submit"
-							class="btn btn-primary">
-						Create Question
-					</button>
+							<div class="col-md-4 mb-3">
+								<label asp-for="QuestionType"
+									   class="form-label"></label>
 
-					<a asp-action="Index"
-					   class="btn btn-outline-secondary">
-						Cancel
-					</a>
+								<select asp-for="QuestionType"
+										class="form-select">
+									<option value="MultipleChoice">
+										Multiple Choice
+									</option>
+									<option value="TrueFalse">
+										True / False
+									</option>
+									<option value="ShortAnswer">
+										Short Answer
+									</option>
+								</select>
 
+								<span asp-validation-for="QuestionType"
+									  class="text-danger"></span>
+							</div>
+
+							<div class="col-md-4 mb-3">
+								<label asp-for="Score"
+									   class="form-label"></label>
+
+								<input asp-for="Score"
+									   type="number"
+									   class="form-control"
+									   min="1" />
+
+								<span asp-validation-for="Score"
+									  class="text-danger"></span>
+							</div>
+						</div>
+
+						<hr />
+
+						<h5 class="mb-3">Answer Choices</h5>
+
+						<div class="alert alert-info">
+							For Multiple Choice, enter at least two answers
+							and mark exactly one as correct.
+						</div>
+
+						@for (int i = 0; i < Model.Answers.Count; i++)
+						{
+							<div class="row align-items-center mb-3">
+								<div class="col-auto">
+									<div class="form-check">
+										<input asp-for="Answers[i].IsCorrect"
+											   class="form-check-input" />
+
+										<label class="form-check-label">
+											Correct
+										</label>
+									</div>
+								</div>
+
+								<div class="col">
+									<input asp-for="Answers[i].AnswerText"
+										   class="form-control"
+										   placeholder="Answer @(i + 1)" />
+								</div>
+							</div>
+						}
+
+						<div class="d-flex gap-2 mt-4">
+							<button type="submit"
+									class="btn btn-primary">
+								Create Question
+							</button>
+
+							<a asp-action="Index"
+							   class="btn btn-secondary">
+								Cancel
+							</a>
+						</div>
+					</form>
 				</div>
-
 			</div>
-
 		</div>
-
-	</form>
-
+	</div>
 </div>
 
 @section Scripts {
-	<partial name="_ValidationScriptsPartial" />
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
 }

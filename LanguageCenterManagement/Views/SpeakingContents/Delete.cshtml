@@ -1,0 +1,69 @@
+﻿@model LanguageCenterManagement.Models.SpeakingContent
+
+@{
+	ViewData["Title"] = "Delete Speaking Content";
+}
+
+<div class="container mt-4">
+
+	<div class="card shadow-sm border-danger">
+
+		<div class="card-header bg-danger text-white">
+			<h4 class="mb-0">
+				Delete Speaking Content
+			</h4>
+		</div>
+
+		<div class="card-body">
+
+			<p>
+				Are you sure you want to delete this speaking exercise?
+			</p>
+
+			<div class="mb-3">
+				<strong>Prompt:</strong>
+
+				<div class="mt-2 p-3 bg-light rounded">
+					@Model.Prompt
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col-md-6">
+					<strong>Preparation:</strong>
+					@Model.PreparationTime seconds
+				</div>
+
+				<div class="col-md-6">
+					<strong>Response:</strong>
+					@Model.ResponseTime seconds
+				</div>
+			</div>
+
+			<div class="alert alert-warning">
+				This will also remove the question associated
+				with this speaking exercise.
+			</div>
+
+			<form asp-action="Delete" method="post">
+
+				<input type="hidden"
+					   asp-for="SpeakingContentId" />
+
+				<button type="submit"
+						class="btn btn-danger">
+					Delete
+				</button>
+
+				<a asp-action="Index"
+				   class="btn btn-secondary">
+					Cancel
+				</a>
+
+			</form>
+
+		</div>
+
+	</div>
+
+</div>

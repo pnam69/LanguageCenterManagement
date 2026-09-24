@@ -299,6 +299,27 @@ namespace LanguageCenterManagement.Data
                 .WithMany()
                 .HasForeignKey(r => r.MakeUpScheduleId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ListeningContent>()
+                .ToTable("ListeningContent");
+            modelBuilder.Entity<SpeakingContent>()
+                .ToTable("SpeakingContent");
+            modelBuilder.Entity<WritingContent>()
+                .ToTable("WritingContent");
+            modelBuilder.Entity<ReadingContent>()
+                .ToTable("ReadingContent");
+
+            modelBuilder.Entity<ReadingContent>()
+                .HasOne(r => r.Question)
+                .WithOne(q => q.ReadingContent)
+                .HasForeignKey<ReadingContent>(r => r.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SpeakingContent>()
+                .HasOne(s => s.Question)
+                .WithOne(q => q.SpeakingContent)
+                .HasForeignKey<SpeakingContent>(s => s.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -127,6 +127,8 @@ namespace LanguageCenterManagement.Controllers
                         QuestionId = eq.QuestionId,
                         QuestionOrder = eq.QuestionOrder,
                         QuestionText = eq.Question?.QuestionText ?? "",
+                        QuestionType = eq.Question?.QuestionType ?? "",
+                        Skill = eq.Question?.Skill ?? "",
                         Score = eq.Question?.Score ?? 1,
                         Answers = eq.Question?.Answers
                             .Select(a => new StudentExamAnswerViewModel
@@ -207,6 +209,33 @@ namespace LanguageCenterManagement.Controllers
                 return RedirectToAction(nameof(Details), new { id });
             }
 
+            var questionIds = exam.ExamQuestions
+                .Select(eq => eq.QuestionId)
+                .ToList();
+
+            // Load Reading content
+            var readingContents = await _context.ReadingContents
+                .Where(r => questionIds.Contains(r.QuestionId))
+                .ToListAsync();
+
+            // Load Speaking content
+            var speakingContents = await _context.SpeakingContents
+                .Where(s => questionIds.Contains(s.QuestionId))
+                .ToListAsync();
+
+            // Load Writing content
+            var writingContents = await _context.WritingContents
+                .Where(w => questionIds.Contains(w.QuestionId))
+                .ToListAsync();
+
+            // Load Listening content.
+            // ListeningContent owns a collection of Questions,
+            // so we load the content and its questions.
+            var listeningContents = await _context.ListeningContents
+                .Include(l => l.Questions)
+                .Where(l => l.Questions.Any(q => questionIds.Contains(q.QuestionId)))
+                .ToListAsync();
+
             var model = new StudentExamViewModel
             {
                 ExamId = exam.ExamId,
@@ -220,20 +249,59 @@ namespace LanguageCenterManagement.Controllers
 
                 Questions = exam.ExamQuestions
                     .OrderBy(eq => eq.QuestionOrder)
-                    .Select(eq => new StudentExamQuestionViewModel
+                    .Select(eq =>
                     {
-                        ExamQuestionId = eq.ExamQuestionId,
-                        QuestionId = eq.QuestionId,
-                        QuestionOrder = eq.QuestionOrder,
-                        QuestionText = eq.Question?.QuestionText ?? "",
-                        Score = eq.Question?.Score ?? 1,
-                        Answers = eq.Question?.Answers
-                            .Select(a => new StudentExamAnswerViewModel
-                            {
-                                AnswerId = a.AnswerId,
-                                AnswerText = a.AnswerText
-                            })
-                            .ToList() ?? new()
+                        var question = eq.Question;
+
+                        var reading = readingContents
+                            .FirstOrDefault(r => r.QuestionId == eq.QuestionId);
+
+                        var speaking = speakingContents
+                            .FirstOrDefault(s => s.QuestionId == eq.QuestionId);
+
+                        var writing = writingContents
+                            .FirstOrDefault(w => w.QuestionId == eq.QuestionId);
+
+                        var listening = listeningContents
+                            .FirstOrDefault(l =>
+                                l.Questions.Any(q =>
+                                    q.QuestionId == eq.QuestionId));
+
+                        return new StudentExamQuestionViewModel
+                        {
+                            ExamQuestionId = eq.ExamQuestionId,
+                            QuestionId = eq.QuestionId,
+                            QuestionOrder = eq.QuestionOrder,
+
+                            QuestionText = question?.QuestionText ?? "",
+                            QuestionType = question?.QuestionType ?? "",
+                            Skill = question?.Skill ?? "",
+                            Score = question?.Score ?? 1,
+
+                            Answers = question?.Answers
+                                .Select(a => new StudentExamAnswerViewModel
+                                {
+                                    AnswerId = a.AnswerId,
+                                    AnswerText = a.AnswerText
+                                })
+                                .ToList() ?? new(),
+
+                            // Reading
+                            ReadingPassage = reading?.Passage,
+
+                            // Listening
+                            ListeningAudioUrl = listening?.AudioUrl,
+
+                            // Speaking
+                            SpeakingPrompt = speaking?.Prompt,
+                            SpeakingPreparationTime =
+                                speaking?.PreparationTime,
+                            SpeakingResponseTime =
+                                speaking?.ResponseTime,
+
+                            // Writing
+                            WritingPrompt = writing?.Prompt
+                        };
                     })
                     .ToList()
             };

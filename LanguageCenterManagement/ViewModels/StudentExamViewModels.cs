@@ -55,12 +55,31 @@ namespace LanguageCenterManagement.ViewModels
 
         public string QuestionText { get; set; } = string.Empty;
 
+        public string QuestionType { get; set; } = string.Empty;
+
+        public string Skill { get; set; } = string.Empty;
+
         public int Score { get; set; }
 
         public List<StudentExamAnswerViewModel> Answers { get; set; }
             = new();
 
         public int? SelectedAnswerId { get; set; }
+
+        public string? TextAnswer { get; set; }
+
+        // Content shown to the student
+        public string? ReadingPassage { get; set; }
+
+        public string? ListeningAudioUrl { get; set; }
+
+        public string? SpeakingPrompt { get; set; }
+
+        public int? SpeakingPreparationTime { get; set; }
+
+        public int? SpeakingResponseTime { get; set; }
+
+        public string? WritingPrompt { get; set; }
     }
 
     public class StudentExamAnswerViewModel
@@ -83,5 +102,7 @@ namespace LanguageCenterManagement.ViewModels
         public int QuestionId { get; set; }
 
         public int? AnswerId { get; set; }
+
+        public string? TextAnswer { get; set; }
     }
 }

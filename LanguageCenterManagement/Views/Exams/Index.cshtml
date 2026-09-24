@@ -1,132 +1,235 @@
 ﻿@model IEnumerable<LanguageCenterManagement.Models.Exam>
 
 @{
-    ViewData["Title"] = "Exams";
+	ViewData["Title"] = "Exams";
 }
 
-<div class="container py-4">
+<div class="container-fluid py-4 px-lg-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">Exams</h2>
-            <p class="text-muted mb-0">Manage exams and their questions.</p>
-        </div>
+	<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+		<div>
+			<h1 class="h3 mb-1">Exams</h1>
+			<p class="text-muted mb-0">
+				Manage exams and their questions.
+			</p>
+		</div>
 
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Create Exam
-        </a>
-    </div>
+		<a asp-action="Create" class="btn btn-primary">
+			<i class="bi bi-plus-lg"></i>
+			Create Exam
+		</a>
+	</div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
-        </div>
-    }
 
-    <form asp-action="Index" method="get" class="mb-4">
-        <div class="input-group">
-            <input name="search"
-                   value="@ViewBag.Search"
-                   class="form-control"
-                   placeholder="Search exams..." />
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<div class="alert alert-success alert-dismissible fade show">
+			@TempData["SuccessMessage"]
 
-            <button type="submit" class="btn btn-outline-primary">
-                <i class="bi bi-search"></i> Search
-            </button>
-        </div>
-    </form>
+			<button type="button"
+					class="btn-close"
+					data-bs-dismiss="alert">
+			</button>
+		</div>
+	}
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
+	@if (TempData["ErrorMessage"] != null)
+	{
+		<div class="alert alert-danger alert-dismissible fade show">
+			@TempData["ErrorMessage"]
 
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+			<button type="button"
+					class="btn-close"
+					data-bs-dismiss="alert">
+			</button>
+		</div>
+	}
 
-                    <thead class="table-light">
-                        <tr>
-                            <th>Exam</th>
-                            <th>Class</th>
-                            <th>Type</th>
-                            <th>Date</th>
-                            <th>Duration</th>
-                            <th>Questions</th>
-                            <th>Status</th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
-                        @foreach (var exam in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <strong>@exam.ExamName</strong>
-                                </td>
+	<!-- Search -->
+	<div class="card shadow-sm border-0 mb-4">
+		<div class="card-body">
 
-                                <td>
-                                    @exam.Class?.ClassName
-                                </td>
+			<form asp-action="Index"
+				  method="get"
+				  class="row g-2">
 
-                                <td>
-                                    @exam.ExamType
-                                </td>
+				<div class="col-md-8">
+					<input type="text"
+						   name="search"
+						   value="@ViewBag.Search"
+						   class="form-control"
+						   placeholder="Search exam name, type, or class..." />
+				</div>
 
-                                <td>
-                                    @exam.ExamDate.ToString("dd/MM/yyyy HH:mm")
-                                </td>
+				<div class="col-md-auto">
+					<button type="submit"
+							class="btn btn-outline-primary">
+						Search
+					</button>
+				</div>
 
-                                <td>
-                                    @exam.Duration min
-                                </td>
+				<div class="col-md-auto">
+					<a asp-action="Index"
+					   class="btn btn-outline-secondary">
+						Clear
+					</a>
+				</div>
 
-                                <td>
-                                    <span class="badge bg-info">
-                                        @exam.ExamQuestions.Count
-                                    </span>
-                                </td>
+			</form>
 
-                                <td>
-                                    <span class="badge bg-secondary">
-                                        @exam.Status
-                                    </span>
-                                </td>
+		</div>
+	</div>
 
-                                <td class="text-end">
-                                    <a asp-action="Details"
-                                       asp-route-id="@exam.ExamId"
-                                       class="btn btn-sm btn-outline-info">
-                                        Details
-                                    </a>
 
-                                    <a asp-action="Edit"
-                                       asp-route-id="@exam.ExamId"
-                                       class="btn btn-sm btn-outline-primary">
-                                        Edit
-                                    </a>
+	@if (!Model.Any())
+	{
+		<div class="card shadow-sm border-0">
+			<div class="card-body text-center py-5">
 
-                                    <a asp-action="Delete"
-                                       asp-route-id="@exam.ExamId"
-                                       class="btn btn-sm btn-outline-danger">
-                                        Delete
-                                    </a>
-                                </td>
-                            </tr>
-                        }
+				<h5>No exams found</h5>
 
-                        @if (!Model.Any())
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">
-                                    No exams found.
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
+				<p class="text-muted mb-3">
+					There are currently no exams matching your search.
+				</p>
 
-                </table>
-            </div>
+				<a asp-action="Create"
+				   class="btn btn-primary">
+					Create the first exam
+				</a>
 
-        </div>
-    </div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<div class="card shadow-sm border-0">
+
+			<div class="table-responsive">
+
+				<table class="table table-hover align-middle mb-0">
+
+					<thead class="table-light">
+						<tr>
+							<th>Exam</th>
+							<th>Class</th>
+							<th>Type</th>
+							<th>Date</th>
+							<th>Duration</th>
+							<th>Questions</th>
+							<th>Status</th>
+							<th class="text-end">Actions</th>
+						</tr>
+					</thead>
+
+					<tbody>
+
+						@foreach (var item in Model)
+						{
+							<tr>
+
+								<td>
+									<div class="fw-semibold">
+										@item.ExamName
+									</div>
+
+									@if (!string.IsNullOrWhiteSpace(item.Description))
+									{
+										<div class="small text-muted">
+											@item.Description
+										</div>
+									}
+								</td>
+
+								<td>
+									@item.Class?.ClassName
+								</td>
+
+								<td>
+									<span class="badge bg-light text-dark border">
+										@item.ExamType
+									</span>
+								</td>
+
+								<td>
+									@item.ExamDate.ToString("dd/MM/yyyy HH:mm")
+								</td>
+
+								<td>
+									@item.Duration min
+								</td>
+
+								<td>
+									<span class="badge bg-secondary">
+										@item.ExamQuestions.Count
+									</span>
+								</td>
+
+								<td>
+									@switch (item.Status)
+									{
+										case "Published":
+											<span class="badge bg-success">
+												Published
+											</span>
+											break;
+
+										case "Draft":
+											<span class="badge bg-secondary">
+												Draft
+											</span>
+											break;
+
+										case "Cancelled":
+											<span class="badge bg-danger">
+												Cancelled
+											</span>
+											break;
+
+										default:
+											<span class="badge bg-warning text-dark">
+												@item.Status
+											</span>
+											break;
+									}
+								</td>
+
+								<td class="text-end">
+
+									<div class="btn-group">
+
+										<a asp-action="Details"
+										   asp-route-id="@item.ExamId"
+										   class="btn btn-sm btn-outline-info">
+											Details
+										</a>
+
+										<a asp-action="Edit"
+										   asp-route-id="@item.ExamId"
+										   class="btn btn-sm btn-outline-warning">
+											Edit
+										</a>
+
+										<a asp-action="Delete"
+										   asp-route-id="@item.ExamId"
+										   class="btn btn-sm btn-outline-danger">
+											Delete
+										</a>
+
+									</div>
+
+								</td>
+
+							</tr>
+						}
+
+					</tbody>
+
+				</table>
+
+			</div>
+
+		</div>
+	}
+
 </div>

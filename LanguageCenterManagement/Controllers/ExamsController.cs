@@ -152,7 +152,7 @@ namespace LanguageCenterManagement.Controllers
 
             await _context.SaveChangesAsync();
 
-            await SaveExamQuestions(exam.ExamId, model.SelectedQuestionIds);
+            await SaveExamQuestions(exam.ExamId, model.Questions);
 
             TempData["SuccessMessage"] = "Exam created successfully.";
 
@@ -168,6 +168,7 @@ namespace LanguageCenterManagement.Controllers
             }
 
             var exam = await _context.Exams
+                .Include(e => e.Class)
                 .Include(e => e.ExamQuestions)
                 .FirstOrDefaultAsync(e => e.ExamId == id);
 
@@ -212,6 +213,7 @@ namespace LanguageCenterManagement.Controllers
             }
 
             var exam = await _context.Exams
+                .Include(e => e.Class)
                 .Include(e => e.ExamQuestions)
                 .FirstOrDefaultAsync(e => e.ExamId == id);
 
@@ -393,12 +395,23 @@ namespace LanguageCenterManagement.Controllers
                 model.ClassId);
 
             var questions = await _context.Questions
-                .Include(q => q.Answers)
                 .OrderBy(q => q.QuestionId)
                 .ToListAsync();
 
+            model.Questions = questions
+                .Select(q => new QuestionSelectionViewModel
+                {
+                    QuestionId = q.QuestionId,
+                    QuestionText = q.QuestionText,
+                    QuestionType = q.QuestionType,
+                    Skill = q.Skill,
+                    Score = q.Score,
+                    Selected = false
+                })
+                .ToList();
+
             ViewBag.Questions = questions;
-            ViewBag.SelectedQuestionIds = model.SelectedQuestionIds;
+            ViewBag.SelectedQuestionIds = model.Questions;
         }
 
         private async Task SaveExamQuestions(
@@ -435,20 +448,20 @@ namespace LanguageCenterManagement.Controllers
         private async Task<bool> CanAccessExam(Exam exam)
         {
             if (User.IsInRole("Admin"))
-            {
                 return true;
-            }
 
             if (!User.IsInRole("Teacher"))
-            {
                 return false;
-            }
 
             var user = await _userManager.GetUserAsync(User);
 
-            return user?.TeacherId != null &&
-                   exam.Class != null &&
-                   exam.Class.TeacherId == user.TeacherId.Value;
+            if (user == null || user.TeacherId == null)
+                return false;
+
+            var teacherId = user.TeacherId.Value;
+
+            return exam.Class != null &&
+                   exam.Class.TeacherId == teacherId;
         }
 
         private async Task<bool> CanCreateClass(int classId)

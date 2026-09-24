@@ -1,141 +1,647 @@
 ﻿@model LanguageCenterManagement.ViewModels.StudentExamViewModel
 
 @{
-    ViewData["Title"] = "Take Exam";
+	ViewData["Title"] = Model.ExamName;
 }
 
-<div class="container py-4">
+<div class="container-fluid py-4 px-lg-5">
 
-    <div class="card border-0 shadow-sm mb-4">
+	<!-- Exam Header -->
+	<div class="card shadow-sm border-0 mb-4">
+		<div class="card-body p-4">
+			<div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+				<div>
+					<h1 class="h3 mb-2">@Model.ExamName</h1>
 
-        <div class="card-body">
+					<div class="text-muted">
+						<span class="me-3">
+							<strong>Class:</strong> @Model.ClassName
+						</span>
 
-            <div class="d-flex justify-content-between align-items-center">
+						<span class="me-3">
+							<strong>Type:</strong> @Model.ExamType
+						</span>
 
-                <div>
-                    <h2 class="fw-bold mb-1">
-                        @Model.ExamName
-                    </h2>
+						<span>
+							<strong>Max Score:</strong> @Model.MaxScore
+						</span>
+					</div>
+				</div>
 
-                    <p class="text-muted mb-0">
-                        @Model.ClassName
-                    </p>
-                </div>
+				<div class="text-end">
+					<div class="text-muted small">Time Remaining</div>
+					<div id="examTimer"
+						 class="fs-3 fw-bold">
+						--:--
+					</div>
+				</div>
+			</div>
 
-                <div class="text-end">
-                    <div class="text-muted small">
-                        Duration
-                    </div>
+			@if (!string.IsNullOrWhiteSpace(Model.Description))
+			{
+				<hr />
 
-                    <strong>
-                        @Model.Duration minutes
-                    </strong>
-                </div>
+				<p class="mb-0 text-muted">
+					@Model.Description
+				</p>
+			}
+		</div>
+	</div>
 
-            </div>
 
-        </div>
+	<form asp-action="Take"
+		  method="post"
+		  id="examForm">
 
-    </div>
+		@Html.AntiForgeryToken()
 
-    <div class="alert alert-warning">
-        <i class="bi bi-exclamation-triangle me-2"></i>
+		<input type="hidden"
+			   name="ExamId"
+			   value="@Model.ExamId" />
 
-        Once you submit the exam, you cannot submit it again.
-        Make sure you have answered all questions before submitting.
-    </div>
 
-    <form asp-action="Take"
-          method="post"
-          id="examForm">
+		<!-- Progress -->
+		<div class="card shadow-sm border-0 mb-4">
+			<div class="card-body">
+				<div class="d-flex justify-content-between mb-2">
+					<span class="fw-semibold">Exam Progress</span>
+					<span id="progressText">0 / @Model.Questions.Count answered</span>
+				</div>
 
-        @Html.AntiForgeryToken()
+				<div class="progress"
+					 style="height: 8px;">
+					<div id="progressBar"
+						 class="progress-bar"
+						 role="progressbar"
+						 style="width: 0%;">
+					</div>
+				</div>
+			</div>
+		</div>
 
-        <input type="hidden"
-               name="ExamId"
-               value="@Model.ExamId" />
 
-        @for (int i = 0; i < Model.Questions.Count; i++)
-        {
-            var question = Model.Questions[i];
+		<!-- Questions -->
+		@for (int i = 0; i < Model.Questions.Count; i++)
+		{
+			var question = Model.Questions[i];
 
-            <div class="card border-0 shadow-sm mb-4">
+			<div class="card shadow-sm border-0 mb-4 question-card"
+				 data-question-index="@i"
+				 data-skill="@question.Skill">
 
-                <div class="card-body">
+				<div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between">
+					<!-- Question Header -->
+					<div class="d-flex justify-content-between align-items-start gap-3 mb-3">
 
-                        <h5 class="fw-bold">
-                            Question @question.QuestionOrder
-                        </h5>
+						<div>
+							<span class="badge bg-secondary mb-2">
+								Question @question.QuestionOrder
+							</span>
 
-                        <span class="badge bg-secondary">
-                            @question.Score point
-                        </span>
+							<span class="badge bg-light text-dark border mb-2">
+								@question.Skill
+							</span>
 
-                    </div>
+							<h2 class="h5 mb-0">
+								@question.QuestionText
+							</h2>
+						</div>
 
-                    <p class="fs-5 mt-3">
-                        @question.QuestionText
-                    </p>
+						<span class="badge bg-primary">
+							@question.Score point@(question.Score == 1 ? "" : "s")
+						</span>
 
-                    <input type="hidden"
-                           name="Answers[@i].QuestionId"
-                           value="@question.QuestionId" />
+					</div>
 
-                    @foreach (var answer in question.Answers)
-                    {
-                        <div class="form-check border rounded p-3 mb-2">
 
-                            <input class="form-check-input ms-0 me-2"
-                                   type="radio"
-                                   name="Answers[@i].AnswerId"
-                                   value="@answer.AnswerId"
-                                   id="answer_@answer.AnswerId" />
+					<!-- READING -->
+					@if (question.Skill.Equals("Reading",
+						StringComparison.OrdinalIgnoreCase))
+					{
+						@if (!string.IsNullOrWhiteSpace(question.ReadingPassage))
+						{
+							<div class="reading-passage bg-light border rounded p-4 mb-4">
 
-                            <label class="form-check-label"
-                                   for="answer_@answer.AnswerId">
+								<h3 class="h6 fw-bold mb-3">
+									Reading Passage
+								</h3>
 
-                                @answer.AnswerText
+								<div style="white-space: pre-line;">
+									@question.ReadingPassage
+								</div>
 
-                            </label>
+							</div>
+						}
 
-                        </div>
-                    }
+						@if (question.Answers.Any())
+						{
+							<div class="answer-list">
 
-                </div>
+								@foreach (var answer in question.Answers)
+								{
+									<div class="form-check border rounded p-3 mb-2">
 
-            </div>
-        }
+										<input class="form-check-input answer-input"
+											   type="radio"
+											   name="Answers[@i].AnswerId"
+											   value="@answer.AnswerId"
+											   id="answer_@(i)_@(answer.AnswerId)"
+											   data-question="@question.QuestionId" />
 
-        <div class="card border-0 shadow-sm">
+										<label class="form-check-label w-100"
+											   for="answer_@(i)_@(answer.AnswerId)">
+											@answer.AnswerText
+										</label>
 
-            <div class="card-body text-center">
+									</div>
+								}
 
-                <h5 class="fw-bold">
-                    Ready to submit?
-                </h5>
+							</div>
+						}
+					}
 
-                <p class="text-muted">
-                    Check your answers before submitting.
-                </p>
 
-                <button type="submit"
-                        class="btn btn-primary btn-lg"
-                        onclick="return confirm('Are you sure you want to submit this exam? You cannot retake it afterwards.');">
-                    <i class="bi bi-send me-1"></i>
-                    Submit Exam
-                </button>
+					<!-- LISTENING -->
+					@if (question.Skill.Equals("Listening",
+						StringComparison.OrdinalIgnoreCase))
+					{
+						@if (!string.IsNullOrWhiteSpace(question.ListeningAudioUrl))
+						{
+							<div class="bg-light border rounded p-4 mb-4">
 
-                <a asp-action="Index"
-                   class="btn btn-outline-secondary btn-lg ms-2">
-                    Exit
-                </a>
+								<h3 class="h6 fw-bold mb-3">
+									Listening
+								</h3>
 
-            </div>
+								<audio controls
+									   class="w-100">
+									<source src="@question.ListeningAudioUrl"
+											type="audio/mpeg" />
 
-        </div>
+									Your browser does not support the audio element.
+								</audio>
 
-    </form>
+							</div>
+						}
+
+						@if (question.Answers.Any())
+						{
+							<div class="answer-list">
+
+								@foreach (var answer in question.Answers)
+								{
+									<div class="form-check border rounded p-3 mb-2">
+
+										<input class="form-check-input answer-input"
+											   type="radio"
+											   name="Answers[@i].AnswerId"
+											   value="@answer.AnswerId"
+											   id="answer_@(i)_@(answer.AnswerId)"
+											   data-question="@question.QuestionId" />
+
+										<label class="form-check-label w-100"
+											   for="answer_@(i)_@(answer.AnswerId)">
+											@answer.AnswerText
+										</label>
+
+									</div>
+								}
+
+							</div>
+						}
+					}
+
+
+					<!-- SPEAKING -->
+					@if (question.Skill.Equals("Speaking",
+						StringComparison.OrdinalIgnoreCase))
+					{
+						<div class="speaking-section">
+
+							@if (!string.IsNullOrWhiteSpace(question.SpeakingPrompt))
+							{
+								<div class="alert alert-light border mb-4">
+									<strong>Speaking Prompt</strong>
+
+									<div class="mt-2">
+										@question.SpeakingPrompt
+									</div>
+								</div>
+							}
+
+							<div class="row g-3 mb-4">
+
+								<div class="col-md-6">
+									<div class="border rounded p-3 h-100">
+										<div class="text-muted small">
+											Preparation Time
+										</div>
+
+										<div class="fs-4 fw-bold">
+											@(question.SpeakingPreparationTime ?? 0)
+											seconds
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="border rounded p-3 h-100">
+										<div class="text-muted small">
+											Response Time
+										</div>
+
+										<div class="fs-4 fw-bold">
+											@(question.SpeakingResponseTime ?? 0)
+											seconds
+										</div>
+									</div>
+								</div>
+
+							</div>
+
+							<div class="alert alert-info">
+								Speaking responses are submitted for teacher evaluation.
+							</div>
+
+							<div class="speaking-controls mt-3">
+
+								<button type="button"
+										class="btn btn-outline-primary speaking-start"
+										data-question="@question.QuestionId"
+										data-preparation="@(question.SpeakingPreparationTime ?? 0)"
+										data-response="@(question.SpeakingResponseTime ?? 0)">
+									Start Speaking Timer
+								</button>
+
+								<span class="ms-3 fw-bold speaking-timer"
+									  id="speakingTimer_@question.QuestionId">
+									Ready
+								</span>
+
+							</div>
+
+						</div>
+					}
+
+
+					<!-- WRITING -->
+					@if (question.Skill.Equals("Writing",
+						StringComparison.OrdinalIgnoreCase))
+					{
+						<div class="writing-section">
+
+							@if (!string.IsNullOrWhiteSpace(question.WritingPrompt))
+							{
+								<div class="alert alert-light border mb-4">
+
+									<strong>Writing Prompt</strong>
+
+									<div class="mt-2">
+										@question.WritingPrompt
+									</div>
+
+								</div>
+							}
+
+							<textarea class="form-control writing-answer"
+									  name="Answers[@i].TextAnswer"
+									  rows="12"
+									  placeholder="Write your answer here..."
+									  data-question="@question.QuestionId"></textarea>
+
+							<div class="d-flex justify-content-between mt-2">
+
+								<span class="text-muted small">
+									Word count:
+									<strong class="word-count">0</strong>
+								</span>
+
+								<span class="text-muted small">
+									Minimum:
+									@(question.WritingPrompt != null ? "See instructions" : "—")
+								</span>
+
+							</div>
+
+						</div>
+					}
+
+
+					<!-- Fallback for other question types -->
+					@if (
+						!question.Skill.Equals("Reading", StringComparison.OrdinalIgnoreCase) &&
+						!question.Skill.Equals("Listening", StringComparison.OrdinalIgnoreCase) &&
+						!question.Skill.Equals("Speaking", StringComparison.OrdinalIgnoreCase) &&
+						!question.Skill.Equals("Writing", StringComparison.OrdinalIgnoreCase)
+					)
+					{
+						@if (question.Answers.Any())
+						{
+							foreach (var answer in question.Answers)
+							{
+								<div class="form-check border rounded p-3 mb-2">
+
+									<input class="form-check-input answer-input"
+										   type="radio"
+										   name="Answers[@i].AnswerId"
+										   value="@answer.AnswerId"
+										   id="answer_@(i)_@(answer.AnswerId)"
+										   data-question="@question.QuestionId" />
+
+									<label class="form-check-label w-100"
+										   for="answer_@(i)_@(answer.AnswerId)">
+										@answer.AnswerText
+									</label>
+
+								</div>
+							}
+						}
+					}
+
+
+					<input type="hidden"
+						   name="Answers[@i].QuestionId"
+						   value="@question.QuestionId" />
+
+				</div>
+			</div>
+		}
+
+
+		<!-- Submit -->
+		<div class="card shadow-sm border-0 mb-5">
+			<div class="card-body p-4 text-center">
+
+				<h2 class="h5 mb-2">
+					Ready to submit?
+				</h2>
+
+				<p class="text-muted mb-4">
+					Make sure you have completed all sections before submitting.
+				</p>
+
+				<button type="submit"
+						class="btn btn-primary btn-lg px-5"
+						id="submitExamButton">
+					Submit Exam
+				</button>
+
+			</div>
+		</div>
+
+	</form>
 
 </div>
+
+
+@section Scripts {
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+
+			/*
+			 * EXAM TIMER
+			 */
+
+			const examDuration = @Model.Duration;
+			const timerElement = document.getElementById("examTimer");
+			const examForm = document.getElementById("examForm");
+			const submitButton = document.getElementById("submitExamButton");
+
+			let remainingSeconds = examDuration * 60;
+
+			function updateExamTimer() {
+
+				const minutes = Math.floor(remainingSeconds / 60);
+				const seconds = remainingSeconds % 60;
+
+				timerElement.textContent =
+					String(minutes).padStart(2, "0") +
+					":" +
+					String(seconds).padStart(2, "0");
+
+				if (remainingSeconds <= 0) {
+					clearInterval(examTimerInterval);
+
+					submitButton.disabled = true;
+
+					alert("Time is up. The exam will be submitted.");
+
+					examForm.submit();
+
+					return;
+				}
+
+				remainingSeconds--;
+			}
+
+			updateExamTimer();
+
+			const examTimerInterval =
+				setInterval(updateExamTimer, 1000);
+
+
+			/*
+			 * PROGRESS
+			 */
+
+			const questionCards =
+				document.querySelectorAll(".question-card");
+
+			const progressText =
+				document.getElementById("progressText");
+
+			const progressBar =
+				document.getElementById("progressBar");
+
+			function updateProgress() {
+
+				let answered = 0;
+
+				questionCards.forEach(function (card) {
+
+					const radio =
+						card.querySelector(
+							'input[type="radio"]:checked'
+						);
+
+					const text =
+						card.querySelector(
+							".writing-answer"
+						);
+
+					if (radio) {
+						answered++;
+					}
+					else if (text && text.value.trim().length > 0) {
+						answered++;
+					}
+
+				});
+
+				const total = questionCards.length;
+
+				const percentage =
+					total === 0
+						? 0
+						: (answered / total) * 100;
+
+				progressText.textContent =
+					answered + " / " + total + " answered";
+
+				progressBar.style.width =
+					percentage + "%";
+			}
+
+
+			document
+				.querySelectorAll(".answer-input")
+				.forEach(function (input) {
+
+					input.addEventListener(
+						"change",
+						updateProgress
+					);
+
+				});
+
+
+			document
+				.querySelectorAll(".writing-answer")
+				.forEach(function (textarea) {
+
+					textarea.addEventListener(
+						"input",
+						function () {
+
+							const countElement =
+								textarea
+									.closest(".writing-section")
+									.querySelector(".word-count");
+
+							const words =
+								textarea.value
+									.trim()
+									.split(/\s+/)
+									.filter(Boolean);
+
+							countElement.textContent =
+								textarea.value.trim() === ""
+									? "0"
+									: words.length;
+
+							updateProgress();
+						}
+					);
+
+				});
+
+
+			updateProgress();
+
+
+			/*
+			 * SPEAKING TIMER
+			 */
+
+			document
+				.querySelectorAll(".speaking-start")
+				.forEach(function (button) {
+
+					button.addEventListener(
+						"click",
+						function () {
+
+							const questionId =
+								button.dataset.question;
+
+							const preparation =
+								parseInt(
+									button.dataset.preparation
+								) || 0;
+
+							const response =
+								parseInt(
+									button.dataset.response
+								) || 0;
+
+							const timer =
+								document.getElementById(
+									"speakingTimer_" +
+									questionId
+								);
+
+							button.disabled = true;
+
+							let phase = "preparation";
+							let remaining = preparation;
+
+							function updateSpeakingTimer() {
+
+								timer.textContent =
+									phase === "preparation"
+										? "Preparation: " + remaining + "s"
+										: "Response: " + remaining + "s";
+
+								if (remaining <= 0) {
+
+									if (phase === "preparation") {
+
+										phase = "response";
+										remaining = response;
+
+									}
+									else {
+
+										clearInterval(
+											speakingInterval
+										);
+
+										timer.textContent =
+											"Time finished";
+
+										return;
+									}
+								}
+
+								remaining--;
+							}
+
+							updateSpeakingTimer();
+
+							const speakingInterval =
+								setInterval(
+									updateSpeakingTimer,
+									1000
+								);
+
+						}
+					);
+
+				});
+
+
+			/*
+			 * SUBMIT CONFIRMATION
+			 */
+
+			examForm.addEventListener(
+				"submit",
+				function (event) {
+
+					const confirmed =
+						confirm(
+							"Are you sure you want to submit this exam? You will not be able to submit it again."
+						);
+
+					if (!confirmed) {
+						event.preventDefault();
+					}
+
+				}
+			);
+
+		});
+	</script>
+}

@@ -29,7 +29,7 @@ namespace LanguageCenterManagement.ViewModels
         [StringLength(500)]
         public string? Description { get; set; }
 
-        public List<int> SelectedQuestionIds { get; set; }
-            = new List<int>();
+        public List<QuestionSelectionViewModel> Questions { get; set; }
+            = new List<QuestionSelectionViewModel>();
     }
 }

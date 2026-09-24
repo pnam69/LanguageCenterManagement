@@ -1,136 +1,126 @@
-﻿@model IEnumerable<LanguageCenterManagement.ViewModels.StudentExamListViewModel>
+﻿@model IEnumerable<LanguageCenterManagement.Models.Exam>
 
 @{
-    ViewData["Title"] = "My Exams";
+	ViewData["Title"] = "My Exams";
 }
 
-<div class="container py-4">
+<div class="container-fluid mt-4 mb-5 px-lg-5">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h2 class="fw-bold mb-1">My Exams</h2>
+			<p class="text-muted mb-0">View and take your available exams.</p>
+		</div>
+	</div>
 
-    <div class="mb-4">
-        <h2 class="fw-bold mb-1">My Exams</h2>
-        <p class="text-muted mb-0">
-            View and take exams for your enrolled classes.
-        </p>
-    </div>
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<div class="alert alert-success">
+			@TempData["SuccessMessage"]
+		</div>
+	}
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
-        </div>
-    }
+	@if (TempData["ErrorMessage"] != null)
+	{
+		<div class="alert alert-danger">
+			@TempData["ErrorMessage"]
+		</div>
+	}
 
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger">
-            @TempData["ErrorMessage"]
-        </div>
-    }
+	@if (!Model.Any())
+	{
+		<div class="card shadow-sm border-0">
+			<div class="card-body text-center py-5">
+				<h5 class="mb-2">No exams available</h5>
+				<p class="text-muted mb-0">
+					You are not currently enrolled in any classes with available exams.
+				</p>
+			</div>
+		</div>
+	}
+	else
+	{
+		<div class="card shadow-sm border-0">
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table table-hover align-middle mb-0">
+						<thead class="table-light">
+							<tr>
+								<th class="ps-4">Exam</th>
+								<th>Class</th>
+								<th>Type</th>
+								<th>Date</th>
+								<th>Duration</th>
+								<th>Status</th>
+								<th class="text-end pe-4">Action</th>
+							</tr>
+						</thead>
 
-    <div class="row g-4">
+						<tbody>
+							@foreach (var exam in Model)
+							{
+								<tr>
+									<td class="ps-4">
+										<div class="fw-semibold">@exam.ExamName</div>
 
-        @foreach (var exam in Model)
-        {
-            <div class="col-md-6 col-lg-4">
+										@if (!string.IsNullOrWhiteSpace(exam.Description))
+										{
+											<div class="small text-muted">
+												@exam.Description
+											</div>
+										}
+									</td>
 
-                <div class="card border-0 shadow-sm h-100">
+									<td>
+										@(exam.Class?.ClassName ?? "-")
+									</td>
 
-                    <div class="card-body">
+									<td>
+										<span class="badge bg-secondary">
+											@exam.ExamType
+										</span>
+									</td>
 
-                        <div class="d-flex justify-content-between mb-3">
+									<td>
+										@exam.ExamDate.ToString("dd/MM/yyyy HH:mm")
+									</td>
 
-                            <span class="badge bg-primary">
-                                @exam.ExamType
-                            </span>
+									<td>
+										@exam.Duration min
+									</td>
 
-                            @if (exam.HasSubmitted)
-                            {
-                                <span class="badge bg-success">
-                                    Completed
-                                </span>
-                            }
-                            else if (exam.Status == "Published")
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    Available
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">
-                                    @exam.Status
-                                </span>
-                            }
+									<td>
+										@if (exam.Status == "Published")
+										{
+											<span class="badge bg-success">Available</span>
+										}
+										else
+										{
+											<span class="badge bg-secondary">@exam.Status</span>
+										}
+									</td>
 
-                        </div>
+									<td class="text-end pe-4">
+										<a asp-action="Details"
+										   asp-route-id="@exam.ExamId"
+										   class="btn btn-sm btn-outline-info me-1">
+											Details
+										</a>
 
-                        <h5 class="fw-bold">
-                            @exam.ExamName
-                        </h5>
-
-                        <p class="text-muted mb-2">
-                            @exam.ClassName
-                        </p>
-
-                        <div class="small text-muted mb-3">
-
-                            <div>
-                                <i class="bi bi-calendar3 me-1"></i>
-                                @exam.ExamDate.ToString("dd/MM/yyyy HH:mm")
-                            </div>
-
-                            <div>
-                                <i class="bi bi-clock me-1"></i>
-                                @exam.Duration minutes
-                            </div>
-
-                            <div>
-                                <i class="bi bi-star me-1"></i>
-                                Maximum score: @exam.MaxScore
-                            </div>
-
-                        </div>
-
-                        @if (exam.HasSubmitted)
-                        {
-                            <a asp-action="Details"
-                               asp-route-id="@exam.ExamId"
-                               class="btn btn-outline-success w-100">
-                                View Exam
-                            </a>
-                        }
-                        else if (exam.Status == "Published" &&
-                                 exam.ExamDate <= DateTime.Now)
-                        {
-                            <a asp-action="Take"
-                               asp-route-id="@exam.ExamId"
-                               class="btn btn-primary w-100">
-                                Start Exam
-                            </a>
-                        }
-                        else
-                        {
-                            <a asp-action="Details"
-                               asp-route-id="@exam.ExamId"
-                               class="btn btn-outline-secondary w-100">
-                                View Details
-                            </a>
-                        }
-
-                    </div>
-
-                </div>
-
-            </div>
-        }
-
-    </div>
-
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info">
-            You currently have no exams.
-        </div>
-    }
-
+										@if (exam.Status == "Published")
+										{
+											<a asp-action="Take"
+											   asp-route-id="@exam.ExamId"
+											   class="btn btn-sm btn-primary">
+												Take Exam
+											</a>
+										}
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	}
 </div>

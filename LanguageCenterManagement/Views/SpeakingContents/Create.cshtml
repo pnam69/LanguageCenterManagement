@@ -1,0 +1,97 @@
+﻿@model LanguageCenterManagement.ViewModels.SpeakingContentViewModel
+
+@{
+	ViewData["Title"] = "Create Speaking Content";
+}
+
+<div class="container mt-4">
+
+	<div class="mb-4">
+		<h2>Create Speaking Content</h2>
+		<p class="text-muted">
+			Create a speaking exercise for students.
+		</p>
+	</div>
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+
+			<form asp-action="Create" method="post">
+
+				<div asp-validation-summary="ModelOnly"
+					 class="text-danger mb-3">
+				</div>
+
+				<div class="mb-3">
+					<label asp-for="Prompt"
+						   class="form-label"></label>
+
+					<textarea asp-for="Prompt"
+							  class="form-control"
+							  rows="5"
+							  placeholder="e.g. Describe your hometown.">
+					</textarea>
+
+					<span asp-validation-for="Prompt"
+						  class="text-danger">
+					</span>
+				</div>
+
+				<div class="row">
+
+					<div class="col-md-6 mb-3">
+						<label asp-for="PreparationTime"
+							   class="form-label"></label>
+
+						<input asp-for="PreparationTime"
+							   type="number"
+							   class="form-control"
+							   min="0"
+							   max="60" />
+
+						<span asp-validation-for="PreparationTime"
+							  class="text-danger">
+						</span>
+					</div>
+
+					<div class="col-md-6 mb-3">
+						<label asp-for="ResponseTime"
+							   class="form-label"></label>
+
+						<input asp-for="ResponseTime"
+							   type="number"
+							   class="form-control"
+							   min="0"
+							   max="600" />
+
+						<span asp-validation-for="ResponseTime"
+							  class="text-danger">
+						</span>
+					</div>
+
+				</div>
+
+				<div class="d-flex gap-2">
+					<button type="submit"
+							class="btn btn-primary">
+						Create
+					</button>
+
+					<a asp-action="Index"
+					   class="btn btn-secondary">
+						Cancel
+					</a>
+				</div>
+
+			</form>
+
+		</div>
+	</div>
+
+</div>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+}

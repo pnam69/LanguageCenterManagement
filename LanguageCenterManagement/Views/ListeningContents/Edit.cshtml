@@ -1,0 +1,85 @@
+﻿@model LanguageCenterManagement.ViewModels.ListeningContentViewModel
+
+@{
+    ViewData["Title"] = "Edit Listening Content";
+}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2>Edit Listening Content</h2>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form asp-action="Edit" method="post">
+
+                <input type="hidden"
+                       asp-for="ListeningContentId" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Title"
+                           class="form-label"></label>
+
+                    <input asp-for="Title"
+                           class="form-control" />
+
+                    <span asp-validation-for="Title"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AudioUrl"
+                           class="form-label"></label>
+
+                    <input asp-for="AudioUrl"
+                           class="form-control" />
+
+                    <span asp-validation-for="AudioUrl"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Transcript"
+                           class="form-label"></label>
+
+                    <textarea asp-for="Transcript"
+                              class="form-control"
+                              rows="10"></textarea>
+
+                    <span asp-validation-for="Transcript"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Save Changes
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

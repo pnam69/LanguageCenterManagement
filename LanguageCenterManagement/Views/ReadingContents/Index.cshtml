@@ -1,0 +1,105 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.ReadingContent>
+
+@{
+	ViewData["Title"] = "Reading Content";
+}
+
+<div class="container-fluid mt-4">
+
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h2>Reading Content</h2>
+			<p class="text-muted mb-0">
+				Manage reading passages and questions.
+			</p>
+		</div>
+
+		<a asp-action="Create" class="btn btn-primary">
+			+ Add Reading Content
+		</a>
+	</div>
+
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<div class="alert alert-success">
+			@TempData["SuccessMessage"]
+		</div>
+	}
+
+	@if (!Model.Any())
+	{
+		<div class="alert alert-info">
+			No reading content has been created yet.
+		</div>
+	}
+	else
+	{
+		<div class="card shadow-sm">
+			<div class="table-responsive">
+				<table class="table table-hover align-middle mb-0">
+
+					<thead class="table-light">
+						<tr>
+							<th>Question</th>
+							<th>Passage</th>
+							<th>Score</th>
+							<th style="width: 230px;">Actions</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td>
+									<strong>
+										@(item.Question?.QuestionText
+											?? "No question")
+									</strong>
+								</td>
+
+								<td>
+									@{
+										var preview = item.Passage.Length > 100
+											? item.Passage.Substring(0, 100) + "..."
+											: item.Passage;
+									}
+
+									@preview
+								</td>
+
+								<td>
+									<span class="badge bg-secondary">
+										@(item.Question?.Score ?? 0)
+									</span>
+								</td>
+
+								<td>
+									<a asp-action="Details"
+									   asp-route-id="@item.ReadingContentId"
+									   class="btn btn-sm btn-outline-primary">
+										Details
+									</a>
+
+									<a asp-action="Edit"
+									   asp-route-id="@item.ReadingContentId"
+									   class="btn btn-sm btn-outline-warning">
+										Edit
+									</a>
+
+									<a asp-action="Delete"
+									   asp-route-id="@item.ReadingContentId"
+									   class="btn btn-sm btn-outline-danger">
+										Delete
+									</a>
+								</td>
+							</tr>
+						}
+					</tbody>
+
+				</table>
+			</div>
+		</div>
+	}
+
+</div>
