@@ -45,18 +45,27 @@ namespace LanguageCenterManagement.Controllers
                 .OrderBy(e => e.ExamDate)
                 .ToListAsync();
 
-            var model = exams.Select(e => new StudentExamListViewModel
+            var model = exams.Select(e =>
             {
-                ExamId = e.ExamId,
-                ExamName = e.ExamName,
-                ClassName = e.Class?.ClassName ?? "",
-                ExamType = e.ExamType,
-                ExamDate = e.ExamDate,
-                Duration = e.Duration,
-                MaxScore = e.MaxScore,
-                Status = e.Status,
-                HasSubmitted = e.ExamResults.Any(
-                    r => r.StudentId == studentId)
+                var result = e.ExamResults
+                    .FirstOrDefault(r => r.StudentId == studentId);
+
+                return new StudentExamListViewModel
+                {
+                    ExamId = e.ExamId,
+                    ExamName = e.ExamName,
+                    ClassName = e.Class?.ClassName ?? "",
+                    ExamType = e.ExamType,
+                    ExamDate = e.ExamDate,
+                    Duration = e.Duration,
+                    MaxScore = e.MaxScore,
+                    Status = e.Status,
+
+                    HasSubmitted = result != null,
+                    ExamResultId = result?.ExamResultId,
+                    Score = result?.Score,
+                    SubmittedAt = result?.SubmittedAt
+                };
             }).ToList();
 
             return View(model);
@@ -321,147 +330,248 @@ namespace LanguageCenterManagement.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Take(
-            StudentExamSubmitViewModel model)
+    int id,
+    StudentExamSubmissionViewModel model)
         {
+            if (!User.IsInRole("Student"))
+                return Forbid();
+
             var user = await _userManager.GetUserAsync(User);
 
-            if (user == null || !user.StudentId.HasValue)
-            {
+            if (user?.StudentId == null)
                 return Forbid();
-            }
 
-            int studentId = user.StudentId.Value;
+            var studentId = user.StudentId.Value;
 
             var exam = await _context.Exams
-                .Include(e => e.Class)
                 .Include(e => e.ExamQuestions)
                     .ThenInclude(eq => eq.Question)
-                        .ThenInclude(q => q!.Answers)
-                .Include(e => e.ExamResults)
-                .FirstOrDefaultAsync(e => e.ExamId == model.ExamId);
+                        .ThenInclude(q => q.Answers)
+                .Include(e => e.Class)
+                .FirstOrDefaultAsync(e => e.ExamId == id);
 
             if (exam == null)
-            {
                 return NotFound();
-            }
 
-            bool enrolled = exam.Class != null &&
-                await _context.Enrollments.AnyAsync(e =>
-                    e.ClassId == exam.ClassId &&
+            var enrolled = await _context.Enrollments
+                .AnyAsync(e =>
                     e.StudentId == studentId &&
-                    e.Status != "Cancelled");
+                    e.ClassId == exam.ClassId);
 
             if (!enrolled)
-            {
                 return Forbid();
-            }
 
             if (exam.Status != "Published")
             {
-                TempData["ErrorMessage"] =
-                    "This exam is not currently available.";
-
+                TempData["ErrorMessage"] = "This exam is not currently available.";
                 return RedirectToAction(nameof(Index));
             }
 
-            if (exam.ExamResults.Any(r => r.StudentId == studentId))
+            var existingResult = await _context.ExamResults
+                .FirstOrDefaultAsync(r =>
+                    r.ExamId == id &&
+                    r.StudentId == studentId);
+
+            if (existingResult != null)
             {
-                TempData["ErrorMessage"] =
-                    "You have already submitted this exam.";
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            decimal totalQuestionPoints = exam.ExamQuestions
-                .Where(eq => eq.Question != null)
-                .Sum(eq => eq.Question!.Score);
-
-            if (totalQuestionPoints <= 0)
-            {
-                TempData["ErrorMessage"] =
-                    "This exam has no valid questions.";
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            decimal earnedPoints = 0;
-
-            foreach (var examQuestion in exam.ExamQuestions)
-            {
-                var submission = model.Answers
-                    .FirstOrDefault(a =>
-                        a.QuestionId == examQuestion.QuestionId);
-
-                if (submission?.AnswerId == null)
+                return RedirectToAction(nameof(Result), new
                 {
-                    continue;
-                }
-
-                var correctAnswer = examQuestion.Question?.Answers
-                    .FirstOrDefault(a =>
-                        a.AnswerId == submission.AnswerId &&
-                        a.IsCorrect);
-
-                if (correctAnswer != null)
-                {
-                    earnedPoints += examQuestion.Question!.Score;
-                }
+                    id = existingResult.ExamResultId
+                });
             }
 
-            decimal finalScore =
-                earnedPoints / totalQuestionPoints * exam.MaxScore;
+            var questions = exam.ExamQuestions
+                .OrderBy(eq => eq.QuestionOrder)
+                .ToList();
 
-            finalScore = Math.Round(finalScore, 2);
+            if (!questions.Any())
+            {
+                TempData["ErrorMessage"] = "This exam has no questions.";
+                return RedirectToAction(nameof(Index));
+            }
 
-            var result = new ExamResult
+            var submittedAnswers = model.Answers ?? new List<StudentExamAnswerSubmissionViewModel>();
+
+            decimal rawScore = 0;
+
+            var examResult = new ExamResult
             {
                 ExamId = exam.ExamId,
                 StudentId = studentId,
-                Score = finalScore,
                 Status = "Completed",
-                SubmittedAt = DateTime.Now
+                SubmittedAt = DateTime.Now,
+                Score = 0
             };
 
-            _context.ExamResults.Add(result);
+            _context.ExamResults.Add(examResult);
+
+            foreach (var examQuestion in questions)
+            {
+                var question = examQuestion.Question;
+
+                if (question == null)
+                    continue;
+
+                var submitted = submittedAnswers
+                    .FirstOrDefault(a => a.QuestionId == question.QuestionId);
+
+                var examAnswer = new ExamAnswer
+                {
+                    ExamResult = examResult,
+                    QuestionId = question.QuestionId,
+                    AnswerId = submitted?.AnswerId,
+                    TextAnswer = submitted?.TextAnswer,
+                    IsCorrect = null,
+                    Score = 0
+                };
+
+                /*
+                 * Multiple choice questions can be automatically graded.
+                 */
+                if (submitted?.AnswerId != null)
+                {
+                    var selectedAnswer = question.Answers
+                        .FirstOrDefault(a => a.AnswerId == submitted.AnswerId);
+
+                    if (selectedAnswer != null)
+                    {
+                        examAnswer.IsCorrect = selectedAnswer.IsCorrect;
+
+                        if (selectedAnswer.IsCorrect)
+                        {
+                            examAnswer.Score = question.Score;
+                            rawScore += question.Score;
+                        }
+                    }
+                }
+
+                /*
+                 * Writing and speaking/text questions are stored,
+                 * but not automatically marked correct.
+                 *
+                 * IsCorrect remains null and Score remains 0
+                 * until a teacher grades them.
+                 */
+
+                _context.ExamAnswers.Add(examAnswer);
+            }
+
+            var totalPossibleScore = questions.Sum(q => q.Question?.Score ?? 0);
+
+            if (totalPossibleScore > 0)
+            {
+                examResult.Score = Math.Round(
+                    (rawScore / totalPossibleScore) * exam.MaxScore,
+                    2);
+            }
+            else
+            {
+                examResult.Score = 0;
+            }
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] =
-                $"Exam submitted successfully. Your score is {finalScore}/{exam.MaxScore}.";
-
-            return RedirectToAction(
-                nameof(Result),
-                new { id = result.ExamResultId });
+            return RedirectToAction(nameof(Result), new
+            {
+                id = examResult.ExamResultId
+            });
         }
 
         // GET: StudentExams/Result/5
-        public async Task<IActionResult> Result(int? id)
+        public async Task<IActionResult> Result(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!User.IsInRole("Student"))
+                return Forbid();
 
             var user = await _userManager.GetUserAsync(User);
 
-            if (user == null || !user.StudentId.HasValue)
-            {
+            if (user?.StudentId == null)
                 return Forbid();
-            }
+
+            var studentId = user.StudentId.Value;
 
             var result = await _context.ExamResults
                 .Include(r => r.Exam)
-                    .ThenInclude(e => e!.Class)
+                    .ThenInclude(e => e.Class)
+                .Include(r => r.ExamAnswers)
+                    .ThenInclude(a => a.Question)
+                        .ThenInclude(q => q.Answers)
                 .FirstOrDefaultAsync(r =>
                     r.ExamResultId == id &&
-                    r.StudentId == user.StudentId.Value);
+                    r.StudentId == studentId);
 
             if (result == null)
-            {
                 return NotFound();
+
+            var exam = result.Exam;
+
+            if (exam == null)
+                return NotFound();
+
+            var examQuestions = await _context.ExamQuestions
+                .Where(eq => eq.ExamId == exam.ExamId)
+                .OrderBy(eq => eq.QuestionOrder)
+                .ToListAsync();
+
+            var model = new StudentExamResultViewModel
+            {
+                ExamResultId = result.ExamResultId,
+                ExamId = result.ExamId,
+                ExamName = exam.ExamName,
+                ClassName = exam.Class?.ClassName ?? "-",
+                Score = result.Score,
+                MaxScore = exam.MaxScore,
+                Status = result.Status,
+                SubmittedAt = result.SubmittedAt
+            };
+
+            foreach (var examQuestion in examQuestions)
+            {
+                var question = await _context.Questions
+                    .Include(q => q.Answers)
+                    .FirstOrDefaultAsync(q => q.QuestionId == examQuestion.QuestionId);
+
+                if (question == null)
+                    continue;
+
+                var studentAnswer = result.ExamAnswers
+                    .FirstOrDefault(a => a.QuestionId == question.QuestionId);
+
+                var item = new StudentExamResultAnswerViewModel
+                {
+                    QuestionId = question.QuestionId,
+                    QuestionOrder = examQuestion.QuestionOrder,
+                    QuestionText = question.QuestionText,
+                    QuestionType = question.QuestionType,
+                    Skill = question.Skill,
+                    QuestionScore = question.Score,
+                    IsCorrect = studentAnswer?.IsCorrect,
+                    Score = studentAnswer?.Score ?? 0,
+                    AnswerOptions = question.Answers
+                        .Select(a => a.AnswerText)
+                        .ToList()
+                };
+
+                if (studentAnswer?.AnswerId != null)
+                {
+                    var selectedAnswer = question.Answers
+                        .FirstOrDefault(a => a.AnswerId == studentAnswer.AnswerId);
+
+                    item.StudentAnswer = selectedAnswer?.AnswerText;
+                }
+                else
+                {
+                    item.StudentAnswer = studentAnswer?.TextAnswer;
+                }
+
+                item.CorrectAnswer = question.Answers
+                    .FirstOrDefault(a => a.IsCorrect)
+                    ?.AnswerText;
+
+                model.Answers.Add(item);
             }
 
-            return View(result);
+            return View(model);
         }
     }
 }

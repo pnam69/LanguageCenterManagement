@@ -45,6 +45,7 @@ namespace LanguageCenterManagement.Data
         public DbSet<SpeakingContent> SpeakingContents { get; set; }
         public DbSet<WritingContent> WritingContents { get; set; }
         public DbSet<ReadingPassage> ReadingPassages { get; set; }
+        public DbSet<ExamAnswer> ExamAnswers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -320,6 +321,28 @@ namespace LanguageCenterManagement.Data
                 .WithOne(q => q.SpeakingContent)
                 .HasForeignKey<SpeakingContent>(s => s.QuestionId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ExamAnswer>()
+                .HasOne(ea => ea.ExamResult)
+                .WithMany(er => er.ExamAnswers)
+                .HasForeignKey(ea => ea.ExamResultId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ExamAnswer>()
+                .HasOne(ea => ea.Question)
+                .WithMany()
+                .HasForeignKey(ea => ea.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExamAnswer>()
+                .HasOne(ea => ea.Answer)
+                .WithMany()
+                .HasForeignKey(ea => ea.AnswerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExamAnswer>()
+                .Property(e => e.Score)
+                .HasPrecision(18, 2);
         }
     }
 }

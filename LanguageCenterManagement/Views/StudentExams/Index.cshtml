@@ -1,14 +1,17 @@
-﻿@model IEnumerable<LanguageCenterManagement.Models.Exam>
+﻿@model IEnumerable<LanguageCenterManagement.ViewModels.StudentExamListViewModel>
 
 @{
 	ViewData["Title"] = "My Exams";
 }
 
 <div class="container-fluid mt-4 mb-5 px-lg-5">
+
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<div>
 			<h2 class="fw-bold mb-1">My Exams</h2>
-			<p class="text-muted mb-0">View and take your available exams.</p>
+			<p class="text-muted mb-0">
+				View and take your available exams.
+			</p>
 		</div>
 	</div>
 
@@ -31,6 +34,7 @@
 		<div class="card shadow-sm border-0">
 			<div class="card-body text-center py-5">
 				<h5 class="mb-2">No exams available</h5>
+
 				<p class="text-muted mb-0">
 					You are not currently enrolled in any classes with available exams.
 				</p>
@@ -41,8 +45,10 @@
 	{
 		<div class="card shadow-sm border-0">
 			<div class="card-body p-0">
+
 				<div class="table-responsive">
 					<table class="table table-hover align-middle mb-0">
+
 						<thead class="table-light">
 							<tr>
 								<th class="ps-4">Exam</th>
@@ -59,19 +65,15 @@
 							@foreach (var exam in Model)
 							{
 								<tr>
-									<td class="ps-4">
-										<div class="fw-semibold">@exam.ExamName</div>
 
-										@if (!string.IsNullOrWhiteSpace(exam.Description))
-										{
-											<div class="small text-muted">
-												@exam.Description
-											</div>
-										}
+									<td class="ps-4">
+										<div class="fw-semibold">
+											@exam.ExamName
+										</div>
 									</td>
 
 									<td>
-										@(exam.Class?.ClassName ?? "-")
+										@exam.ClassName
 									</td>
 
 									<td>
@@ -89,24 +91,37 @@
 									</td>
 
 									<td>
-										@if (exam.Status == "Published")
+										@if (exam.HasSubmitted)
 										{
-											<span class="badge bg-success">Available</span>
+											<span class="badge bg-success">
+												Completed
+											</span>
+										}
+										else if (exam.Status == "Published")
+										{
+											<span class="badge bg-primary">
+												Available
+											</span>
 										}
 										else
 										{
-											<span class="badge bg-secondary">@exam.Status</span>
+											<span class="badge bg-secondary">
+												@exam.Status
+											</span>
 										}
 									</td>
 
 									<td class="text-end pe-4">
-										<a asp-action="Details"
-										   asp-route-id="@exam.ExamId"
-										   class="btn btn-sm btn-outline-info me-1">
-											Details
-										</a>
 
-										@if (exam.Status == "Published")
+										@if (exam.HasSubmitted && exam.ExamResultId.HasValue)
+										{
+											<a asp-action="Result"
+											   asp-route-id="@exam.ExamResultId.Value"
+											   class="btn btn-sm btn-outline-success">
+												View Result
+											</a>
+										}
+										else if (exam.Status == "Published")
 										{
 											<a asp-action="Take"
 											   asp-route-id="@exam.ExamId"
@@ -114,13 +129,18 @@
 												Take Exam
 											</a>
 										}
+
 									</td>
+
 								</tr>
 							}
 						</tbody>
+
 					</table>
 				</div>
+
 			</div>
 		</div>
 	}
+
 </div>

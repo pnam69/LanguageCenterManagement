@@ -22,5 +22,8 @@ namespace LanguageCenterManagement.Models
 
         [StringLength(500)]
         public string? Note { get; set; }
+
+        public ICollection<ExamAnswer> ExamAnswers { get; set; }
+            = new List<ExamAnswer>();
     }
 }

@@ -21,6 +21,12 @@ namespace LanguageCenterManagement.ViewModels
         public string Status { get; set; } = string.Empty;
 
         public bool HasSubmitted { get; set; }
+
+        public int? ExamResultId { get; set; }
+
+        public decimal? Score { get; set; }
+
+        public DateTime? SubmittedAt { get; set; }
     }
 
     public class StudentExamViewModel
@@ -40,6 +46,14 @@ namespace LanguageCenterManagement.ViewModels
         public decimal MaxScore { get; set; }
 
         public string? Description { get; set; }
+
+        public int? ExamResultId { get; set; }
+
+        public bool HasSubmitted { get; set; }
+
+        public decimal? Score { get; set; }
+
+        public DateTime? SubmittedAt { get; set; }
 
         public List<StudentExamQuestionViewModel> Questions { get; set; }
             = new();

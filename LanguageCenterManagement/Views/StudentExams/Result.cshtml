@@ -1,16 +1,15 @@
-﻿@model LanguageCenterManagement.Models.ExamResult
+﻿@model LanguageCenterManagement.ViewModels.StudentExamResultViewModel
 
 @{
 	ViewData["Title"] = "Exam Result";
 }
 
 <div class="container mt-4 mb-5">
+
 	<div class="d-flex justify-content-between align-items-center mb-4">
 		<div>
-			<h2 class="fw-bold mb-1">Exam Result</h2>
-			<p class="text-muted mb-0">
-				@(Model.Exam?.ExamName ?? "Exam")
-			</p>
+			<h2 class="fw-bold mb-1">@Model.ExamName</h2>
+			<p class="text-muted mb-0">@Model.ClassName</p>
 		</div>
 
 		<a asp-action="Index" class="btn btn-outline-secondary">
@@ -18,54 +17,174 @@
 		</a>
 	</div>
 
+	<!-- Score -->
 	<div class="card shadow-sm border-0 mb-4">
-		<div class="card-body text-center py-5">
-			<div class="text-muted mb-2">Your Score</div>
+		<div class="card-body text-center py-4">
 
-			<h1 class="display-4 fw-bold mb-2">
-				@Model.Score
+			<div class="text-muted mb-1">
+				Your Score
+			</div>
+
+			<h1 class="display-4 fw-bold mb-1">
+				@Model.Score.ToString("0.##")
+				<span class="fs-4 text-muted">
+					/ @Model.MaxScore.ToString("0.##")
+				</span>
 			</h1>
 
-			@if (Model.Exam != null)
+			@if (Model.SubmittedAt.HasValue)
 			{
 				<p class="text-muted mb-0">
-					out of @Model.Exam.MaxScore
+					Submitted @Model.SubmittedAt.Value.ToString("dd/MM/yyyy HH:mm")
 				</p>
 			}
+
 		</div>
 	</div>
 
+	<!-- Questions -->
 	<div class="card shadow-sm border-0">
-		<div class="card-body">
-			<div class="row g-4">
-				<div class="col-md-6">
-					<label class="text-muted small">Exam</label>
-					<div class="fw-semibold">
-						@(Model.Exam?.ExamName ?? "-")
-					</div>
-				</div>
 
-				<div class="col-md-6">
-					<label class="text-muted small">Class</label>
-					<div class="fw-semibold">
-						@(Model.Exam?.Class?.ClassName ?? "-")
-					</div>
-				</div>
+		<div class="card-header bg-white py-3">
+			<div class="d-flex justify-content-between align-items-center">
+				<h5 class="mb-0">Answer Review</h5>
 
-				<div class="col-md-6">
-					<label class="text-muted small">Submitted At</label>
-					<div class="fw-semibold">
-						@(Model.SubmittedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-					</div>
-				</div>
-
-				<div class="col-md-6">
-					<label class="text-muted small">Status</label>
-					<div>
-						<span class="badge bg-success">Submitted</span>
-					</div>
-				</div>
+				<span class="text-muted">
+					@Model.Answers.Count question@(Model.Answers.Count == 1 ? "" : "s")
+				</span>
 			</div>
+		</div>
+
+		<div class="card-body">
+
+			@if (!Model.Answers.Any())
+			{
+				<div class="text-center py-4 text-muted">
+					No answer information is available.
+				</div>
+			}
+			else
+			{
+				@foreach (var answer in Model.Answers.OrderBy(a => a.QuestionOrder))
+				{
+					<div class="border rounded p-4 mb-4">
+
+						<!-- Question header -->
+						<div class="d-flex justify-content-between align-items-start mb-3">
+
+							<div>
+								<span class="fw-bold">
+									Question @answer.QuestionOrder
+								</span>
+
+								<span class="badge bg-secondary ms-2">
+									@answer.Skill
+								</span>
+
+								<span class="badge bg-light text-dark border ms-1">
+									@answer.QuestionType
+								</span>
+							</div>
+
+							<div class="text-muted">
+								@answer.Score / @answer.QuestionScore
+							</div>
+
+						</div>
+
+						<!-- Question -->
+						<div class="mb-3">
+							<div class="fw-semibold">
+								@answer.QuestionText
+							</div>
+						</div>
+
+						<!-- Multiple choice -->
+						@if (answer.AnswerOptions.Any())
+						{
+							<div class="mb-3">
+
+								@foreach (var option in answer.AnswerOptions)
+								{
+									<div class="border rounded px-3 py-2 mb-2">
+										@option
+									</div>
+								}
+
+							</div>
+						}
+
+						<!-- Student answer -->
+						<div class="mb-2">
+
+							<div class="small text-muted mb-1">
+								Your Answer
+							</div>
+
+							@if (string.IsNullOrWhiteSpace(answer.StudentAnswer))
+							{
+								<div class="text-muted fst-italic">
+									No answer submitted.
+								</div>
+							}
+							else
+							{
+								<div class="border rounded p-3">
+									@answer.StudentAnswer
+								</div>
+							}
+
+						</div>
+
+						<!-- Correct answer -->
+						@if (!string.IsNullOrWhiteSpace(answer.CorrectAnswer))
+						{
+							<div class="mb-3">
+
+								<div class="small text-muted mb-1">
+									Correct Answer
+								</div>
+
+								<div class="border rounded p-3">
+									@answer.CorrectAnswer
+								</div>
+
+							</div>
+						}
+
+						<!-- Result status -->
+						@if (answer.IsCorrect == true)
+						{
+							<div class="alert alert-success mb-0">
+								<strong>Correct</strong>
+								<span class="ms-2">
+									You earned @answer.Score point@(answer.Score == 1 ? "" : "s").
+								</span>
+							</div>
+						}
+						else if (answer.IsCorrect == false)
+						{
+							<div class="alert alert-danger mb-0">
+								<strong>Incorrect</strong>
+								<span class="ms-2">
+									You earned @answer.Score point@(answer.Score == 1 ? "" : "s").
+								</span>
+							</div>
+						}
+						else
+						{
+							<div class="alert alert-warning mb-0">
+								<strong>Pending review</strong>
+								<span class="ms-2">
+									This question requires teacher grading.
+								</span>
+							</div>
+						}
+
+					</div>
+				}
+			}
+
 		</div>
 	</div>
 </div>
