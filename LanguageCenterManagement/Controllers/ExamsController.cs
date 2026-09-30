@@ -316,6 +316,49 @@ namespace LanguageCenterManagement.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Exams/Results/5
+        public async Task<IActionResult> Results(int id)
+        {
+            var exam = await _context.Exams
+                .Include(e => e.Class)
+                .Include(e => e.ExamResults)
+                    .ThenInclude(r => r.Student)
+                .FirstOrDefaultAsync(e => e.ExamId == id);
+
+            if (exam == null)
+            {
+                return NotFound();
+            }
+
+            if (!await CanAccessExam(exam))
+            {
+                return Forbid();
+            }
+
+            var model = exam.ExamResults
+                .OrderByDescending(r => r.SubmittedAt)
+                .Select(r => new TeacherExamResultViewModel
+                {
+                    ExamResultId = r.ExamResultId,
+                    ExamId = exam.ExamId,
+                    ExamName = exam.ExamName,
+                    StudentId = r.StudentId,
+                    StudentCode = r.Student != null
+                        ? r.Student.StudentCode
+                        : string.Empty,
+                    StudentName = r.Student != null
+                        ? r.Student.FullName
+                        : $"Student #{r.StudentId}",
+                    Score = r.Score,
+                    MaxScore = exam.MaxScore,
+                    Status = r.Status,
+                    SubmittedAt = r.SubmittedAt
+                })
+                .ToList();
+
+            return View(model);
+        }
+
         private async Task LoadFormData(
             ExamFormViewModel model,
             ICollection<ExamQuestion>? existingQuestions = null)
@@ -415,8 +458,8 @@ namespace LanguageCenterManagement.Controllers
         }
 
         private async Task SaveExamQuestions(
-    int examId,
-    List<int> selectedQuestionIds)
+            int examId,
+            List<int> selectedQuestionIds)
         {
             int order = 1;
 

@@ -36,4 +36,27 @@ namespace LanguageCenterManagement.ViewModels
 
         public string? Note { get; set; }
     }
+
+    public class TeacherExamResultViewModel
+    {
+        public int ExamResultId { get; set; }
+
+        public int ExamId { get; set; }
+
+        public string ExamName { get; set; } = string.Empty;
+
+        public int StudentId { get; set; }
+
+        public string StudentCode { get; set; } = string.Empty;
+
+        public string StudentName { get; set; } = string.Empty;
+
+        public decimal Score { get; set; }
+
+        public decimal MaxScore { get; set; }
+
+        public string Status { get; set; } = string.Empty;
+
+        public DateTime? SubmittedAt { get; set; }
+    }
 }
