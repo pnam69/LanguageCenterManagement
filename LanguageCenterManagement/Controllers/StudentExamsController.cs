@@ -329,9 +329,7 @@ namespace LanguageCenterManagement.Controllers
         // POST: StudentExams/Take
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Take(
-    int id,
-    StudentExamSubmissionViewModel model)
+        public async Task<IActionResult> Take(int id, StudentExamSubmissionViewModel model)
         {
             if (!User.IsInRole("Student"))
                 return Forbid();
@@ -363,7 +361,15 @@ namespace LanguageCenterManagement.Controllers
 
             if (exam.Status != "Published")
             {
-                TempData["ErrorMessage"] = "This exam is not currently available.";
+                TempData["ErrorMessage"] = exam.Status == "Closed" ? "This exam is closed." : "This exam is not currently available.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (DateTime.Now < exam.ExamDate)
+            {
+                TempData["ErrorMessage"] = $"This exam will be available on {exam.ExamDate:dd/MM/yyyy HH:mm}.";
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -424,6 +430,45 @@ namespace LanguageCenterManagement.Controllers
                     IsCorrect = null,
                     Score = 0
                 };
+
+                if (submitted?.AudioFile != null &&
+                    submitted.AudioFile.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "wwwroot",
+                        "uploads",
+                        "exam-answers");
+
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var extension =
+                        Path.GetExtension(submitted.AudioFile.FileName);
+
+                    if (string.IsNullOrWhiteSpace(extension))
+                    {
+                        extension = ".webm";
+                    }
+
+                    var fileName =
+                        Guid.NewGuid().ToString("N") +
+                        extension;
+
+                    var filePath =
+                        Path.Combine(
+                            uploadsFolder,
+                            fileName);
+
+                    using (var stream = new FileStream(
+                        filePath,
+                        FileMode.Create))
+                    {
+                        await submitted.AudioFile.CopyToAsync(stream);
+                    }
+
+                    examAnswer.AudioAnswerUrl =
+                        "/uploads/exam-answers/" + fileName;
+                }
 
                 /*
                  * Multiple choice questions can be automatically graded.

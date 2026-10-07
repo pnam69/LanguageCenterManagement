@@ -43,6 +43,15 @@
 
 		<div class="card shadow-sm border-0 mb-4">
 
+			@if (ViewBag.HasSubmissions == true)
+			{
+				<div class="alert alert-warning">
+					<i class="bi bi-lock-fill me-2"></i>
+					<strong>This exam has student submissions.</strong>
+					The exam questions are locked and cannot be changed.
+				</div>
+			}
+
 			<div class="card-header bg-white">
 				<h2 class="h5 mb-0">
 					Exam Information
@@ -172,35 +181,25 @@
 
 					</div>
 
-
 					<div class="col-md-4">
-
-						<label asp-for="Status"
-							   class="form-label">
+						<label asp-for="Status" class="form-label">
 							Status
 						</label>
 
-						<select asp-for="Status"
-								class="form-select">
-
-							<option value="Draft">
-								Draft
-							</option>
-
-							<option value="Published">
-								Published
-							</option>
-
-							<option value="Cancelled">
-								Cancelled
-							</option>
-
+						<select asp-for="Status" class="form-select">
+							<option value="Draft">Draft</option>
+							<option value="Published">Published</option>
+							<option value="Closed">Closed</option>
 						</select>
 
 						<span asp-validation-for="Status"
-							  class="text-danger">
-						</span>
+							  class="text-danger"></span>
 
+						<div class="form-text">
+							Draft: students cannot access the exam.
+							Published: students can take the exam when available.
+							Closed: students can no longer start the exam.
+						</div>
 					</div>
 
 

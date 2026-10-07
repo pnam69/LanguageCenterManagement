@@ -357,6 +357,7 @@ namespace LanguageCenterManagement.Controllers
                     Skill = question.Skill,
                     MaxScore = question.Score,
                     Score = submittedAnswer?.Score ?? 0,
+                    AudioAnswerUrl = submittedAnswer?.AudioAnswerUrl,
                     IsCorrect = submittedAnswer?.IsCorrect,
 
                     RequiresManualGrading =
@@ -667,6 +668,9 @@ namespace LanguageCenterManagement.Controllers
 
                 submittedQuestion.StudentAnswer =
                     existingAnswer?.TextAnswer;
+
+                submittedQuestion.AudioAnswerUrl =
+                    existingAnswer?.AudioAnswerUrl;
 
                 submittedQuestion.RequiresManualGrading =
                     question.QuestionType.Equals(

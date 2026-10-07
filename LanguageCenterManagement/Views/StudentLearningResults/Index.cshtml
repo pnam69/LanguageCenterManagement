@@ -2,114 +2,303 @@
 
 @{
     ViewData["Title"] = "My Learning Results";
+
+    var results = Model.ToList();
+    var totalClasses = results.Count;
+    var passedClasses = results.Count(x => x.Result == "Passed");
+    var failedClasses = results.Count(x => x.Result == "Failed");
+    var averageScore = results.Any()
+        ? results.Average(x => x.AverageScore)
+        : 0;
 }
 
-<div class="mb-4">
-    <h2 class="fw-bold mb-1">My Learning Results</h2>
-    <p class="text-muted">
-        View your overall results for each class.
-    </p>
-</div>
+<div class="container-fluid mt-4 mb-5 px-lg-5">
 
-<div class="row g-4">
-    @foreach (var item in Model)
+    <!-- Header -->
+    <div class="mb-4">
+
+        <div class="text-muted small mb-1">
+            Academic Progress
+        </div>
+
+        <h2 class="fw-bold mb-2">
+            My Learning Results
+        </h2>
+
+        <p class="text-muted mb-0">
+            Review your performance across your classes.
+        </p>
+
+    </div>
+
+
+    @if (!results.Any())
     {
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="text-muted small">
-                                @item.ClassCode
-                            </div>
+        <div class="card border-0 shadow-sm">
 
-                            <h5 class="fw-bold mb-1">
-                                @item.ClassName
-                            </h5>
+            <div class="card-body text-center py-5">
 
-                            <div class="text-muted">
-                                @item.CourseName
-                            </div>
+                <i class="bi bi-bar-chart fs-1 text-muted"></i>
+
+                <h5 class="fw-bold mt-3">
+                    No learning results yet
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Your teacher has not entered any learning results.
+                </p>
+
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <!-- Summary -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-sm-6 col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            Classes
                         </div>
 
-                        @if (item.Result == "Passed")
-                        {
-                            <span class="badge bg-success">
-                                Passed
-                            </span>
-                        }
-                        else if (item.Result == "Failed")
-                        {
-                            <span class="badge bg-danger">
-                                Failed
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-warning text-dark">
-                                @item.Result
-                            </span>
-                        }
+                        <div class="fs-3 fw-bold">
+                            @totalClasses
+                        </div>
+
                     </div>
-
-                    <hr />
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-muted small">
-                                Average Score
-                            </div>
-
-                            <h3 class="fw-bold mb-0">
-                                @item.AverageScore.ToString("0.00")
-                                <span class="fs-6 text-muted">/ 10</span>
-                            </h3>
-                        </div>
-
-                        <div class="text-end">
-                            <div class="text-muted small">
-                                Completed
-                            </div>
-
-                            <div>
-                                @(item.CompletedDate?.ToString("dd/MM/yyyy") ?? "-")
-                            </div>
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrWhiteSpace(item.TeacherComment))
-                    {
-                        <div class="mt-3 bg-light rounded p-3">
-                            <div class="small fw-semibold mb-1">
-                                Teacher Comment
-                            </div>
-
-                            <div class="text-muted">
-                                @item.TeacherComment
-                            </div>
-                        </div>
-                    }
                 </div>
+
+            </div>
+
+
+            <div class="col-sm-6 col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            Passed
+                        </div>
+
+                        <div class="fs-3 fw-bold text-success">
+                            @passedClasses
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="col-sm-6 col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            Failed
+                        </div>
+
+                        <div class="fs-3 fw-bold text-danger">
+                            @failedClasses
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="col-sm-6 col-lg-3">
+
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+
+                        <div class="text-muted small mb-2">
+                            Overall Average
+                        </div>
+
+                        <div class="fs-3 fw-bold text-primary">
+                            @averageScore.ToString("0.00")
+                            <span class="fs-6 text-muted">/ 10</span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Class Results -->
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white border-0 p-4">
+
+                <h5 class="fw-bold mb-1">
+                    Class Results
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Your overall performance for each enrolled class.
+                </p>
+
+            </div>
+
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="ps-4">
+                                    Class
+                                </th>
+
+                                <th>
+                                    Course
+                                </th>
+
+                                <th>
+                                    Average Score
+                                </th>
+
+                                <th>
+                                    Result
+                                </th>
+
+                                <th>
+                                    Completed
+                                </th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in results)
+                            {
+                                <tr>
+
+                                    <td class="ps-4">
+
+                                        <div class="fw-semibold">
+                                            @item.ClassName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @item.ClassCode
+                                        </small>
+
+                                    </td>
+
+
+                                    <td>
+                                        @item.CourseName
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="fw-semibold">
+                                            @item.AverageScore.ToString("0.00")
+                                        </span>
+
+                                        <span class="text-muted">
+                                            / 10
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (item.Result == "Passed")
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Passed
+                                            </span>
+                                        }
+                                        else if (item.Result == "Failed")
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                Failed
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                @item.Result
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (item.CompletedDate.HasValue)
+                                        {
+                                            @item.CompletedDate.Value.ToString("dd/MM/yyyy")
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                -
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+
+
+                                @if (!string.IsNullOrWhiteSpace(item.TeacherComment))
+                                {
+                                    <tr>
+
+                                        <td colspan="5" class="pt-0 ps-4 pe-4">
+
+                                            <div class="bg-light rounded-3 p-3">
+
+                                                <div class="small fw-semibold mb-1">
+                                                    <i class="bi bi-chat-left-text me-1"></i>
+                                                    Teacher Comment
+                                                </div>
+
+                                                <div class="text-muted">
+                                                    @item.TeacherComment
+                                                </div>
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+                                }
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
             </div>
         </div>
     }
 
-    @if (!Model.Any())
-    {
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-bar-chart fs-1 text-muted"></i>
-
-                    <h5 class="mt-3">
-                        No learning results yet
-                    </h5>
-
-                    <p class="text-muted mb-0">
-                        Your teacher has not entered any learning results.
-                    </p>
-                </div>
-            </div>
-        </div>
-    }
 </div>

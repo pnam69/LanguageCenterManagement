@@ -51,7 +51,8 @@
 
 	<form asp-action="Take"
 		  method="post"
-		  id="examForm">
+		  id="examForm"
+		  enctype="multipart/form-data">
 
 		@Html.AntiForgeryToken()
 
@@ -222,18 +223,22 @@
 							@if (!string.IsNullOrWhiteSpace(question.SpeakingPrompt))
 							{
 								<div class="alert alert-light border mb-4">
+
 									<strong>Speaking Prompt</strong>
 
 									<div class="mt-2">
 										@question.SpeakingPrompt
 									</div>
+
 								</div>
 							}
+
 
 							<div class="row g-3 mb-4">
 
 								<div class="col-md-6">
 									<div class="border rounded p-3 h-100">
+
 										<div class="text-muted small">
 											Preparation Time
 										</div>
@@ -242,11 +247,14 @@
 											@(question.SpeakingPreparationTime ?? 0)
 											seconds
 										</div>
+
 									</div>
 								</div>
 
+
 								<div class="col-md-6">
 									<div class="border rounded p-3 h-100">
+
 										<div class="text-muted small">
 											Response Time
 										</div>
@@ -255,35 +263,84 @@
 											@(question.SpeakingResponseTime ?? 0)
 											seconds
 										</div>
+
 									</div>
 								</div>
 
 							</div>
 
-							<div class="alert alert-info">
-								Speaking responses are submitted for teacher evaluation.
-							</div>
 
-							<div class="speaking-controls mt-3">
+							<div class="border rounded p-4">
 
-								<button type="button"
-										class="btn btn-outline-primary speaking-start"
-										data-question="@question.QuestionId"
-										data-preparation="@(question.SpeakingPreparationTime ?? 0)"
-										data-response="@(question.SpeakingResponseTime ?? 0)">
-									Start Speaking Timer
-								</button>
+								<div class="d-flex justify-content-between align-items-center mb-3">
 
-								<span class="ms-3 fw-bold speaking-timer"
-									  id="speakingTimer_@question.QuestionId">
-									Ready
-								</span>
+									<div>
+										<div class="fw-semibold">
+											<i class="bi bi-mic me-1"></i>
+											Speaking Response
+										</div>
+
+										<div class="text-muted small">
+											Record your response after the preparation time.
+										</div>
+									</div>
+
+									<span id="speakingTimer_@question.QuestionId"
+										  class="badge bg-secondary">
+										Ready
+									</span>
+
+								</div>
+
+
+								<div class="d-flex flex-wrap gap-2 mb-3">
+
+									<button type="button"
+											class="btn btn-primary speaking-start"
+											data-question="@question.QuestionId"
+											data-index="@i"
+											data-preparation="@(question.SpeakingPreparationTime ?? 0)"
+											data-response="@(question.SpeakingResponseTime ?? 0)">
+
+										<i class="bi bi-mic-fill me-1"></i>
+										Start Recording
+									</button>
+
+									<button type="button"
+											class="btn btn-danger speaking-stop"
+											data-question="@question.QuestionId"
+											data-index="@i"
+											disabled>
+
+										<i class="bi bi-stop-fill me-1"></i>
+										Stop Recording
+									</button>
+
+								</div>
+
+
+								<div class="speaking-status text-muted small mb-3"
+									 id="speakingStatus_@question.QuestionId">
+									Microphone not started.
+								</div>
+
+
+								<audio class="w-100 speaking-preview d-none"
+									   id="speakingPreview_@question.QuestionId"
+									   controls>
+								</audio>
+
+
+								<input type="file"
+									   name="Answers[@i].AudioFile"
+									   id="audioFile_@question.QuestionId"
+									   class="d-none"
+									   accept="audio/*" />
 
 							</div>
 
 						</div>
 					}
-
 
 					<!-- WRITING -->
 					@if (question.Skill.Equals("Writing",
@@ -541,85 +598,290 @@
 			updateProgress();
 
 
-			/*
-			 * SPEAKING TIMER
-			 */
+					/*
+		 * SPEAKING RECORDING
+		 */
 
-			document
-				.querySelectorAll(".speaking-start")
-				.forEach(function (button) {
+		const speakingRecorders = {};
 
-					button.addEventListener(
-						"click",
-						function () {
+		document
+			.querySelectorAll(".speaking-start")
+			.forEach(function (button) {
 
-							const questionId =
-								button.dataset.question;
+				button.addEventListener("click", async function () {
 
-							const preparation =
-								parseInt(
-									button.dataset.preparation
-								) || 0;
+					const questionId = button.dataset.question;
+					const index = button.dataset.index;
 
-							const response =
-								parseInt(
-									button.dataset.response
-								) || 0;
+					const preparation =
+						parseInt(button.dataset.preparation) || 0;
 
-							const timer =
-								document.getElementById(
-									"speakingTimer_" +
-									questionId
-								);
+					const response =
+						parseInt(button.dataset.response) || 0;
 
-							button.disabled = true;
+					const stopButton =
+						document.querySelector(
+							'.speaking-stop[data-question="' +
+							questionId +
+							'"]'
+						);
 
-							let phase = "preparation";
-							let remaining = preparation;
+					const timer =
+						document.getElementById(
+							"speakingTimer_" + questionId
+						);
 
-							function updateSpeakingTimer() {
+					const status =
+						document.getElementById(
+							"speakingStatus_" + questionId
+						);
 
-								timer.textContent =
-									phase === "preparation"
-										? "Preparation: " + remaining + "s"
-										: "Response: " + remaining + "s";
+					const preview =
+						document.getElementById(
+							"speakingPreview_" + questionId
+						);
 
-								if (remaining <= 0) {
+					const fileInput =
+						document.getElementById(
+							"audioFile_" + questionId
+						);
 
-									if (phase === "preparation") {
 
-										phase = "response";
-										remaining = response;
+					if (!navigator.mediaDevices ||
+						!navigator.mediaDevices.getUserMedia ||
+						!window.MediaRecorder) {
 
-									}
-									else {
+						alert(
+							"Audio recording is not supported by this browser."
+						);
 
-										clearInterval(
-											speakingInterval
-										);
+						return;
+					}
 
-										timer.textContent =
-											"Time finished";
 
-										return;
-									}
-								}
+					try {
 
-								remaining--;
+						const stream =
+							await navigator.mediaDevices.getUserMedia({
+								audio: true
+							});
+
+						const chunks = [];
+
+						const recorder =
+							new MediaRecorder(stream);
+
+						speakingRecorders[questionId] = {
+							recorder: recorder,
+							stream: stream,
+							chunks: chunks,
+							timerInterval: null
+						};
+
+
+						recorder.ondataavailable = function (event) {
+
+							if (event.data.size > 0) {
+								chunks.push(event.data);
 							}
 
-							updateSpeakingTimer();
+						};
 
-							const speakingInterval =
-								setInterval(
-									updateSpeakingTimer,
-									1000
+
+						recorder.onstop = function () {
+
+							stream
+								.getTracks()
+								.forEach(track => track.stop());
+
+
+							const blob =
+								new Blob(
+									chunks,
+									{ type: recorder.mimeType }
 								);
 
+
+							const audioUrl =
+								URL.createObjectURL(blob);
+
+							preview.src = audioUrl;
+							preview.classList.remove("d-none");
+
+
+							const file =
+								new File(
+									[blob],
+									"speaking_" +
+									questionId +
+									".webm",
+									{
+										type: blob.type
+									}
+								);
+
+
+							const dataTransfer =
+								new DataTransfer();
+
+							dataTransfer.items.add(file);
+
+							fileInput.files =
+								dataTransfer.files;
+
+
+							status.textContent =
+								"Recording completed. You can listen to your response before submitting.";
+
+							timer.textContent =
+								"Recorded";
+
+							updateProgress();
+						};
+
+
+						recorder.start();
+
+						button.disabled = true;
+						stopButton.disabled = false;
+
+
+						let phase = "preparation";
+						let remaining = preparation;
+
+
+						function updateTimer() {
+
+							if (phase === "preparation") {
+
+								timer.textContent =
+									"Prepare: " +
+									remaining +
+									"s";
+
+								status.textContent =
+									"Preparation time. Get ready to speak.";
+
+							}
+							else {
+
+								timer.textContent =
+									"Recording: " +
+									remaining +
+									"s";
+
+								status.textContent =
+									"Recording your response...";
+
+							}
+
+
+							if (remaining <= 0) {
+
+								if (phase === "preparation") {
+
+									phase = "response";
+									remaining = response;
+
+									return;
+								}
+
+
+								clearInterval(
+									speakingRecorders[
+										questionId
+									].timerInterval
+								);
+
+
+								if (recorder.state !== "inactive") {
+									recorder.stop();
+								}
+
+
+								button.disabled = true;
+								stopButton.disabled = true;
+
+								return;
+							}
+
+							remaining--;
 						}
-					);
+
+
+						updateTimer();
+
+
+						speakingRecorders[
+							questionId
+						].timerInterval =
+							setInterval(
+								updateTimer,
+								1000
+							);
+
+					}
+					catch (error) {
+
+						console.error(error);
+
+						alert(
+							"Unable to access your microphone. Please allow microphone access and try again."
+						);
+
+					}
 
 				});
+
+			});
+
+
+		document
+			.querySelectorAll(".speaking-stop")
+			.forEach(function (button) {
+
+				button.addEventListener("click", function () {
+
+					const questionId =
+						button.dataset.question;
+
+					const data =
+						speakingRecorders[questionId];
+
+					if (!data) {
+						return;
+					}
+
+
+					if (data.timerInterval) {
+
+						clearInterval(
+							data.timerInterval
+						);
+
+					}
+
+
+					if (data.recorder.state !== "inactive") {
+
+						data.recorder.stop();
+
+					}
+
+
+					const startButton =
+						document.querySelector(
+							'.speaking-start[data-question="' +
+							questionId +
+							'"]'
+						);
+
+					startButton.disabled = true;
+					button.disabled = true;
+
+				});
+
+			});
 
 
 			/*

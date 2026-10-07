@@ -127,7 +127,21 @@ namespace LanguageCenterManagement.Controllers
         {
             if (!await CanCreateClass(model.ClassId))
             {
-                ModelState.AddModelError("ClassId", "You cannot create an exam for this class.");
+                ModelState.AddModelError(
+                    "ClassId",
+                    "You cannot create an exam for this class.");
+            }
+
+            if (model.Questions == null || !model.Questions.Any(q => q.Selected))
+            {
+                ModelState.AddModelError(
+                    "Questions",
+                    "An exam must contain at least one question.");
+            }
+
+            if (model.Status != "Draft" && model.Status != "Published" && model.Status != "Closed")
+            {
+                model.Status = "Draft";
             }
 
             if (!ModelState.IsValid)
@@ -197,6 +211,10 @@ namespace LanguageCenterManagement.Controllers
 
             await LoadFormData(model, exam.ExamQuestions);
 
+            var hasSubmissions = await _context.ExamResults.AnyAsync(r => r.ExamId == exam.ExamId);
+
+            ViewBag.HasSubmissions = hasSubmissions;
+
             return View(model);
         }
 
@@ -227,9 +245,63 @@ namespace LanguageCenterManagement.Controllers
                 return Forbid();
             }
 
+            var hasSubmissions = await _context.ExamResults.AnyAsync(r => r.ExamId == exam.ExamId);
+
+            if (hasSubmissions && model.Status == "Draft")
+            {
+                ModelState.AddModelError(
+                    "Status",
+                    "An exam with student submissions cannot be changed back to Draft.");
+            }
+
             if (!await CanCreateClass(model.ClassId))
             {
-                ModelState.AddModelError("ClassId", "You cannot use this class.");
+                ModelState.AddModelError(
+                    "ClassId",
+                    "You cannot use this class.");
+            }
+
+            if (model.Questions == null ||
+                !model.Questions.Any(q => q.Selected))
+            {
+                ModelState.AddModelError(
+                    "Questions",
+                    "An exam must contain at least one question.");
+            }
+
+            if (model.Status != "Draft" &&
+                model.Status != "Published" &&
+                model.Status != "Closed")
+            {
+                model.Status = "Draft";
+            }
+
+            if (hasSubmissions && model.Status == "Draft")
+            {
+                ModelState.AddModelError(
+                    "Status",
+                    "An exam with student submissions cannot be changed back to Draft.");
+            }
+
+            if (hasSubmissions)
+            {
+                var existingQuestionIds = exam.ExamQuestions
+                    .Select(eq => eq.QuestionId)
+                    .OrderBy(id => id)
+                    .ToList();
+
+                var submittedQuestionIds = model.Questions
+                    .Where(q => q.Selected)
+                    .Select(q => q.QuestionId)
+                    .OrderBy(id => id)
+                    .ToList();
+
+                if (!existingQuestionIds.SequenceEqual(submittedQuestionIds))
+                {
+                    ModelState.AddModelError(
+                        "Questions",
+                        "The questions cannot be changed because students have already submitted this exam.");
+                }
             }
 
             if (!ModelState.IsValid)
@@ -246,6 +318,8 @@ namespace LanguageCenterManagement.Controllers
             exam.MaxScore = model.MaxScore;
             exam.Status = model.Status;
             exam.Description = model.Description;
+
+
 
             _context.ExamQuestions.RemoveRange(exam.ExamQuestions);
 
@@ -282,6 +356,14 @@ namespace LanguageCenterManagement.Controllers
                 return Forbid();
             }
 
+            if (exam.ExamResults.Any())
+            {
+                TempData["ErrorMessage"] =
+                    "This exam cannot be deleted because students have already submitted it.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
             return View(exam);
         }
 
@@ -305,9 +387,22 @@ namespace LanguageCenterManagement.Controllers
                 return Forbid();
             }
 
+            if (exam.ExamResults.Any())
+            {
+                TempData["ErrorMessage"] =
+                    "This exam cannot be deleted because students have already submitted it.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
             _context.ExamQuestions.RemoveRange(exam.ExamQuestions);
-            _context.ExamResults.RemoveRange(exam.ExamResults);
             _context.Exams.Remove(exam);
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Exam deleted successfully.";
+
+            return RedirectToAction(nameof(Index));
 
             await _context.SaveChangesAsync();
 

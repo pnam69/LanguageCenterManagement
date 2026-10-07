@@ -111,12 +111,4 @@ namespace LanguageCenterManagement.ViewModels
             = new();
     }
 
-    public class StudentExamAnswerSubmissionViewModel
-    {
-        public int QuestionId { get; set; }
-
-        public int? AnswerId { get; set; }
-
-        public string? TextAnswer { get; set; }
-    }
 }

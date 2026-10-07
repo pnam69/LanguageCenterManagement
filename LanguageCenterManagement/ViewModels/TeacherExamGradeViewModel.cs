@@ -63,5 +63,6 @@
         public int? SpeakingResponseTime { get; set; }
 
         public string? WritingPrompt { get; set; }
+        public string? AudioAnswerUrl { get; set; }
     }
 }

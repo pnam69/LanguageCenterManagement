@@ -227,20 +227,46 @@
                             <div class="mb-3">
 
                                 <label class="form-label fw-semibold">
-                                    Student Answer
+                                    Student Response
                                 </label>
 
-                                @if (string.IsNullOrWhiteSpace(question.StudentAnswer))
+                                @if (!string.IsNullOrWhiteSpace(question.AudioAnswerUrl))
                                 {
-                                    <div class="alert alert-secondary mb-0">
-                                        No answer submitted.
+                                    <div class="border rounded p-3 bg-light">
+
+                                        <div class="d-flex align-items-center mb-2">
+
+                                            <i class="bi bi-mic-fill text-primary me-2"></i>
+
+                                            <span class="fw-semibold">
+                                                Speaking Recording
+                                            </span>
+
+                                        </div>
+
+                                        <audio controls
+                                               class="w-100"
+                                               preload="metadata">
+                                            <source src="@question.AudioAnswerUrl"
+                                                    type="audio/webm" />
+
+                                            Your browser does not support audio playback.
+                                        </audio>
+
                                     </div>
                                 }
-                                else
+                                else if (!string.IsNullOrWhiteSpace(question.StudentAnswer))
                                 {
                                     <div class="border rounded p-3 bg-light"
                                          style="white-space: pre-wrap;">
                                         @question.StudentAnswer
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-secondary mb-0">
+                                        <i class="bi bi-dash-circle me-1"></i>
+                                        No response submitted.
                                     </div>
                                 }
 

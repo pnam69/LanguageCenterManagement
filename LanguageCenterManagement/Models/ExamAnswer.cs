@@ -15,6 +15,8 @@
 
         public string? TextAnswer { get; set; }
 
+        public string? AudioAnswerUrl { get; set; }
+
         public bool? IsCorrect { get; set; }
 
         public decimal Score { get; set; }
