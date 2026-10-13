@@ -333,39 +333,39 @@ namespace LanguageCenterManagement.Controllers
         }
 
         // GET: Exams/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var exam = await _context.Exams
-                .Include(e => e.Class)
-                    .ThenInclude(c => c!.Course)
-                .Include(e => e.ExamQuestions)
-                .FirstOrDefaultAsync(e => e.ExamId == id);
+        //    var exam = await _context.Exams
+        //        .Include(e => e.Class)
+        //            .ThenInclude(c => c!.Course)
+        //        .Include(e => e.ExamQuestions)
+        //        .FirstOrDefaultAsync(e => e.ExamId == id);
 
-            if (exam == null)
-            {
-                return NotFound();
-            }
+        //    if (exam == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            if (!await CanAccessExam(exam))
-            {
-                return Forbid();
-            }
+        //    if (!await CanAccessExam(exam))
+        //    {
+        //        return Forbid();
+        //    }
 
-            if (exam.ExamResults.Any())
-            {
-                TempData["ErrorMessage"] =
-                    "This exam cannot be deleted because students have already submitted it.";
+        //    if (exam.ExamResults.Any())
+        //    {
+        //        TempData["ErrorMessage"] =
+        //            "This exam cannot be deleted because students have already submitted it.";
 
-                return RedirectToAction(nameof(Index));
-            }
+        //        return RedirectToAction(nameof(Index));
+        //    }
 
-            return View(exam);
-        }
+        //    return View(exam);
+        //}
 
         // POST: Exams/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -373,6 +373,7 @@ namespace LanguageCenterManagement.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var exam = await _context.Exams
+                .Include(e => e.Class)
                 .Include(e => e.ExamQuestions)
                 .Include(e => e.ExamResults)
                 .FirstOrDefaultAsync(e => e.ExamId == id);
@@ -397,12 +398,6 @@ namespace LanguageCenterManagement.Controllers
 
             _context.ExamQuestions.RemoveRange(exam.ExamQuestions);
             _context.Exams.Remove(exam);
-
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] = "Exam deleted successfully.";
-
-            return RedirectToAction(nameof(Index));
 
             await _context.SaveChangesAsync();
 
