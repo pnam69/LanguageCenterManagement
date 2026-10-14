@@ -115,6 +115,19 @@
 
 					</div>
 
+					@if (question.QuestionType == "FillInTheBlank")
+					{
+						<input type="text"
+							   class="form-control fill-blank-answer"
+							   name="Answers[@i].TextAnswer"
+							   placeholder="Type your answer"
+							   data-question="@question.QuestionId" />
+					}
+					else if (question.Skill.Equals(
+						"Reading", StringComparison.OrdinalIgnoreCase))
+					{
+						@* Keep your existing Reading block here unchanged. *@
+					}
 
 					<!-- READING -->
 					@if (question.Skill.Equals("Reading",
@@ -135,7 +148,7 @@
 							</div>
 						}
 
-						@if (question.Answers.Any())
+						@if (question.QuestionType != "FillInTheBlank" && question.Answers.Any())
 						{
 							<div class="answer-list">
 
@@ -387,6 +400,7 @@
 
 					<!-- Fallback for other question types -->
 					@if (
+						question.QuestionType != "FillInTheBlank" &&
 						!question.Skill.Equals("Reading", StringComparison.OrdinalIgnoreCase) &&
 						!question.Skill.Equals("Listening", StringComparison.OrdinalIgnoreCase) &&
 						!question.Skill.Equals("Speaking", StringComparison.OrdinalIgnoreCase) &&
@@ -596,6 +610,18 @@
 
 
 			updateProgress();
+
+		const fillBlank = card.querySelector(".fill-blank-answer");
+
+		if (radio) {
+			answered++;
+		}
+		else if (text && text.value.trim().length > 0) {
+			answered++;
+		}
+		else if (fillBlank && fillBlank.value.trim().length > 0) {
+			answered++;
+		}
 
 
 					/*

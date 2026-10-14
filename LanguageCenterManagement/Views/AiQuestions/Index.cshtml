@@ -1,0 +1,125 @@
+﻿@model LanguageCenterManagement.ViewModels.AiQuestionGenerationViewModel
+
+@{
+    ViewData["Title"] = "AI Question Generator";
+}
+
+<div class="container py-4">
+    <h2>AI Question Generator</h2>
+    <p class="text-muted">
+        Generate English multiple-choice questions for teacher review.
+    </p>
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <form asp-action="Generate" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="Topic" class="form-label">Topic</label>
+            <input asp-for="Topic" class="form-control"
+                   placeholder="e.g. Present Simple, Travel, Food" />
+            <span asp-validation-for="Topic" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Skill" class="form-label">Skill</label>
+            <select asp-for="Skill" class="form-select">
+                <option value="Reading">Reading</option>
+                <option value="Listening">Listening</option>
+                <option value="Speaking">Speaking</option>
+                <option value="Writing">Writing</option>
+            </select>
+            <span asp-validation-for="Skill" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="QuestionType" class="form-label">Question Type</label>
+            <select id="QuestionType"
+                    name="QuestionType"
+                    class="form-select">
+                <option value="MultipleChoice">Multiple Choice</option>
+                <option value="TrueFalse">True / False</option>
+                <option value="FillInTheBlank">Fill in the Blank</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Difficulty" class="form-label">Difficulty</label>
+            <select asp-for="Difficulty" class="form-select">
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Count" class="form-label">Number of questions</label>
+            <input asp-for="Count" type="number" min="1" max="10"
+                   class="form-control" />
+            <span asp-validation-for="Count" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Generate with AI
+        </button>
+        <button type="button"
+                id="cancelGeneration"
+                class="btn btn-outline-secondary"
+                disabled>
+            Cancel
+        </button>
+
+        <a asp-controller="Questions" asp-action="Index"
+           class="btn btn-outline-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    const form = document.querySelector('form');
+    const generateButton = form?.querySelector(
+        'button[type="submit"]');
+    const cancelButton = document.getElementById(
+        'cancelGeneration');
+
+    let generationController = null;
+
+    form?.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        generationController = new AbortController();
+        generateButton.disabled = true;
+        cancelButton.disabled = false;
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                signal: generationController.signal
+            });
+
+            const html = await response.text();
+
+            document.open();
+            document.write(html);
+            document.close();
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                window.location.reload();
+            } else {
+                alert('Question generation failed. Please try again.');
+            }
+        } finally {
+            if (generateButton.isConnected) {
+                generateButton.disabled = false;
+            }
+            if (cancelButton.isConnected) {
+                cancelButton.disabled = true;
+            }
+        }
+    });
+
+    cancelButton?.addEventListener('click', function () {
+        generationController?.abort();
+    });
+</script>

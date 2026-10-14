@@ -166,11 +166,6 @@ namespace LanguageCenterManagement.Controllers
                     }).ToList()
             };
 
-            while (model.Answers.Count < 4)
-            {
-                model.Answers.Add(new AnswerManagementViewModel());
-            }
-
             return View(model);
         }
 

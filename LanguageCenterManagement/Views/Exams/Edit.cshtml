@@ -287,7 +287,9 @@
 									<th style="width: 60px;">
 										<input type="checkbox"
 											   id="selectAll"
-											   class="form-check-input" />
+											   class="form-check-input"
+											   disabled="@(ViewBag.HasSubmissions == true)"
+											   />
 									</th>
 
 									<th>Question</th>
@@ -305,9 +307,23 @@
 									<tr class="question-row">
 
 										<td>
+											@if (ViewBag.HasSubmissions == true)
+											{
+												<input type="checkbox"
+													   class="form-check-input"
+													   checked="@Model.Questions[i].Selected"
+													   disabled
+													   aria-label="Question selection locked because submissions exist" />
 
-											<input asp-for="Questions[i].Selected"
-												   class="form-check-input question-checkbox" />
+												<input type="hidden"
+													   name="Questions[@i].Selected"
+													   value="@Model.Questions[i].Selected.ToString().ToLowerInvariant()" />
+											}
+											else
+											{
+												<input asp-for="Questions[i].Selected"
+													   class="form-check-input question-checkbox" />
+											}
 
 											<input type="hidden"
 												   asp-for="Questions[i].QuestionId" />
@@ -436,23 +452,13 @@
 
 
 			if (selectAll) {
+				const total = checkboxes.length;
 
-				selectAll.addEventListener(
-					"change",
-					function () {
+				selectAll.checked =
+					total > 0 && selected === total;
 
-						checkboxes.forEach(function (checkbox) {
-
-							checkbox.checked =
-								selectAll.checked;
-
-						});
-
-						updateSelectedCount();
-
-					}
-				);
-
+				selectAll.indeterminate =
+					selected > 0 && selected < total;
 			}
 
 

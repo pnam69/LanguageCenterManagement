@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LanguageCenterManagement.Services.Ai;
 
 namespace LanguageCenterManagement.Controllers
 {
@@ -13,13 +14,16 @@ namespace LanguageCenterManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AiAnswerReviewService _aiAnswerReviewService;
 
         public StudentExamsController(
             ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            AiAnswerReviewService aiAnswerReviewService)
         {
             _context = context;
             _userManager = userManager;
+            _aiAnswerReviewService = aiAnswerReviewService;
         }
 
         // GET: StudentExams
@@ -473,7 +477,32 @@ namespace LanguageCenterManagement.Controllers
                 /*
                  * Multiple choice questions can be automatically graded.
                  */
-                if (submitted?.AnswerId != null)
+
+                if (question.QuestionType == "FillInTheBlank")
+                {
+                    var correctAnswer = question.Answers
+                        .FirstOrDefault(a => a.IsCorrect);
+
+                    var submittedText = submitted?.TextAnswer?.Trim();
+                    var correctText = correctAnswer?.AnswerText?.Trim();
+
+                    bool isCorrect =
+                        !string.IsNullOrWhiteSpace(submittedText) &&
+                        !string.IsNullOrWhiteSpace(correctText) &&
+                        string.Equals(
+                            submittedText,
+                            correctText,
+                            StringComparison.OrdinalIgnoreCase);
+
+                    examAnswer.IsCorrect = isCorrect;
+
+                    if (isCorrect)
+                    {
+                        examAnswer.Score = question.Score;
+                        rawScore += question.Score;
+                    }
+                }
+                else if (submitted?.AnswerId != null)
                 {
                     var selectedAnswer = question.Answers
                         .FirstOrDefault(a => a.AnswerId == submitted.AnswerId);
@@ -489,7 +518,6 @@ namespace LanguageCenterManagement.Controllers
                         }
                     }
                 }
-
                 /*
                  * Writing and speaking/text questions are stored,
                  * but not automatically marked correct.
@@ -618,5 +646,110 @@ namespace LanguageCenterManagement.Controllers
 
             return View(model);
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReviewAnswer(
+            int resultId,
+            int questionId,
+            CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user?.StudentId == null)
+                return Forbid();
+
+            var result = await _context.ExamResults
+                .Include(r => r.ExamAnswers)
+                    .ThenInclude(a => a.Question)
+                        .ThenInclude(q => q!.Answers)
+                .FirstOrDefaultAsync(r =>
+                    r.ExamResultId == resultId &&
+                    r.StudentId == user.StudentId.Value,
+                    cancellationToken);
+
+            if (result == null)
+                return NotFound();
+
+            if (result.Status != "Completed")
+                return BadRequest(new { error = "This exam has not been completed." });
+
+            var examAnswer = result.ExamAnswers
+                .FirstOrDefault(a => a.QuestionId == questionId);
+
+            var question = examAnswer?.Question;
+
+            if (examAnswer == null || question == null)
+                return NotFound();
+
+            // AI review is for automatically graded objective questions only.
+            var supportedTypes = new[]
+            {
+                "MultipleChoice",
+                "TrueFalse",
+                "FillInTheBlank"
+            };
+
+            if (!supportedTypes.Contains(
+                question.QuestionType,
+                StringComparer.OrdinalIgnoreCase))
+            {
+                return BadRequest(new
+                {
+                    error = "AI review is not available for this question type."
+                });
+            }
+
+            if (examAnswer.IsCorrect == true)
+            {
+                return BadRequest(new
+                {
+                    error = "AI review is only available for incorrect or unanswered questions."
+                });
+            }
+
+            var correctAnswer = question.Answers
+                .FirstOrDefault(a => a.IsCorrect)?.AnswerText;
+
+            if (string.IsNullOrWhiteSpace(correctAnswer))
+            {
+                return BadRequest(new
+                {
+                    error = "A correct answer has not been configured for this question."
+                });
+            }
+
+            var studentAnswer = examAnswer.AnswerId.HasValue
+                ? question.Answers
+                    .FirstOrDefault(a => a.AnswerId == examAnswer.AnswerId.Value)
+                    ?.AnswerText ?? string.Empty
+                : examAnswer.TextAnswer ?? string.Empty;
+
+            try
+            {
+                var explanation = await _aiAnswerReviewService.ExplainAsync(
+                    question.QuestionText,
+                    studentAnswer,
+                    correctAnswer,
+                    question.Answers.Select(a => a.AnswerText),
+                    cancellationToken);
+
+                return Json(new { explanation });
+            }
+            catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                return StatusCode(503, new
+                {
+                    error = "AI review is temporarily unavailable. Make sure Ollama is running and try again."
+                });
+            }
+        }
+
     }
 }

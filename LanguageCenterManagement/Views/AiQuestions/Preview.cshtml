@@ -1,0 +1,112 @@
+﻿@model LanguageCenterManagement.ViewModels.AiQuestionGenerationViewModel
+
+@{
+    ViewData["Title"] = "Review AI Questions";
+}
+
+<div class="container py-4">
+    <h2>Review Generated Questions</h2>
+    <p class="text-muted">
+        Edit the questions and answers as needed. Select exactly one
+        correct answer for each question before saving.
+    </p>
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    @if (Model.Questions == null || !Model.Questions.Any())
+    {
+        <div class="alert alert-warning">
+            No questions were generated. Please generate them again.
+        </div>
+
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    }
+    else
+    {
+        <form asp-action="Save" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="Topic" />
+            <input type="hidden" asp-for="Skill" />
+            <input type="hidden" asp-for="Difficulty" />
+            <input type="hidden" asp-for="Count" />
+            <input type="hidden" asp-for="QuestionType" />
+
+            @for (int i = 0; i < Model.Questions.Count; i++)
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Question @(i + 1)
+                    </div>
+
+                    <div class="card-body">
+                        <label class="form-label"
+                               for="question-@i">Question text</label>
+
+                        <textarea id="question-@i"
+                                  name="Questions[@i].QuestionText"
+                                  class="form-control mb-3"
+                                  maxlength="2000"
+                                  required>@Model.Questions[i].QuestionText</textarea>
+
+                        <p class="fw-semibold">Answer options</p>
+
+                        @for (int j = 0;
+                              j < Model.Questions[i].Answers.Count;
+                              j++)
+                        {
+                            <div class="input-group mb-2">
+                                <div class="input-group-text">
+                                    <input type="checkbox"
+                                           class="form-check-input correct-answer-checkbox"
+                                           name="Questions[@i].Answers[@j].IsCorrect"
+                                           value="true"
+                                           checked="@Model.Questions[i].Answers[j].IsCorrect"
+                                           aria-label="Mark this answer as correct" />
+
+                                    <input type="hidden"
+                                           name="Questions[@i].Answers[@j].IsCorrect"
+                                           value="false" />
+                                </div>
+
+                                <input type="text"
+                                       name="Questions[@i].Answers[@j].AnswerText"
+                                       class="form-control"
+                                       value="@Model.Questions[i].Answers[j].AnswerText"
+                                       maxlength="1000"
+                                       required />
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <button type="submit" class="btn btn-success">
+                Approve and Save
+            </button>
+
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                Generate Again
+            </a>
+        </form>
+    }
+</div>
+<script>
+    document.querySelectorAll(".card").forEach(card => {
+        const checkboxes = card.querySelectorAll(
+            ".correct-answer-checkbox"
+        );
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                    checkboxes.forEach(other => {
+                        if (other !== this) {
+                            other.checked = false;
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>

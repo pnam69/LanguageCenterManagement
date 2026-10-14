@@ -1,7 +1,8 @@
 using LanguageCenterManagement.Data;
-using Microsoft.EntityFrameworkCore;
 using LanguageCenterManagement.Models;
+using LanguageCenterManagement.Services.Ai;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,17 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
+
+builder.Services.AddHttpClient<
+    LanguageCenterManagement.Services.Ai.QuestionGenerationService>(
+    client =>
+    {
+        client.BaseAddress = new Uri("http://localhost:11434/");
+        client.Timeout = TimeSpan.FromMinutes(3);
+    });
+
+builder.Services.AddHttpClient<AiAnswerReviewService>(
+    client => client.Timeout = TimeSpan.FromSeconds(90));
 
 var app = builder.Build();
 

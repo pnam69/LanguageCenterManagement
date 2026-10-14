@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenterManagement.ViewModels
 {
@@ -31,5 +32,8 @@ namespace LanguageCenterManagement.ViewModels
 
         public List<QuestionSelectionViewModel> Questions { get; set; }
             = new List<QuestionSelectionViewModel>();
+
+        public List<int> SelectedQuestionIds { get; set; }
+            = new List<int>();
     }
 }

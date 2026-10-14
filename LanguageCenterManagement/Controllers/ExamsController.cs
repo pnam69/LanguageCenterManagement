@@ -121,6 +121,7 @@ namespace LanguageCenterManagement.Controllers
         }
 
         // POST: Exams/Create
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ExamCreateViewModel model)
@@ -128,18 +129,39 @@ namespace LanguageCenterManagement.Controllers
             if (!await CanCreateClass(model.ClassId))
             {
                 ModelState.AddModelError(
-                    "ClassId",
+                    nameof(model.ClassId),
                     "You cannot create an exam for this class.");
             }
 
-            if (model.Questions == null || !model.Questions.Any(q => q.Selected))
+            model.SelectedQuestionIds ??= new List<int>();
+
+            if (!model.SelectedQuestionIds.Any())
             {
                 ModelState.AddModelError(
-                    "Questions",
+                    nameof(model.SelectedQuestionIds),
                     "An exam must contain at least one question.");
             }
+            else
+            {
+                // Only accept question IDs that actually exist.
+                var validIds = await _context.Questions
+                    .Where(q => model.SelectedQuestionIds.Contains(q.QuestionId))
+                    .Select(q => q.QuestionId)
+                    .ToListAsync();
 
-            if (model.Status != "Draft" && model.Status != "Published" && model.Status != "Closed")
+                if (validIds.Count != model.SelectedQuestionIds.Distinct().Count())
+                {
+                    ModelState.AddModelError(
+                        nameof(model.SelectedQuestionIds),
+                        "One or more selected questions are invalid.");
+                }
+
+                model.SelectedQuestionIds = validIds.Distinct().ToList();
+            }
+
+            if (model.Status != "Draft" &&
+                model.Status != "Published" &&
+                model.Status != "Closed")
             {
                 model.Status = "Draft";
             }
@@ -163,15 +185,17 @@ namespace LanguageCenterManagement.Controllers
             };
 
             _context.Exams.Add(exam);
-
             await _context.SaveChangesAsync();
 
-            await SaveExamQuestions(exam.ExamId, model.Questions);
+            await SaveExamQuestions(
+                exam.ExamId,
+                model.SelectedQuestionIds);
 
             TempData["SuccessMessage"] = "Exam created successfully.";
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: Exams/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -539,12 +563,12 @@ namespace LanguageCenterManagement.Controllers
                     QuestionType = q.QuestionType,
                     Skill = q.Skill,
                     Score = q.Score,
-                    Selected = false
+                    Selected = model.SelectedQuestionIds.Contains(q.QuestionId)
                 })
                 .ToList();
 
             ViewBag.Questions = questions;
-            ViewBag.SelectedQuestionIds = model.Questions;
+            ViewBag.SelectedQuestionIds = model.SelectedQuestionIds;
         }
 
         private async Task SaveExamQuestions(

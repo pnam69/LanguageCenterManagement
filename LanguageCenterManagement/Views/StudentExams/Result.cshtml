@@ -32,6 +32,9 @@
 
     </div>
 
+    <form id="aiReviewTokenForm" class="d-none">
+    @Html.AntiForgeryToken()
+    </form>
 
     <!-- Result Summary -->
     <div class="row g-4 mb-4">
@@ -296,64 +299,90 @@
                         }
                         else
                         {
-                            <!-- Automatically graded -->
-                            <div class="bg-light rounded-3 p-3">
+                               <!-- Automatically graded -->
+                                <div class="bg-light rounded-3 p-4">
 
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-
-                                    <div class="fw-semibold">
-                                        Your Answer
+                                    <!-- Header -->
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="fw-semibold">
+                                            Your Answer
+                                        </div>
+                                        @if (answer.IsCorrect == true)
+                                        {
+                                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Correct
+                                            </span>
+                                        }
+                                        else if (answer.IsCorrect == false)
+                                        {
+                                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                Incorrect
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2">
+                                                <i class="bi bi-hourglass-split me-1"></i>
+                                                Not Graded
+                                            </span>
+                                        }
                                     </div>
 
-                                    @if (answer.IsCorrect == true)
+                                    <!-- Student's Answer -->
+                                    @if (!string.IsNullOrWhiteSpace(answer.StudentAnswer))
                                     {
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle me-1"></i>
-                                            Correct
-                                        </span>
+                                        <div class="bg-white border rounded-3 p-3 mb-3">
+                                            @answer.StudentAnswer
+                                        </div>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">
-                                            <i class="bi bi-x-circle me-1"></i>
-                                            Incorrect
-                                        </span>
+                                        <div class="bg-white border rounded-3 p-3 mb-3 text-muted">
+                                            <i>No answer selected.</i>
+                                        </div>
+                                    }
+
+                                    <!-- Correct Answer -->
+                                    @if (answer.IsCorrect != true &&
+                                         !string.IsNullOrWhiteSpace(answer.CorrectAnswer))
+                                    {
+                                        <div class="mb-3">
+                                            <div class="small fw-semibold text-success mb-2">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Correct Answer
+                                            </div>
+
+                                            <div class="bg-white border border-success-subtle rounded-3 p-3">
+                                                @answer.CorrectAnswer
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- AI Review -->
+                                    @if (answer.IsCorrect != true &&
+                                         !string.IsNullOrWhiteSpace(answer.CorrectAnswer) &&
+                                         new[] { "MultipleChoice", "TrueFalse", "FillInTheBlank" }
+                                             .Contains(answer.QuestionType, StringComparer.OrdinalIgnoreCase))
+                                    {
+                                        <div class="border-top pt-3 mt-3">
+                                            <button type="button"
+                                                    class="btn btn-outline-primary btn-sm ai-review-btn"
+                                                    data-result-id="@Model.ExamResultId"
+                                                    data-question-id="@answer.QuestionId">
+                                                <i class="bi bi-stars me-1"></i>
+                                                Explain with AI
+                                            </button>
+
+                                            <div class="ai-review-result mt-3"
+                                                 aria-live="polite"
+                                                 hidden>
+                                            </div>
+                                        </div>
                                     }
 
                                 </div>
-
-
-                                @if (!string.IsNullOrWhiteSpace(answer.StudentAnswer))
-                                {
-                                    <div class="bg-white border rounded-3 p-3 mb-3">
-                                        @answer.StudentAnswer
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="text-muted mb-3">
-                                        No answer selected.
-                                    </div>
-                                }
-
-
-                                @if (answer.IsCorrect != true &&
-                                     !string.IsNullOrWhiteSpace(answer.CorrectAnswer))
-                                {
-                                    <div>
-
-                                        <div class="small text-muted mb-1">
-                                            Correct Answer
-                                        </div>
-
-                                        <div class="bg-white border rounded-3 p-3">
-                                            @answer.CorrectAnswer
-                                        </div>
-
-                                    </div>
-                                }
-
-                            </div>
                         }
 
                     </div>
@@ -364,3 +393,69 @@
     </div>
 
 </div>
+
+                                        
+<script>
+    document.querySelectorAll(".ai-review-btn").forEach(button => {
+        button.addEventListener("click", async () => {
+            const output = button.parentElement.querySelector(
+                ".ai-review-result"
+            );
+
+            const originalText = button.innerHTML;
+
+            button.disabled = true;
+            button.innerHTML =
+                '<span class="spinner-border spinner-border-sm me-1"></span> Generating...';
+
+            output.hidden = false;
+            output.className =
+                "ai-review-result alert alert-info mt-3";
+            output.textContent = "Preparing your explanation...";
+
+            try {
+                const token = document.querySelector(
+                    '#aiReviewTokenForm input[name="__RequestVerificationToken"]'
+                ).value;
+
+                const body = new URLSearchParams({
+                    resultId: button.dataset.resultId,
+                    questionId: button.dataset.questionId
+                });
+
+                const response = await fetch(
+                    '@Url.Action("ReviewAnswer", "StudentExams")',
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/x-www-form-urlencoded",
+                            "RequestVerificationToken": token
+                        },
+                        body
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error || "Could not generate an explanation."
+                    );
+                }
+
+                output.className =
+                    "ai-review-result alert alert-primary mt-3";
+                output.textContent = data.explanation;
+            } catch (error) {
+                output.className =
+                    "ai-review-result alert alert-warning mt-3";
+                output.textContent =
+                    error.message || "AI review failed. Please try again.";
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        });
+    });
+</script>
