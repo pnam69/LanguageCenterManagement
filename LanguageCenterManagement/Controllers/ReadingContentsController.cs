@@ -1,4 +1,5 @@
-﻿using LanguageCenterManagement.Data;
+﻿
+using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
 using LanguageCenterManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LanguageCenterManagement.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Teacher")]
     public class ReadingContentsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -17,25 +18,24 @@ namespace LanguageCenterManagement.Controllers
             _context = context;
         }
 
-        // GET: ReadingContents
         public async Task<IActionResult> Index()
         {
             var contents = await _context.ReadingContents
-                .Include(x => x.Question)
+                .Include(x => x.Questions)
                 .OrderBy(x => x.ReadingContentId)
                 .ToListAsync();
 
             return View(contents);
         }
 
-        // GET: ReadingContents/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
                 return NotFound();
 
             var content = await _context.ReadingContents
-                .Include(x => x.Question)
+                .Include(x => x.Questions)
+                    .ThenInclude(q => q.Answers)
                 .FirstOrDefaultAsync(x =>
                     x.ReadingContentId == id);
 
@@ -45,13 +45,11 @@ namespace LanguageCenterManagement.Controllers
             return View(content);
         }
 
-        // GET: ReadingContents/Create
         public IActionResult Create()
         {
-            return View();
+            return View(new ReadingContentViewModel());
         }
 
-        // POST: ReadingContents/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -60,58 +58,39 @@ namespace LanguageCenterManagement.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var question = new Question
-            {
-                QuestionText = model.QuestionText,
-                QuestionType = "Reading",
-                Skill = "Reading",
-                Score = model.Score
-            };
-
             var content = new ReadingContent
             {
-                Question = question,
                 Passage = model.Passage
             };
 
             _context.ReadingContents.Add(content);
-
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] =
-                "Reading content created successfully.";
+                "Reading passage created successfully.";
 
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: ReadingContents/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
                 return NotFound();
 
             var content = await _context.ReadingContents
-                .Include(x => x.Question)
                 .FirstOrDefaultAsync(x =>
                     x.ReadingContentId == id);
 
             if (content == null)
                 return NotFound();
 
-            var model = new ReadingContentViewModel
+            return View(new ReadingContentViewModel
             {
                 ReadingContentId = content.ReadingContentId,
-                QuestionId = content.QuestionId,
-                QuestionText = content.Question?.QuestionText
-                    ?? string.Empty,
-                Passage = content.Passage,
-                Score = content.Question?.Score ?? 1
-            };
-
-            return View(model);
+                Passage = content.Passage
+            });
         }
 
-        // POST: ReadingContents/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -125,7 +104,6 @@ namespace LanguageCenterManagement.Controllers
                 return View(model);
 
             var content = await _context.ReadingContents
-                .Include(x => x.Question)
                 .FirstOrDefaultAsync(x =>
                     x.ReadingContentId == id);
 
@@ -134,31 +112,21 @@ namespace LanguageCenterManagement.Controllers
 
             content.Passage = model.Passage;
 
-            if (content.Question != null)
-            {
-                content.Question.QuestionText =
-                    model.QuestionText;
-
-                content.Question.Score =
-                    model.Score;
-            }
-
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] =
-                "Reading content updated successfully.";
+                "Reading passage updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: ReadingContents/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
                 return NotFound();
 
             var content = await _context.ReadingContents
-                .Include(x => x.Question)
+                .Include(x => x.Questions)
                 .FirstOrDefaultAsync(x =>
                     x.ReadingContentId == id);
 
@@ -168,30 +136,29 @@ namespace LanguageCenterManagement.Controllers
             return View(content);
         }
 
-        // POST: ReadingContents/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var content = await _context.ReadingContents
-                .Include(x => x.Question)
+                .Include(x => x.Questions)
                 .FirstOrDefaultAsync(x =>
                     x.ReadingContentId == id);
 
             if (content == null)
                 return NotFound();
 
-            _context.ReadingContents.Remove(content);
-
-            if (content.Question != null)
+            // Keep the questions. Only unlink them from this passage.
+            foreach (var question in content.Questions)
             {
-                _context.Questions.Remove(content.Question);
+                question.ReadingContentId = null;
             }
 
+            _context.ReadingContents.Remove(content);
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] =
-                "Reading content deleted successfully.";
+                "Reading passage deleted successfully. Associated questions were kept.";
 
             return RedirectToAction(nameof(Index));
         }

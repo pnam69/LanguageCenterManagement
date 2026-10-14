@@ -13,7 +13,7 @@ namespace LanguageCenterManagement.Models
         public string QuestionType { get; set; } = "MultipleChoice";
 
         [StringLength(20)]
-        public string Skill { get; set; } = "Reading";
+        public string Skill { get; set; } = "Grammar";
 
         public int Score { get; set; } = 1;
 
@@ -30,5 +30,9 @@ namespace LanguageCenterManagement.Models
         public SpeakingContent? SpeakingContent { get; set; }
 
         public WritingContent? WritingContent { get; set; }
+
+        public int? ReadingContentId { get; set; }
+
+        public ReadingContent? ReadingContent { get; set; }
     }
 }

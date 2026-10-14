@@ -228,7 +228,8 @@ namespace LanguageCenterManagement.Controllers
 
             // Load Reading content
             var readingContents = await _context.ReadingContents
-                .Where(r => questionIds.Contains(r.QuestionId))
+                .Where(r => r.Questions.Any(q => questionIds.Contains(q.QuestionId)))
+                .Include(r => r.Questions)
                 .ToListAsync();
 
             // Load Speaking content
@@ -267,7 +268,7 @@ namespace LanguageCenterManagement.Controllers
                         var question = eq.Question;
 
                         var reading = readingContents
-                            .FirstOrDefault(r => r.QuestionId == eq.QuestionId);
+                            .FirstOrDefault(r => r.Questions.Any(q => q.QuestionId == eq.QuestionId));
 
                         var speaking = speakingContents
                             .FirstOrDefault(s => s.QuestionId == eq.QuestionId);

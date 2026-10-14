@@ -65,7 +65,7 @@ namespace LanguageCenterManagement.Controllers
         }
 
         // GET: Questions/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var model = new QuestionManagementViewModel();
 
@@ -74,6 +74,7 @@ namespace LanguageCenterManagement.Controllers
                 model.Answers.Add(new AnswerManagementViewModel());
             }
 
+            await LoadReadingContents();
             return View(model);
         }
 
@@ -84,7 +85,8 @@ namespace LanguageCenterManagement.Controllers
             QuestionManagementViewModel model)
         {
             if (!ModelState.IsValid)
-                return View(model);
+                await LoadReadingContents(model.ReadingContentId);
+            return View(model);
 
             if (model.QuestionType == "MultipleChoice")
             {
@@ -98,6 +100,7 @@ namespace LanguageCenterManagement.Controllers
                         "Answers",
                         "Multiple choice questions must have at least 2 answers.");
 
+                    await LoadReadingContents(model.ReadingContentId);
                     return View(model);
                 }
 
@@ -107,6 +110,7 @@ namespace LanguageCenterManagement.Controllers
                         "Answers",
                         "Multiple choice questions must have exactly one correct answer.");
 
+                    await LoadReadingContents(model.ReadingContentId);
                     return View(model);
                 }
             }
@@ -290,4 +294,16 @@ namespace LanguageCenterManagement.Controllers
             return RedirectToAction(nameof(Index));
         }
     }
-}
+    private async Task LoadReadingContents(int? selectedId = null)
+        {
+            ViewBag.ReadingContents = await _context.ReadingContents
+                .OrderBy(r => r.ReadingContentId)
+                .Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = r.ReadingContentId.ToString(),
+                    Text = "Passage #" + r.ReadingContentId,
+                    Selected = r.ReadingContentId == selectedId
+                })
+                .ToListAsync();
+        }
+    }

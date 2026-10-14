@@ -601,6 +601,9 @@ namespace LanguageCenterManagement.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int?>("ReadingPassageId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Score")
                         .HasColumnType("int");
 
@@ -612,6 +615,8 @@ namespace LanguageCenterManagement.Migrations
                     b.HasKey("QuestionId");
 
                     b.HasIndex("ListeningContentId");
+
+                    b.HasIndex("ReadingPassageId");
 
                     b.ToTable("Questions");
                 });
@@ -1338,7 +1343,14 @@ namespace LanguageCenterManagement.Migrations
                         .WithMany("Questions")
                         .HasForeignKey("ListeningContentId");
 
+                    b.HasOne("LanguageCenterManagement.Models.ReadingPassage", "ReadingPassage")
+                        .WithMany("Questions")
+                        .HasForeignKey("ReadingPassageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("ListeningContent");
+
+                    b.Navigation("ReadingPassage");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.ReadingContent", b =>
@@ -1535,6 +1547,11 @@ namespace LanguageCenterManagement.Migrations
                     b.Navigation("SpeakingContent");
 
                     b.Navigation("WritingContent");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ReadingPassage", b =>
+                {
+                    b.Navigation("Questions");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Room", b =>

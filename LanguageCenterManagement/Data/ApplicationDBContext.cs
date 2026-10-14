@@ -310,11 +310,17 @@ namespace LanguageCenterManagement.Data
             modelBuilder.Entity<ReadingContent>()
                 .ToTable("ReadingContent");
 
-            modelBuilder.Entity<ReadingContent>()
-                .HasOne(r => r.Question)
-                .WithOne(q => q.ReadingContent)
-                .HasForeignKey<ReadingContent>(r => r.QuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
+            //modelBuilder.Entity<ReadingContent>()
+            //    .HasOne(r => r.Question)
+            //    .WithOne(q => q.ReadingContent)
+            //    .HasForeignKey<ReadingContent>(r => r.QuestionId)
+            //    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.ReadingContent)
+                .WithMany(r => r.Questions)
+                .HasForeignKey(q => q.ReadingContentId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<SpeakingContent>()
                 .HasOne(s => s.Question)

@@ -17,10 +17,12 @@ namespace LanguageCenterManagement.ViewModels
 
         [Required]
         [StringLength(20)]
-        public string Skill { get; set; } = "Reading";
+        public string Skill { get; set; } = "Grammar";
 
         [Range(1, 100)]
         public int Score { get; set; } = 1;
+
+        public int? ReadingContentId { get; set; }
 
         public List<AnswerManagementViewModel> Answers { get; set; }
             = new List<AnswerManagementViewModel>();
