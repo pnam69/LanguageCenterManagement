@@ -89,6 +89,7 @@
 							<th>ID</th>
 							<th>Question</th>
 							<th>Skill</th>
+							<th>Passage</th>
 							<th>Type</th>
 							<th>Score</th>
 							<th>Answers</th>
@@ -114,6 +115,29 @@
 									<span class="badge bg-secondary">
 										@question.Skill
 									</span>
+									<td>
+									@if (question.Skill == "Reading")
+									{
+										@if (question.ReadingContent != null)
+										{
+											var passage = question.ReadingContent.Passage;
+
+											<span title="@passage">
+												@(passage.Length > 50
+													? passage.Substring(0, 50) + "..."
+													: passage)
+											</span>
+										}
+										else
+										{
+											<span class="text-danger">No passage linked</span>
+										}
+									}
+									else
+									{
+										<span class="text-muted">—</span>
+									}
+								</td>
 								</td>
 
 								<td>@question.QuestionType</td>

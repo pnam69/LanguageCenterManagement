@@ -601,6 +601,9 @@ namespace LanguageCenterManagement.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int?>("ReadingContentId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ReadingPassageId")
                         .HasColumnType("int");
 
@@ -615,6 +618,8 @@ namespace LanguageCenterManagement.Migrations
                     b.HasKey("QuestionId");
 
                     b.HasIndex("ListeningContentId");
+
+                    b.HasIndex("ReadingContentId");
 
                     b.HasIndex("ReadingPassageId");
 
@@ -633,13 +638,7 @@ namespace LanguageCenterManagement.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
                     b.HasKey("ReadingContentId");
-
-                    b.HasIndex("QuestionId")
-                        .IsUnique();
 
                     b.ToTable("ReadingContent", (string)null);
                 });
@@ -1343,25 +1342,18 @@ namespace LanguageCenterManagement.Migrations
                         .WithMany("Questions")
                         .HasForeignKey("ListeningContentId");
 
-                    b.HasOne("LanguageCenterManagement.Models.ReadingPassage", "ReadingPassage")
+                    b.HasOne("LanguageCenterManagement.Models.ReadingContent", "ReadingContent")
                         .WithMany("Questions")
-                        .HasForeignKey("ReadingPassageId")
+                        .HasForeignKey("ReadingContentId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("LanguageCenterManagement.Models.ReadingPassage", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("ReadingPassageId");
 
                     b.Navigation("ListeningContent");
 
-                    b.Navigation("ReadingPassage");
-                });
-
-            modelBuilder.Entity("LanguageCenterManagement.Models.ReadingContent", b =>
-                {
-                    b.HasOne("LanguageCenterManagement.Models.Question", "Question")
-                        .WithOne("ReadingContent")
-                        .HasForeignKey("LanguageCenterManagement.Models.ReadingContent", "QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
+                    b.Navigation("ReadingContent");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.Schedule", b =>
@@ -1542,11 +1534,14 @@ namespace LanguageCenterManagement.Migrations
 
                     b.Navigation("ExamQuestions");
 
-                    b.Navigation("ReadingContent");
-
                     b.Navigation("SpeakingContent");
 
                     b.Navigation("WritingContent");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ReadingContent", b =>
+                {
+                    b.Navigation("Questions");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.ReadingPassage", b =>

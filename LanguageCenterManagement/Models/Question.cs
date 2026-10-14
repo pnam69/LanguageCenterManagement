@@ -33,6 +33,5 @@ namespace LanguageCenterManagement.Models
 
         public int? ReadingContentId { get; set; }
 
-        public ReadingContent? ReadingContent { get; set; }
     }
 }

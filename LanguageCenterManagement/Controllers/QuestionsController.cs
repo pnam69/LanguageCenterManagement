@@ -24,6 +24,7 @@ namespace LanguageCenterManagement.Controllers
         {
             var query = _context.Questions
                 .Include(q => q.Answers)
+                .Include(q => q.ReadingContent)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -85,8 +86,20 @@ namespace LanguageCenterManagement.Controllers
             QuestionManagementViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 await LoadReadingContents(model.ReadingContentId);
-            return View(model);
+                return View(model);
+            }
+
+            if (model.Skill == "Reading" && model.ReadingContentId == null)
+            {
+                ModelState.AddModelError(
+                    nameof(model.ReadingContentId),
+                    "Please select a reading passage.");
+
+                await LoadReadingContents(model.ReadingContentId);
+                return View(model);
+            }
 
             if (model.QuestionType == "MultipleChoice")
             {
@@ -120,7 +133,9 @@ namespace LanguageCenterManagement.Controllers
                 QuestionText = model.QuestionText,
                 QuestionType = model.QuestionType,
                 Skill = model.Skill,
-                Score = model.Score
+                Score = model.Score,
+                ReadingContentId = model.Skill == "Reading"
+                ? model.ReadingContentId : null
             };
 
             foreach (var answerModel in model.Answers)
@@ -156,6 +171,7 @@ namespace LanguageCenterManagement.Controllers
 
             var model = new QuestionManagementViewModel
             {
+                ReadingContentId = question.ReadingContentId,
                 QuestionId = question.QuestionId,
                 QuestionText = question.QuestionText,
                 QuestionType = question.QuestionType,
@@ -169,7 +185,7 @@ namespace LanguageCenterManagement.Controllers
                         IsCorrect = a.IsCorrect
                     }).ToList()
             };
-
+            await LoadReadingContents(model.ReadingContentId);
             return View(model);
         }
 
@@ -184,7 +200,20 @@ namespace LanguageCenterManagement.Controllers
                 return NotFound();
 
             if (!ModelState.IsValid)
+            {
+                await LoadReadingContents(model.ReadingContentId);
                 return View(model);
+            }
+
+            if (model.Skill == "Reading" && model.ReadingContentId == null)
+            {
+                ModelState.AddModelError(
+                    nameof(model.ReadingContentId),
+                    "Please select a reading passage.");
+
+                await LoadReadingContents(model.ReadingContentId);
+                return View(model);
+            }
 
             if (model.QuestionType == "MultipleChoice")
             {
@@ -197,7 +226,7 @@ namespace LanguageCenterManagement.Controllers
                     ModelState.AddModelError(
                         "Answers",
                         "Multiple choice questions must have at least 2 answers.");
-
+                    await LoadReadingContents(model.ReadingContentId);
                     return View(model);
                 }
 
@@ -206,7 +235,7 @@ namespace LanguageCenterManagement.Controllers
                     ModelState.AddModelError(
                         "Answers",
                         "Multiple choice questions must have exactly one correct answer.");
-
+                    await LoadReadingContents(model.ReadingContentId);
                     return View(model);
                 }
             }
@@ -221,23 +250,39 @@ namespace LanguageCenterManagement.Controllers
             question.QuestionText = model.QuestionText;
             question.QuestionType = model.QuestionType;
             question.Skill = model.Skill;
+            question.ReadingContentId = model.Skill == "Reading" ? model.ReadingContentId : null;
             question.Score = model.Score;
 
-            _context.Answers.RemoveRange(question.Answers);
-
-            question.Answers.Clear();
+            var submittedAnswerIds = model.Answers
+                .Where(a => a.AnswerId > 0)
+                .Select(a => a.AnswerId)
+                .ToHashSet();
 
             foreach (var answerModel in model.Answers)
             {
                 if (string.IsNullOrWhiteSpace(answerModel.AnswerText))
                     continue;
 
-                question.Answers.Add(new Answer
+                if (answerModel.AnswerId > 0)
                 {
-                    QuestionId = question.QuestionId,
-                    AnswerText = answerModel.AnswerText,
-                    IsCorrect = answerModel.IsCorrect
-                });
+                    var existingAnswer = question.Answers
+                        .FirstOrDefault(a => a.AnswerId == answerModel.AnswerId);
+
+                    if (existingAnswer == null)
+                        continue;
+
+                    existingAnswer.AnswerText = answerModel.AnswerText;
+                    existingAnswer.IsCorrect = answerModel.IsCorrect;
+                }
+                else
+                {
+                    question.Answers.Add(new Answer
+                    {
+                        QuestionId = question.QuestionId,
+                        AnswerText = answerModel.AnswerText,
+                        IsCorrect = answerModel.IsCorrect
+                    });
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -293,17 +338,30 @@ namespace LanguageCenterManagement.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-    }
-    private async Task LoadReadingContents(int? selectedId = null)
+
+        private async Task LoadReadingContents(int? selectedId = null)
         {
-            ViewBag.ReadingContents = await _context.ReadingContents
+            var passages = await _context.ReadingContents
                 .OrderBy(r => r.ReadingContentId)
-                .Select(r => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                .Select(r => new
                 {
-                    Value = r.ReadingContentId.ToString(),
-                    Text = "Passage #" + r.ReadingContentId,
-                    Selected = r.ReadingContentId == selectedId
+                    r.ReadingContentId,
+                    r.Passage
                 })
                 .ToListAsync();
+
+            ViewBag.ReadingContents = passages.Select(r =>
+                new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = r.ReadingContentId.ToString(),
+                    Text = $"Passage #{r.ReadingContentId}: " +
+                        (r.Passage.Length > 70
+                            ? r.Passage.Substring(0, 70) + "..."
+                            : r.Passage),
+                    Selected = r.ReadingContentId == selectedId
+                }).ToList();
         }
     }
+
+
+}

@@ -50,6 +50,20 @@
 									  class="text-danger"></span>
 							</div>
 
+							<div class="col-md-4 mb-3" id="readingContentGroup" style="display: none;">
+								<label asp-for="ReadingContentId" class="form-label">
+									Reading Passage
+								</label>
+
+								<select asp-for="ReadingContentId"
+										asp-items="ViewBag.ReadingContents"
+										class="form-select">
+									<option value="">-- Select a passage --</option>
+								</select>
+
+								<span asp-validation-for="ReadingContentId" class="text-danger"></span>
+							</div>
+
 							<div class="col-md-4 mb-3">
 								<label asp-for="QuestionType"
 									   class="form-label"></label>
@@ -140,6 +154,23 @@
 </div>
 
 @section Scripts {
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			const skillSelect = document.getElementById("Skill");
+			const passageGroup = document.getElementById("readingContentGroup");
+			const passageSelect = document.getElementById("ReadingContentId");
+
+			function toggleReadingPassage() {
+				const isReading = skillSelect.value === "Reading";
+
+				passageGroup.style.display = isReading ? "" : "none";
+				passageSelect.required = isReading;
+			}
+
+			skillSelect.addEventListener("change", toggleReadingPassage);
+			toggleReadingPassage();
+		});
+	</script>
 	@{
 		await Html.RenderPartialAsync("_ValidationScriptsPartial");
 	}

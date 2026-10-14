@@ -26,6 +26,57 @@
         </div>
     </div>
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <strong>Add an Existing Reading Question</strong>
+        </div>
+        <div class="card-body">
+            <form asp-action="LinkQuestion" method="post">
+                <input type="hidden"
+                       name="id"
+                       value="@Model.ReadingContentId" />
+
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-9">
+                        <label for="questionId" class="form-label">
+                            Unassigned Reading Question
+                        </label>
+
+                        <select name="questionId"
+                                id="questionId"
+                                class="form-select"
+                                asp-items="ViewBag.AvailableReadingQuestions"
+                                required>
+                            <option value="">-- Select a question --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Link Question
+                        </button>
+                    </div>
+                </div>
+
+                @Html.AntiForgeryToken()
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header">
             <strong>Linked Questions (@Model.Questions.Count)</strong>

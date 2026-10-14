@@ -33,16 +33,76 @@ namespace LanguageCenterManagement.Controllers
             if (id == null)
                 return NotFound();
 
-            var content = await _context.ReadingContents
-                .Include(x => x.Questions)
-                    .ThenInclude(q => q.Answers)
-                .FirstOrDefaultAsync(x =>
-                    x.ReadingContentId == id);
+            var readingContent = await _context.ReadingContents
+                .Include(r => r.Questions)
+                .FirstOrDefaultAsync(r => r.ReadingContentId == id);
 
-            if (content == null)
+            if (readingContent == null)
                 return NotFound();
 
-            return View(content);
+            var availableQuestions = await _context.Questions
+                .Where(q => q.Skill == "Reading"
+                    && q.ReadingContentId == null)
+                .OrderBy(q => q.QuestionId)
+                .Select(q => new
+                {
+                    q.QuestionId,
+                    q.QuestionText
+                })
+                .ToListAsync();
+
+            ViewBag.AvailableReadingQuestions = availableQuestions
+                .Select(q => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = q.QuestionId.ToString(),
+                    Text = $"#{q.QuestionId}: " +
+                        (q.QuestionText.Length > 70
+                            ? q.QuestionText.Substring(0, 70) + "..."
+                            : q.QuestionText)
+                })
+                .ToList();
+
+            return View(readingContent);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LinkQuestion(int id, int questionId)
+        {
+            var passage = await _context.ReadingContents
+                .FirstOrDefaultAsync(r => r.ReadingContentId == id);
+
+            if (passage == null)
+                return NotFound();
+
+            var question = await _context.Questions
+                .FirstOrDefaultAsync(q => q.QuestionId == questionId);
+
+            if (question == null)
+            {
+                TempData["ErrorMessage"] = "Question not found.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (question.Skill != "Reading")
+            {
+                TempData["ErrorMessage"] =
+                    "Only Reading questions can be linked to a passage.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            if (question.ReadingContentId != null)
+            {
+                TempData["ErrorMessage"] =
+                    "This question is already linked to a passage.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            question.ReadingContentId = passage.ReadingContentId;
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Question linked to the passage.";
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         public IActionResult Create()
