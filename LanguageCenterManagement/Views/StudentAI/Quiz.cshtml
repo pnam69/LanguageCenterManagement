@@ -1,0 +1,69 @@
+﻿@model LanguageCenterManagement.ViewModels.StudentPracticeQuizViewModel
+
+@{
+    ViewData["Title"] = "Take Practice Quiz";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="h3 fw-bold">Practice Quiz</h1>
+        <p class="text-muted">
+            @Model.Skill · @Model.Difficulty · @Model.Questions.Count questions
+        </p>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Passage))
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-semibold mb-3">
+                    <i class="bi bi-book me-2"></i>Reading Passage
+                </h5>
+                <div style="white-space: pre-wrap;">@Model.Passage</div>
+            </div>
+        </div>
+    }
+
+    <form asp-controller="StudentAI" asp-action="Submit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="QuizId" value="@Model.QuizId" />
+
+        @for (var i = 0; i < Model.Questions.Count; i++)
+        {
+            var question = Model.Questions[i];
+
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-semibold mb-3">
+                        Question @(i + 1)
+                    </h5>
+
+                    <p>@question.QuestionText</p>
+
+                    @for (var j = 0; j < question.Options.Count; j++)
+                    {
+                        <label class="d-flex align-items-start gap-2 border rounded p-3 mb-2">
+                            <input class="form-check-input mt-1"
+                                   type="radio"
+                                   name="Answers[@i]"
+                                   value="@j" />
+                            <span>@question.Options[j]</span>
+                        </label>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle me-1"></i> Submit Answers
+            </button>
+
+            <a asp-controller="StudentAI"
+               asp-action="Practice"
+               class="btn btn-outline-secondary">
+                Exit Quiz
+            </a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,121 @@
+﻿@model LanguageCenterManagement.ViewModels.StudentPracticeResultViewModel
+
+@{
+    ViewData["Title"] = "Practice Results";
+    var percentage = Model.TotalQuestions == 0
+        ? 0
+        : (int)Math.Round(Model.Score * 100.0 / Model.TotalQuestions);
+}
+
+<div class="container py-4">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4 text-center">
+            <i class="bi bi-award display-4 text-primary"></i>
+            <h1 class="h3 fw-bold mt-2">Practice Results</h1>
+
+            <div class="display-5 fw-bold my-3">
+                @Model.Score / @Model.TotalQuestions
+            </div>
+
+            <p class="text-muted mb-3">
+                You answered @percentage% of the questions correctly.
+            </p>
+
+            <div class="progress" style="height: 10px;">
+                <div class="progress-bar"
+                     role="progressbar"
+                     style="width: @percentage%;"
+                     aria-valuenow="@percentage"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Passage))
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-semibold mb-3">Original Reading Passage</h5>
+                <div style="white-space: pre-wrap;">@Model.Passage</div>
+            </div>
+        </div>
+    }
+
+    @for (var i = 0; i < Model.Questions.Count; i++)
+    {
+        var question = Model.Questions[i];
+
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between gap-3 mb-3">
+                    <h5 class="fw-semibold">Question @(i + 1)</h5>
+
+                    @if (question.IsCorrect)
+                    {
+                        <span class="badge bg-success">Correct</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Incorrect</span>
+                    }
+                </div>
+
+                <p>@question.QuestionText</p>
+
+                <div class="mb-3">
+                    @for (var j = 0; j < question.Options.Count; j++)
+                    {
+                        var isCorrectOption = j == question.CorrectAnswerIndex;
+                        var isSelectedOption = j == question.SelectedAnswerIndex;
+
+                        <div class="rounded border p-3 mb-2
+                            @(isCorrectOption ? "border-success bg-success-subtle" : "")
+                            @(isSelectedOption && !isCorrectOption ? "border-danger bg-danger-subtle" : "")">
+                            @if (isCorrectOption)
+                            {
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                            }
+                            else if (isSelectedOption)
+                            {
+                                <i class="bi bi-x-circle text-danger me-2"></i>
+                            }
+
+                            @question.Options[j]
+
+                            @if (isSelectedOption)
+                            {
+                                <span class="small text-muted ms-1">(Your answer)</span>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (!question.IsCorrect)
+                {
+                    <div class="alert alert-info mb-0">
+                        <div class="fw-semibold mb-1">
+                            <i class="bi bi-stars me-1"></i>AI Explanation
+                        </div>
+                        <div style="white-space: pre-wrap;">@question.Explanation</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="d-flex flex-wrap gap-2 mt-4">
+        <a asp-controller="StudentAI"
+           asp-action="Practice"
+           class="btn btn-primary">
+            <i class="bi bi-arrow-repeat me-1"></i> Try Another Quiz
+        </a>
+
+        <a asp-controller="StudentDashboard"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+</div>

@@ -80,11 +80,29 @@ namespace LanguageCenterManagement.Controllers
         }
 
         // POST: Questions/Create
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            QuestionManagementViewModel model)
+        public async Task<IActionResult> Create(QuestionManagementViewModel model)
         {
+            // Writing questions do not need answer choices.
+            if (model.Skill == "Writing")
+            {
+                ModelState.Remove(nameof(model.QuestionType));
+
+                if (model.Answers != null)
+                {
+                    ModelState.Remove("Answers");
+                    for (int i = 0; i < model.Answers.Count; i++)
+                    {
+                        ModelState.Remove($"Answers[{i}].AnswerText");
+                        ModelState.Remove($"Answers[{i}].IsCorrect");
+                    }
+                }
+
+                model.QuestionType = "ShortAnswer";
+            }
+
             if (!ModelState.IsValid)
             {
                 await LoadReadingContents(model.ReadingContentId);
@@ -101,11 +119,34 @@ namespace LanguageCenterManagement.Controllers
                 return View(model);
             }
 
-            if (model.QuestionType == "MultipleChoice")
+            if (model.Skill == "Writing")
             {
-                var validAnswers = model.Answers
+                if (string.IsNullOrWhiteSpace(model.WritingPrompt))
+                {
+                    ModelState.AddModelError(
+                        nameof(model.WritingPrompt),
+                        "Please enter a writing prompt.");
+                }
+
+                if (model.MinimumWords < 0 ||
+                    model.MaximumWords < model.MinimumWords)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.MaximumWords),
+                        "Maximum words must be greater than or equal to minimum words.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    await LoadReadingContents(model.ReadingContentId);
+                    return View(model);
+                }
+            }
+            else if (model.QuestionType == "MultipleChoice")
+            {
+                var validAnswers = model.Answers?
                     .Where(a => !string.IsNullOrWhiteSpace(a.AnswerText))
-                    .ToList();
+                    .ToList() ?? new();
 
                 if (validAnswers.Count < 2)
                 {
@@ -131,27 +172,47 @@ namespace LanguageCenterManagement.Controllers
             var question = new Question
             {
                 QuestionText = model.QuestionText,
-                QuestionType = model.QuestionType,
+                QuestionType = model.Skill == "Writing"
+                    ? "ShortAnswer"
+                    : model.QuestionType,
                 Skill = model.Skill,
                 Score = model.Score,
                 ReadingContentId = model.Skill == "Reading"
-                ? model.ReadingContentId : null
+                    ? model.ReadingContentId
+                    : null
             };
 
-            foreach (var answerModel in model.Answers)
+            if (model.Skill != "Writing" && model.Answers != null)
             {
-                if (string.IsNullOrWhiteSpace(answerModel.AnswerText))
-                    continue;
-
-                question.Answers.Add(new Answer
+                foreach (var answerModel in model.Answers)
                 {
-                    AnswerText = answerModel.AnswerText,
-                    IsCorrect = answerModel.IsCorrect
-                });
+                    if (string.IsNullOrWhiteSpace(answerModel.AnswerText))
+                        continue;
+
+                    question.Answers.Add(new Answer
+                    {
+                        AnswerText = answerModel.AnswerText,
+                        IsCorrect = answerModel.IsCorrect
+                    });
+                }
             }
 
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
+
+            if (model.Skill == "Writing")
+            {
+                var writingContent = new WritingContent
+                {
+                    QuestionId = question.QuestionId,
+                    Prompt = model.WritingPrompt.Trim(),
+                    MinimumWords = model.MinimumWords,
+                    MaximumWords = model.MaximumWords
+                };
+
+                _context.WritingContents.Add(writingContent);
+                await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -169,12 +230,19 @@ namespace LanguageCenterManagement.Controllers
             if (question == null)
                 return NotFound();
 
+            var writingContent = await _context.WritingContents
+                .AsNoTracking()
+                .FirstOrDefaultAsync(w => w.QuestionId == question.QuestionId);
+
             var model = new QuestionManagementViewModel
             {
                 ReadingContentId = question.ReadingContentId,
                 QuestionId = question.QuestionId,
                 QuestionText = question.QuestionText,
                 QuestionType = question.QuestionType,
+                WritingPrompt = writingContent?.Prompt ?? string.Empty,
+                MinimumWords = writingContent?.MinimumWords ?? 100,
+                MaximumWords = writingContent?.MaximumWords ?? 300,
                 Skill = question.Skill,
                 Score = question.Score,
                 Answers = question.Answers.Select(a =>
@@ -199,6 +267,40 @@ namespace LanguageCenterManagement.Controllers
             if (id != model.QuestionId)
                 return NotFound();
 
+
+            if (model.Skill == "Writing")
+            {
+                ModelState.Remove(nameof(model.QuestionType));
+
+                if (model.Answers != null)
+                {
+                    ModelState.Remove("Answers");
+
+                    for (int i = 0; i < model.Answers.Count; i++)
+                    {
+                        ModelState.Remove($"Answers[{i}].AnswerText");
+                        ModelState.Remove($"Answers[{i}].IsCorrect");
+                    }
+                }
+
+                model.QuestionType = "ShortAnswer";
+
+                if (string.IsNullOrWhiteSpace(model.WritingPrompt))
+                {
+                    ModelState.AddModelError(
+                        nameof(model.WritingPrompt),
+                        "Please enter a writing prompt.");
+                }
+
+                if (model.MinimumWords < 0 ||
+                    model.MaximumWords < model.MinimumWords)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.MaximumWords),
+                        "Maximum words must be greater than or equal to minimum words.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 await LoadReadingContents(model.ReadingContentId);
@@ -215,7 +317,7 @@ namespace LanguageCenterManagement.Controllers
                 return View(model);
             }
 
-            if (model.QuestionType == "MultipleChoice")
+            if (model.Skill != "Writing" && model.QuestionType == "MultipleChoice")
             {
                 var validAnswers = model.Answers
                     .Where(a => !string.IsNullOrWhiteSpace(a.AnswerText))
@@ -248,40 +350,71 @@ namespace LanguageCenterManagement.Controllers
                 return NotFound();
 
             question.QuestionText = model.QuestionText;
-            question.QuestionType = model.QuestionType;
+            //question.QuestionType = model.QuestionType;
+            question.QuestionType = model.Skill == "Writing" ? "ShortAnswer" : model.QuestionType;
             question.Skill = model.Skill;
             question.ReadingContentId = model.Skill == "Reading" ? model.ReadingContentId : null;
             question.Score = model.Score;
 
-            var submittedAnswerIds = model.Answers
+            var writingContent = await _context.WritingContents.FirstOrDefaultAsync(w => w.QuestionId == question.QuestionId);
+
+            if (model.Skill == "Writing")
+            {
+                if (writingContent == null)
+                {
+                    writingContent = new WritingContent
+                    {
+                        QuestionId = question.QuestionId,
+                        Prompt = model.WritingPrompt.Trim(),
+                        MinimumWords = model.MinimumWords,
+                        MaximumWords = model.MaximumWords
+                    };
+
+                    _context.WritingContents.Add(writingContent);
+                }
+                else
+                {
+                    writingContent.Prompt = model.WritingPrompt.Trim();
+                    writingContent.MinimumWords = model.MinimumWords;
+                    writingContent.MaximumWords = model.MaximumWords;
+                }
+            }
+            else if (writingContent != null)
+            {
+                _context.WritingContents.Remove(writingContent);
+            }
+            if (model.Skill != "Writing")
+            {
+                var submittedAnswerIds = model.Answers
                 .Where(a => a.AnswerId > 0)
                 .Select(a => a.AnswerId)
                 .ToHashSet();
 
-            foreach (var answerModel in model.Answers)
-            {
-                if (string.IsNullOrWhiteSpace(answerModel.AnswerText))
-                    continue;
-
-                if (answerModel.AnswerId > 0)
+                foreach (var answerModel in model.Answers)
                 {
-                    var existingAnswer = question.Answers
-                        .FirstOrDefault(a => a.AnswerId == answerModel.AnswerId);
-
-                    if (existingAnswer == null)
+                    if (string.IsNullOrWhiteSpace(answerModel.AnswerText))
                         continue;
 
-                    existingAnswer.AnswerText = answerModel.AnswerText;
-                    existingAnswer.IsCorrect = answerModel.IsCorrect;
-                }
-                else
-                {
-                    question.Answers.Add(new Answer
+                    if (answerModel.AnswerId > 0)
                     {
-                        QuestionId = question.QuestionId,
-                        AnswerText = answerModel.AnswerText,
-                        IsCorrect = answerModel.IsCorrect
-                    });
+                        var existingAnswer = question.Answers
+                            .FirstOrDefault(a => a.AnswerId == answerModel.AnswerId);
+
+                        if (existingAnswer == null)
+                            continue;
+
+                        existingAnswer.AnswerText = answerModel.AnswerText;
+                        existingAnswer.IsCorrect = answerModel.IsCorrect;
+                    }
+                    else
+                    {
+                        question.Answers.Add(new Answer
+                        {
+                            QuestionId = question.QuestionId,
+                            AnswerText = answerModel.AnswerText,
+                            IsCorrect = answerModel.IsCorrect
+                        });
+                    }
                 }
             }
 

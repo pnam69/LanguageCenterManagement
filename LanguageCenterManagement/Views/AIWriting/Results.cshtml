@@ -1,0 +1,149 @@
+﻿@model LanguageCenterManagement.ViewModels.WritingAssessmentInputViewModel
+
+@{
+    ViewData["Title"] = "Writing Assessment Results";
+    var assessment = Model.Assessment;
+    var isTeacher = User.IsInRole("Teacher") || User.IsInRole("Admin");
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="h3">Writing Assessment Results</h1>
+            <p class="text-muted mb-0">
+                AI-generated feedback to support learning and review.
+            </p>
+        </div>
+
+        <a asp-action="@(isTeacher ? "Assess" : "Practice")"
+           class="btn btn-outline-secondary">
+            Assess Another Response
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h6 text-muted">Writing task</h2>
+            <p>@Model.TaskPrompt</p>
+
+            <h2 class="h6 text-muted mt-4">Student response</h2>
+            <div class="p-3 bg-body-tertiary rounded"
+                 style="white-space: pre-wrap;">
+                @Model.StudentWriting
+            </div>
+        </div>
+    </div>
+
+    @if (assessment != null)
+    {
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h2 class="h5 mb-1">Suggested score</h2>
+                        <p class="text-muted mb-0">
+                            Total across four assessment criteria
+                        </p>
+                    </div>
+
+                    <div class="text-end">
+                        <div class="display-5 fw-bold">
+                            @assessment.TotalScore
+                            <span class="fs-4 text-muted">/ @assessment.MaxScore</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress mt-3" role="progressbar"
+                     aria-valuenow="@assessment.TotalScore"
+                     aria-valuemin="0"
+                     aria-valuemax="20"
+                     aria-label="Writing score">
+                    <div class="progress-bar"
+                         style="width: @(assessment.TotalScore * 5)%"></div>
+                </div>
+
+                <h3 class="h6 mt-4">Overall feedback</h3>
+                <p class="mb-0">@assessment.OverallFeedback</p>
+            </div>
+        </div>
+
+        <h2 class="h5 mb-3">Assessment criteria</h2>
+
+        <div class="row g-3 mb-4">
+            @foreach (var criterion in assessment.Criteria)
+            {
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between gap-2 mb-2">
+                                <h3 class="h6">@criterion.Name</h3>
+                                <strong>@criterion.Score / @criterion.MaxScore</strong>
+                            </div>
+                            <p class="text-muted mb-0">@criterion.Feedback</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h2 class="h5">Corrections</h2>
+
+                @if (assessment.Corrections.Count > 0)
+                {
+                    <ul class="mb-0">
+                        @foreach (var correction in assessment.Corrections)
+                        {
+                            <li class="mb-2">@correction</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">
+                        No specific corrections were identified.
+                    </p>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h2 class="h5">Suggestions for improvement</h2>
+
+                @if (assessment.Suggestions.Count > 0)
+                {
+                    <ul class="mb-0">
+                        @foreach (var suggestion in assessment.Suggestions)
+                        {
+                            <li class="mb-2">@suggestion</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">
+                        No additional suggestions were returned.
+                    </p>
+                }
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5">Suggested improved version</h2>
+                <div style="white-space: pre-wrap;">@assessment.ImprovedVersion</div>
+            </div>
+        </div>
+
+        @if (isTeacher)
+        {
+            <div class="alert alert-warning mt-4">
+                This is an AI-generated recommendation, not an official grade.
+                Review the response and rubric before deciding the final mark.
+            </div>
+        }
+    }
+</div>

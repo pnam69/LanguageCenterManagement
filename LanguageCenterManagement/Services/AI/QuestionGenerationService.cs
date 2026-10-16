@@ -36,51 +36,71 @@ namespace LanguageCenterManagement.Services.Ai
                 _ => throw new InvalidOperationException("Unsupported question type.")
             };
 
+
+            var passageInstruction = request.Skill == "Reading"
+                && !string.IsNullOrWhiteSpace(request.PassageText)
+                ? $"""
+      
+                  READING PASSAGE:
+                  {request.PassageText}
+
+                  For this Reading task:
+                  - Base every question and correct answer strictly on the passage.
+                  - Do not require outside knowledge to answer.
+                  - Test comprehension of details, main ideas, vocabulary in context,
+                    and reasonable inferences supported by the passage.
+                  - Ensure the correct answer is supported by the passage.
+                  - Do not invent details that contradict the passage.
+                  """ : "";
+
             var prompt = string.Format("""
-        You are an English teacher creating quiz questions.
+                You are an English teacher creating quiz questions.
 
-        Generate exactly {0} questions.
-        Topic: {1}
-        Skill: {2}
-        Difficulty: {3}
-        Question type: {4}
+                Generate exactly {0} questions.
+                Topic: {1}
+                Skill: {2}
+                Difficulty: {3}
+                Question type: {4}
 
-        RULES:
-        - Every question must have exactly {6} answer object(s).
-        - Exactly one answer must have "isCorrect": true. All others must be false.
-        - Never omit an answer.
-        - Answer texts must be distinct and non-empty.
-        - Return JSON only. Do not include explanations or markdown.
-        - For each question, decide the correct answer first, then set isCorrect accordingly.
-        - Do not set every isCorrect value to false.
-        {5}
+                RULES:
+                - Every question must have exactly {6} answer object(s).
+                - Exactly one answer must have "isCorrect": true. All others must be false.
+                - Never omit an answer.
+                - Answer texts must be distinct and non-empty.
+                - Return JSON only. Do not include explanations or markdown.
+                - For each question, decide the correct answer first, then set isCorrect accordingly.
+                - Do not set every isCorrect value to false.
+                {5}
+                {7}
 
-        Required JSON structure:
-        {{
-          "questions": [
-            {{
-              "questionText": "Example question",
-              "answers": [
-                {{ "answerText": "Correct option", "isCorrect": true }},
-                {{ "answerText": "Wrong option 1", "isCorrect": false }},
-                {{ "answerText": "Wrong option 2", "isCorrect": false }},
-                {{ "answerText": "Wrong option 3", "isCorrect": false }}
-              ]
-            }}
-          ]
-        }}
+                Required JSON structure:
+                {{
+                  "questions": [
+                    {{
+                      "questionText": "Example question",
+                      "answers": [
+                        {{ "answerText": "Correct option", "isCorrect": true }},
+                        {{ "answerText": "Wrong option 1", "isCorrect": false }},
+                        {{ "answerText": "Wrong option 2", "isCorrect": false }},
+                        {{ "answerText": "Wrong option 3", "isCorrect": false }}
+                      ]
+                    }}
+                  ]
+                }}
 
-        For MultipleChoice → exactly four options.
-        For TrueFalse → exactly two options named "True" and "False".
-        For FillInTheBlank → put ____ in the question text and return one correct answer.
-        """,
+                For MultipleChoice → exactly four options.
+                For TrueFalse → exactly two options named "True" and "False".
+                For FillInTheBlank → put ____ in the question text and return one correct answer.
+                """,
                 request.Count,
                 request.Topic,
                 request.Skill,
                 request.Difficulty,
                 request.QuestionType,
                 typeInstructions,
-                expectedAnswers);
+                expectedAnswers,
+                passageInstruction);
+
 
             using var response = await _httpClient.PostAsJsonAsync(
                 "api/generate",

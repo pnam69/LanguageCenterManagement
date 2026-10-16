@@ -394,6 +394,63 @@
                             </li>
                         }
 
+                        <!-- ================= AI TOOLS ================= -->
+                        @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <i class="bi bi-stars"></i>
+                                    <span>AI Tools</span>
+                                </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+                                    <li class="dropdown-header">AI ASSISTANT</li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="AiQuestions"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-patch-question text-primary"></i>
+                                            Generate Questions
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="AIReading"
+                                           asp-action="Index">
+
+                                            <i class="bi bi-journal-richtext text-success"></i>
+                                            Generate Reading Passage
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="AIWriting"
+                                           asp-action="Assess">
+                                            <i class="bi bi-clipboard-check me-2"></i>
+                                            AI Writing Assessment
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="WritingIntegrityReviews"
+                                           asp-action="Index">
+                                            <i class="bi bi-shield-check me-2"></i>
+                                            Writing Integrity Reviews
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
 
                         <!-- ================= STUDENT ================= -->
                         @if (User.IsInRole("Student"))
@@ -447,6 +504,37 @@
 
                                 </ul>
 
+                            </li>
+
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="bi bi-stars"></i>
+                                    <span>AI Learning</span>
+                                </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="StudentAI"
+                                           asp-action="Practice">
+                                            <i class="bi bi-patch-question text-primary"></i>
+                                            Practice Quiz
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="AIWriting"
+                                           asp-action="Practice">
+                                            <i class="bi bi-pencil-square me-2"></i>
+                                            AI Writing Practice
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
 
 

@@ -27,9 +27,29 @@ namespace LanguageCenterManagement.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int? readingContentId)
         {
-            return View(new AiQuestionGenerationViewModel());
+            var model = new AiQuestionGenerationViewModel
+            {
+                ReadingContentId = readingContentId
+            };
+
+            if (readingContentId.HasValue)
+            {
+                var passage = await _context.ReadingContents
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        r => r.ReadingContentId == readingContentId.Value);
+
+                if (passage == null)
+                    return NotFound();
+
+                model.Skill = "Reading";
+                model.Topic = "Reading comprehension";
+                ViewBag.SelectedPassage = passage.Passage;
+            }
+
+            return View(model);
         }
 
         [HttpPost]
@@ -43,13 +63,46 @@ namespace LanguageCenterManagement.Controllers
 
             try
             {
+                ReadingContent? selectedPassage = null;
+
+                if (model.ReadingContentId.HasValue)
+                {
+                    if (model.Skill != "Reading")
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.Skill),
+                            "A reading passage can only be used with Reading questions.");
+
+                        return View("Index", model);
+                    }
+
+                    selectedPassage = await _context.ReadingContents
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(
+                            r => r.ReadingContentId == model.ReadingContentId.Value,
+                            cancellationToken);
+
+                    if (selectedPassage == null)
+                    {
+                        ModelState.AddModelError(
+                            "",
+                            "The selected reading passage could not be found.");
+
+                        return View("Index", model);
+                    }
+
+                    ViewBag.SelectedPassage = selectedPassage.Passage;
+                }
+
                 var request = new QuestionGenerationRequest
                 {
                     Topic = model.Topic.Trim(),
                     Skill = model.Skill,
                     Difficulty = model.Difficulty,
                     QuestionType = model.QuestionType,
-                    Count = model.Count
+                    Count = model.Count,
+                    ReadingContentId = model.ReadingContentId,
+                    PassageText = selectedPassage?.Passage
                 };
 
                 var generated = await _generationService.GenerateAsync(
@@ -63,13 +116,11 @@ namespace LanguageCenterManagement.Controllers
                         new AiGeneratedAnswerViewModel
                         {
                             AnswerText = a.AnswerText,
-
-                            // Require teachers to choose the correct option.
-                            // Fill-in-the-blank has only one expected answer.
                             IsCorrect = model.QuestionType == "FillInTheBlank"
                         }).ToList()
                 }).ToList();
 
+                ViewBag.SelectedPassage = selectedPassage?.Passage;
                 return View("Preview", model);
             }
             catch (OperationCanceledException)
@@ -105,9 +156,38 @@ namespace LanguageCenterManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Save(
-            AiQuestionGenerationViewModel model)
+        public async Task<IActionResult> Save(AiQuestionGenerationViewModel model)
         {
+            ReadingContent? selectedPassage = null;
+
+            if (model.ReadingContentId.HasValue)
+            {
+                selectedPassage = await _context.ReadingContents
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        r => r.ReadingContentId == model.ReadingContentId.Value);
+
+                if (selectedPassage == null)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "The selected reading passage no longer exists.");
+
+                    return RedirectToAction("Index", "ReadingContents");
+                }
+
+                if (model.Skill != "Reading")
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Skill),
+                        "A passage can only be linked to Reading questions.");
+
+                    ViewBag.SelectedPassage = selectedPassage.Passage;
+                    return View("Preview", model);
+                }
+            }
+
+            ViewBag.SelectedPassage = selectedPassage?.Passage;
             if (!ValidateOptions(model))
                 return View("Preview", model);
 
@@ -120,9 +200,6 @@ namespace LanguageCenterManagement.Controllers
 
                 return View("Preview", model);
             }
-
-
-
 
             foreach (var question in model.Questions)
             {
@@ -169,6 +246,30 @@ namespace LanguageCenterManagement.Controllers
                 }
             }
 
+            if (model.ReadingContentId.HasValue)
+            {
+                if (model.Skill != "Reading")
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Skill),
+                        "A passage can only be linked to Reading questions.");
+
+                    return View("Preview", model);
+                }
+
+                bool passageExists = await _context.ReadingContents
+                    .AnyAsync(
+                        r => r.ReadingContentId == model.ReadingContentId.Value);
+
+                if (!passageExists)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "The selected reading passage no longer exists.");
+
+                    return View("Preview", model);
+                }
+            }
 
             foreach (var generated in model.Questions)
             {
@@ -178,6 +279,7 @@ namespace LanguageCenterManagement.Controllers
                     QuestionType = model.QuestionType,
                     Skill = model.Skill,
                     Score = 1,
+                    ReadingContentId = model.Skill == "Reading" ? model.ReadingContentId : null,
                     Answers = generated.Answers.Select(a => new Answer
                     {
                         AnswerText = a.AnswerText.Trim(),

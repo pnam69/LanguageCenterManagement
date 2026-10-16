@@ -1,0 +1,55 @@
+﻿@model LanguageCenterManagement.ViewModels.WritingAssessmentInputViewModel
+
+@{
+    ViewData["Title"] = "AI Writing Assessment";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="h3">AI Writing Assessment</h1>
+        <p class="text-muted">
+            Review a student's writing with AI-assisted feedback.
+            The suggested score is not an official grade until you approve it.
+        </p>
+    </div>
+
+    <div asp-validation-summary="All"
+         class="alert alert-danger"></div>
+
+    <form asp-action="Assess" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="TaskPrompt" class="form-label">
+                Original writing task
+            </label>
+            <textarea asp-for="TaskPrompt"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Enter the prompt the student was given."></textarea>
+            <span asp-validation-for="TaskPrompt"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="StudentWriting" class="form-label">
+                Student's response
+            </label>
+            <textarea asp-for="StudentWriting"
+                      class="form-control"
+                      rows="10"
+                      placeholder="Paste the student's response here."></textarea>
+            <span asp-validation-for="StudentWriting"
+                  class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-clipboard-check me-1"></i>
+            Assess Writing
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1004,6 +1004,49 @@ namespace LanguageCenterManagement.Migrations
                     b.ToTable("WritingContent", (string)null);
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.WritingIntegrityReview", b =>
+                {
+                    b.Property<int>("WritingIntegrityReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WritingIntegrityReviewId"));
+
+                    b.Property<DateTime>("CheckedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExamAnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MatchedExamAnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MatchingText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("SimilarityPercent")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("WritingIntegrityReviewId");
+
+                    b.HasIndex("ExamAnswerId");
+
+                    b.ToTable("WritingIntegrityReviews");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -1440,6 +1483,17 @@ namespace LanguageCenterManagement.Migrations
                         .IsRequired();
 
                     b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.WritingIntegrityReview", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.ExamAnswer", "ExamAnswer")
+                        .WithMany()
+                        .HasForeignKey("ExamAnswerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExamAnswer");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

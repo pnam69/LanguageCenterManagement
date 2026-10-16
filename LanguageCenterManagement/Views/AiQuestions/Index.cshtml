@@ -14,7 +14,17 @@
 
     <form asp-action="Generate" method="post">
         @Html.AntiForgeryToken()
-
+        <input type="hidden" asp-for="ReadingContentId" />
+        @if (ViewBag.SelectedPassage != null)
+        {
+            <div class="alert alert-info mb-3">
+                <strong>Generating questions from the selected passage</strong>
+                <div class="mt-2"
+                     style="white-space: pre-wrap; max-height: 250px; overflow-y: auto;">
+                    @ViewBag.SelectedPassage
+                </div>
+            </div>
+        }
         <div class="mb-3">
             <label asp-for="Topic" class="form-label">Topic</label>
             <input asp-for="Topic" class="form-control"

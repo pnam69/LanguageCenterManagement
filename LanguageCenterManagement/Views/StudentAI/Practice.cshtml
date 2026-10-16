@@ -1,0 +1,132 @@
+﻿
+@model LanguageCenterManagement.ViewModels.StudentPracticeViewModel
+
+@{
+    ViewData["Title"] = "AI Practice Quiz";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="h3 fw-bold">
+            <i class="bi bi-stars text-primary me-2"></i>AI Practice Quiz
+        </h1>
+        <p class="text-muted">
+            Practice your English skills with AI-generated questions.
+            This is practice only and does not affect your official exam results.
+        </p>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-warning">@TempData["Error"]</div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form asp-controller="StudentAI"
+                  asp-action="Generate"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label asp-for="Skill" class="form-label fw-semibold">
+                        Skill
+                    </label>
+                    <select asp-for="Skill" class="form-select" id="skillSelect">
+                        <option value="Reading">Reading</option>
+                        <option value="Listening">Listening</option>
+                        <option value="Speaking">Speaking</option>
+                        <option value="Writing">Writing</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ReadingContentId" class="form-label fw-semibold">
+                        Saved reading passage (optional)
+                    </label>
+                    <select asp-for="ReadingContentId"
+                            class="form-select"
+                            id="passageSelect">
+                        <option value="">Generate from a topic instead</option>
+                        @foreach (var passage in Model.Passages)
+                        {
+                            <option value="@passage.ReadingContentId">
+                                @passage.DisplayName
+                            </option>
+                        }
+                    </select>
+                    <div class="form-text">
+                        Select a passage to generate Reading comprehension questions from its text.
+                    </div>
+                </div>
+
+                <div class="mb-3" id="topicGroup">
+                    <label asp-for="Topic" class="form-label fw-semibold">
+                        Topic
+                    </label>
+                    <input asp-for="Topic"
+                           class="form-control"
+                           placeholder="e.g. daily routines, travel, environmental protection"
+                           required/>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Difficulty" class="form-label fw-semibold">
+                            Difficulty
+                        </label>
+                        <select asp-for="Difficulty" class="form-select">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Count" class="form-label fw-semibold">
+                            Number of questions
+                        </label>
+                        <select asp-for="Count" class="form-select">
+                            <option value="5">5 questions</option>
+                            <option value="10">10 questions</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-stars me-1"></i> Generate Quiz
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const skillSelect = document.getElementById("skillSelect");
+        const passageSelect = document.getElementById("passageSelect");
+        const topicGroup = document.getElementById("topicGroup");
+
+        function updatePracticeOptions() {
+            const passageSelected = passageSelect.value !== "";
+            const readingSelected = skillSelect.value === "Reading";
+
+            passageSelect.disabled = !readingSelected;
+            topicGroup.style.display = passageSelected ? "none" : "";
+
+            const topicInput = document.getElementById("Topic");
+            topicInput.required = !passageSelected;
+            topicInput.disabled = passageSelected;
+        }
+
+        skillSelect.addEventListener("change", updatePracticeOptions);
+        passageSelect.addEventListener("change", updatePracticeOptions);
+
+        updatePracticeOptions();
+    </script>
+}

@@ -15,15 +15,21 @@ namespace LanguageCenterManagement.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AiAnswerReviewService _aiAnswerReviewService;
+        private readonly WritingIntegrityService _writingIntegrityService;
+        private readonly ILogger<StudentExamsController> _logger;
 
         public StudentExamsController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            AiAnswerReviewService aiAnswerReviewService)
+            AiAnswerReviewService aiAnswerReviewService,
+            WritingIntegrityService writingIntegrityService,
+            ILogger<StudentExamsController> logger)
         {
             _context = context;
             _userManager = userManager;
             _aiAnswerReviewService = aiAnswerReviewService;
+            _writingIntegrityService = writingIntegrityService;
+            _logger = logger;
         }
 
         // GET: StudentExams
@@ -544,6 +550,32 @@ namespace LanguageCenterManagement.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            // Check submitted writing answers after the exam is safely saved.
+            // Integrity-check failures must not discard a student's submission.
+            var writingAnswerIds = await _context.ExamAnswers
+                .Where(a =>
+                    a.ExamResultId == examResult.ExamResultId &&
+                    a.TextAnswer != null &&
+                    a.Question != null &&
+                    a.Question.Skill == "Writing")
+                .Select(a => a.ExamAnswerId)
+                .ToListAsync();
+
+            foreach (var answerId in writingAnswerIds)
+            {
+                try
+                {
+                    await _writingIntegrityService.CheckAnswerAsync(answerId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Writing integrity check failed for answer {AnswerId}",
+                        answerId);
+                }
+            }
 
             return RedirectToAction(nameof(Result), new
             {

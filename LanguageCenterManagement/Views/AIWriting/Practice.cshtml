@@ -1,0 +1,58 @@
+﻿@model LanguageCenterManagement.ViewModels.WritingAssessmentInputViewModel
+
+@{
+    ViewData["Title"] = "AI Writing Practice";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="h3">AI Writing Practice</h1>
+        <p class="text-muted">
+            Write in English and receive feedback on your writing,
+            grammar, vocabulary, and organization.
+        </p>
+    </div>
+
+    <div asp-validation-summary="All"
+         class="alert alert-danger"></div>
+
+    <form asp-action="Practice" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="TaskPrompt" class="form-label">
+                Writing task or topic
+            </label>
+            <textarea asp-for="TaskPrompt"
+                      class="form-control"
+                      rows="3"
+                      placeholder="Example: Write about a memorable holiday."></textarea>
+            <span asp-validation-for="TaskPrompt"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="StudentWriting" class="form-label">
+                Your writing
+            </label>
+            <textarea asp-for="StudentWriting"
+                      class="form-control"
+                      rows="10"
+                      placeholder="Write your English response here..."></textarea>
+            <span asp-validation-for="StudentWriting"
+                  class="text-danger"></span>
+            <small class="text-muted">
+                Your response must contain at least 10 characters.
+            </small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-robot me-1"></i>
+            Assess My Writing
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

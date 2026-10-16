@@ -63,25 +63,99 @@
 								<span asp-validation-for="ReadingContentId" class="text-danger"></span>
 							</div>
 
-							<div class="col-md-4 mb-3">
-								<label asp-for="QuestionType"
-									   class="form-label"></label>
+							
+							<div id="writingContentGroup" style="display: none;">
+								<hr />
 
-								<select asp-for="QuestionType"
-										class="form-select">
-									<option value="MultipleChoice">
-										Multiple Choice
-									</option>
-									<option value="TrueFalse">
-										True / False
-									</option>
-									<option value="ShortAnswer">
-										Short Answer
-									</option>
-								</select>
+								<h5 class="mb-3">Writing Instructions</h5>
 
-								<span asp-validation-for="QuestionType"
-									  class="text-danger"></span>
+								<div class="mb-3">
+									<label asp-for="WritingPrompt" class="form-label">
+										Writing Prompt
+									</label>
+									<textarea asp-for="WritingPrompt"
+											  class="form-control"
+											  rows="5"
+											  placeholder="Example: Describe the advantages and disadvantages of studying online."></textarea>
+									<span asp-validation-for="WritingPrompt"
+										  class="text-danger"></span>
+								</div>
+
+								<div class="row">
+									<div class="col-md-6 mb-3">
+										<label asp-for="MinimumWords" class="form-label">
+											Minimum Words
+										</label>
+										<input asp-for="MinimumWords"
+											   type="number"
+											   min="0"
+											   max="10000"
+											   class="form-control" />
+										<span asp-validation-for="MinimumWords"
+											  class="text-danger"></span>
+									</div>
+
+									<div class="col-md-6 mb-3">
+										<label asp-for="MaximumWords" class="form-label">
+											Maximum Words
+										</label>
+										<input asp-for="MaximumWords"
+											   type="number"
+											   min="0"
+											   max="10000"
+											   class="form-control" />
+										<span asp-validation-for="MaximumWords"
+											  class="text-danger"></span>
+									</div>
+								</div>
+							</div>
+
+							<!-- Question Type + Answer Choices -->
+							<div id="answerSettingsGroup">
+
+								<!-- Your existing Question Type dropdown -->
+								<div class="col-md-4 mb-3">
+									<label asp-for="QuestionType" class="form-label"></label>
+									<select asp-for="QuestionType" class="form-select">
+										<option value="MultipleChoice">Multiple Choice</option>
+										<option value="TrueFalse">True / False</option>
+										<option value="ShortAnswer">Short Answer</option>
+									</select>
+									<span asp-validation-for="QuestionType"
+										  class="text-danger"></span>
+								</div>
+
+								<!-- Move your ENTIRE existing Answer Choices section here -->
+								<h5 class="mb-3">Answer Choices</h5>
+
+								<div class="alert alert-info">
+									For Multiple Choice, enter at least two answers
+									and mark exactly one as correct.
+								</div>
+
+								@for (int i = 0; i < Model.Answers.Count; i++)
+								{
+									<div class="row align-items-center mb-3">
+										<div class="col-auto">
+											<div class="form-check">
+												<input asp-for="Answers[i].IsCorrect"
+													   class="form-check-input" />
+
+												<label class="form-check-label">
+													Correct
+												</label>
+											</div>
+										</div>
+
+										<div class="col">
+											<input asp-for="Answers[i].AnswerText"
+												   class="form-control"
+												   placeholder="Answer @(i + 1)" />
+										</div>
+									</div>
+								}
+
+
 							</div>
 
 							<div class="col-md-4 mb-3">
@@ -100,35 +174,7 @@
 
 						<hr />
 
-						<h5 class="mb-3">Answer Choices</h5>
-
-						<div class="alert alert-info">
-							For Multiple Choice, enter at least two answers
-							and mark exactly one as correct.
-						</div>
-
-						@for (int i = 0; i < Model.Answers.Count; i++)
-						{
-							<div class="row align-items-center mb-3">
-								<div class="col-auto">
-									<div class="form-check">
-										<input asp-for="Answers[i].IsCorrect"
-											   class="form-check-input" />
-
-										<label class="form-check-label">
-											Correct
-										</label>
-									</div>
-								</div>
-
-								<div class="col">
-									<input asp-for="Answers[i].AnswerText"
-										   class="form-control"
-										   placeholder="Answer @(i + 1)" />
-								</div>
-							</div>
-						}
-
+						
 						<div class="d-flex gap-2 mt-4">
 							<button type="submit"
 									class="btn btn-primary">
@@ -151,20 +197,39 @@
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
 			const skillSelect = document.getElementById("Skill");
-			const passageGroup = document.getElementById("readingContentGroup");
-			const passageSelect = document.getElementById("ReadingContentId");
 
-			function toggleReadingPassage() {
+			const passageGroup =
+				document.getElementById("readingContentGroup");
+			const passageSelect =
+				document.getElementById("ReadingContentId");
+
+			const writingGroup =
+				document.getElementById("writingContentGroup");
+			const writingPrompt =
+				document.getElementById("WritingPrompt");
+
+			const answerSettingsGroup =
+				document.getElementById("answerSettingsGroup");
+
+			function toggleSkillSections() {
 				const isReading = skillSelect.value === "Reading";
+				const isWriting = skillSelect.value === "Writing";
 
 				passageGroup.style.display = isReading ? "" : "none";
 				passageSelect.required = isReading;
+
+				writingGroup.style.display = isWriting ? "" : "none";
+				writingPrompt.required = isWriting;
+
+				answerSettingsGroup.style.display =
+					isWriting ? "none" : "";
 			}
 
-			skillSelect.addEventListener("change", toggleReadingPassage);
-			toggleReadingPassage();
+			skillSelect.addEventListener("change", toggleSkillSections);
+			toggleSkillSections();
 		});
 	</script>
+
 	@{
 		await Html.RenderPartialAsync("_ValidationScriptsPartial");
 	}

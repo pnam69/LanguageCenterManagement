@@ -9,7 +9,8 @@ namespace LanguageCenterManagement.Services.Ai
         public string Skill { get; set; } = "Reading";
         public string Difficulty { get; set; } = "Medium";
         public int Count { get; set; } = 5;
-
+        public string? PassageText { get; set; }
+        public int? ReadingContentId { get; set; }
         [Required]
         public string QuestionType { get; set; } = "MultipleChoice";
     }

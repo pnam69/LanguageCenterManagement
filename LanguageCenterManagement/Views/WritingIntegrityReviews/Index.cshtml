@@ -1,0 +1,144 @@
+﻿@model IEnumerable<LanguageCenterManagement.Models.WritingIntegrityReview>
+
+@{
+    ViewData["Title"] = "Writing Integrity Reviews";
+}
+
+<div class="container-fluid py-4 px-lg-5">
+    <div class="mb-4">
+        <h1 class="h3 mb-2">Writing Integrity Reviews</h1>
+        <p class="text-muted">
+            Review writing answers flagged for similarity with another student's submission.
+            A match is not, by itself, proof of plagiarism.
+        </p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <form asp-action="CheckUnreviewed"
+          method="post"
+          class="mb-3">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-primary">
+            Check Unreviewed Submissions
+        </button>
+    </form>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-light border">
+            No writing submissions are currently flagged for review.
+        </div>
+    }
+    else
+    {
+        @foreach (var review in Model)
+        {
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1">
+                                @(review.ExamAnswer?.ExamResult?.Exam?.ExamName
+                                    ?? "Exam")
+                            </h2>
+
+                            <div class="text-muted small">
+                                Student ID:
+                                @(review.ExamAnswer?.ExamResult?.StudentId.ToString()
+                                    ?? "-")
+                                · Question ID:
+                                @(review.ExamAnswer?.QuestionId.ToString() ?? "-")
+                            </div>
+                        </div>
+
+                        <div>
+                            <strong>
+                                @review.SimilarityPercent.ToString("0.##")%
+                            </strong>
+                            <span class="text-muted">similarity</span>
+                        </div>
+                    </div>
+
+                    <p>
+                        <strong>Question:</strong>
+                        @(review.ExamAnswer?.Question?.QuestionText
+                            ?? "Question unavailable")
+                    </p>
+
+                    <details class="mb-3">
+                        <summary class="mb-2">View submitted writing</summary>
+                        <div class="border rounded p-3"
+                             style="white-space: pre-wrap; overflow-wrap: anywhere;">
+                            @review.ExamAnswer?.TextAnswer
+                        </div>
+                    </details>
+
+                    @if (!string.IsNullOrWhiteSpace(review.MatchingText))
+                    {
+                        <div class="mb-3">
+                            <strong>Matching phrases</strong>
+                            <div class="border rounded bg-light p-3 mt-2"
+                                 style="overflow-wrap: anywhere;">
+                                @review.MatchingText
+                            </div>
+                            <div class="text-muted small mt-1">
+                                Matched submission ID:
+                                @(review.MatchedExamAnswerId?.ToString() ?? "-")
+                            </div>
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <strong>Status:</strong> @review.Status
+                        <span class="text-muted small ms-2">
+                            Checked @review.CheckedAt.ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(review.ReviewNote))
+                    {
+                        <p>
+                            <strong>Previous review note:</strong>
+                            @review.ReviewNote
+                        </p>
+                    }
+
+                    <form asp-action="Review" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@review.WritingIntegrityReviewId" />
+
+                        <div class="mb-3">
+                            <label class="form-label">Decision</label>
+                            <select name="decision" class="form-select" required>
+                                <option value="Cleared">Cleared — no further action</option>
+                                <option value="Confirmed">Confirmed — concern substantiated</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Review notes</label>
+                            <textarea name="reviewNote"
+                                      class="form-control"
+                                      rows="2"
+                                      maxlength="1000"
+                                      placeholder="Explain your decision or request further investigation"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Save review decision
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    }
+</div>

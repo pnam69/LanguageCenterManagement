@@ -46,9 +46,14 @@ namespace LanguageCenterManagement.Data
         public DbSet<WritingContent> WritingContents { get; set; }
         public DbSet<ReadingPassage> ReadingPassages { get; set; }
         public DbSet<ExamAnswer> ExamAnswers { get; set; }
+        public DbSet<WritingIntegrityReview> WritingIntegrityReviews => Set<WritingIntegrityReview>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<WritingIntegrityReview>()
+                .Property(r => r.SimilarityPercent)
+                .HasPrecision(5, 2);
 
             modelBuilder.Entity<Student>()
                 .HasIndex(x => x.StudentCode)

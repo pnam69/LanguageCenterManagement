@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿
+using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenterManagement.ViewModels
 {
@@ -23,6 +24,16 @@ namespace LanguageCenterManagement.ViewModels
         public int Score { get; set; } = 1;
 
         public int? ReadingContentId { get; set; }
+
+        // Writing content
+        [Display(Name = "Writing Prompt")]
+        public string WritingPrompt { get; set; } = string.Empty;
+
+        [Range(0, 10000)]
+        public int MinimumWords { get; set; } = 100;
+
+        [Range(0, 10000)]
+        public int MaximumWords { get; set; } = 300;
 
         public List<AnswerManagementViewModel> Answers { get; set; }
             = new List<AnswerManagementViewModel>();

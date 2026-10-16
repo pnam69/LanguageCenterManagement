@@ -18,6 +18,7 @@ namespace LanguageCenterManagement.ViewModels
         public int Count { get; set; } = 5;
         [Required]
         public string QuestionType { get; set; } = "MultipleChoice";
+        public int? ReadingContentId { get; set; }
 
         public List<AiGeneratedQuestionViewModel> Questions { get; set; } = new();
     }

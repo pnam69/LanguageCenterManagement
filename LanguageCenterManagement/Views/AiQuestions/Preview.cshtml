@@ -25,12 +25,33 @@
     {
         <form asp-action="Save" method="post">
             @Html.AntiForgeryToken()
-
+            <input type="hidden" asp-for="ReadingContentId" />
             <input type="hidden" asp-for="Topic" />
             <input type="hidden" asp-for="Skill" />
             <input type="hidden" asp-for="Difficulty" />
             <input type="hidden" asp-for="Count" />
             <input type="hidden" asp-for="QuestionType" />
+
+            @if (ViewBag.SelectedPassage != null)
+            {
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-book-half fs-5"></i>
+                            <h5 class="mb-0">Original Reading Passage</h5>
+                        </div>
+
+                        <div class="p-3 rounded bg-light"
+                             style="white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+                            @ViewBag.SelectedPassage
+                        </div>
+
+                        <small class="text-muted d-block mt-2">
+                            Review the passage against each generated question and its correct answer before saving.
+                        </small>
+                    </div>
+                </div>
+            }
 
             @for (int i = 0; i < Model.Questions.Count; i++)
             {

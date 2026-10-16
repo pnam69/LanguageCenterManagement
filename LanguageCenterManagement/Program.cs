@@ -1,5 +1,6 @@
 using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
+using LanguageCenterManagement.Services;
 using LanguageCenterManagement.Services.Ai;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,21 @@ builder.Services.AddHttpClient<
 
 builder.Services.AddHttpClient<AiAnswerReviewService>(
     client => client.Timeout = TimeSpan.FromSeconds(90));
+
+builder.Services.AddHttpClient<
+    LanguageCenterManagement.Services.Ai.ReadingGenerationService>();
+
+builder.Services.AddScoped<
+    LanguageCenterManagement.Services.Ai.WritingIntegrityService>();
+
+builder.Services.AddMemoryCache();
+
+builder.Services.AddHttpClient<LanguageCenterManagement.Services.Ai.AiWritingAssessmentService>(
+    client =>
+    {
+        client.BaseAddress = new Uri("http://localhost:11434/");
+        client.Timeout = TimeSpan.FromSeconds(90);
+    });
 
 var app = builder.Build();
 
