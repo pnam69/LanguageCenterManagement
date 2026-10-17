@@ -431,6 +431,23 @@
                                         </a>
                                     </li>
 
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <i class="bi bi-stars"></i>
+                                    <span>Writing Integrity</span>
+                                </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+                                    <li class="dropdown-header">Writing Checker</li>
+
                                     <li>
                                         <a class="dropdown-item"
                                            asp-controller="AIWriting"
@@ -448,8 +465,18 @@
                                             Writing Integrity Reviews
                                         </a>
                                     </li>
+
+                                    <li class="nav-item">
+                                        <a class="dropdown-item"
+                                           asp-controller="WritingAiReviews"
+                                           asp-action="Index">
+                                            <i class="bi bi-clipboard-check me-1"></i>
+                                            Writing AI Reviews
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
+
                         }
 
                         <!-- ================= STUDENT ================= -->

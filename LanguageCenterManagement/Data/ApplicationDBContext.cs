@@ -47,6 +47,8 @@ namespace LanguageCenterManagement.Data
         public DbSet<ReadingPassage> ReadingPassages { get; set; }
         public DbSet<ExamAnswer> ExamAnswers { get; set; }
         public DbSet<WritingIntegrityReview> WritingIntegrityReviews => Set<WritingIntegrityReview>();
+
+        public DbSet<WritingAiReview> WritingAiReviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

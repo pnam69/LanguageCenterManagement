@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LanguageCenterManagement.Services.Ai;
 
 namespace LanguageCenterManagement.Controllers
 {
@@ -13,13 +14,19 @@ namespace LanguageCenterManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AiWritingAssessmentService _writingAssessmentService;
+        private readonly ILogger<TeacherExamResultsController> _logger;
 
         public TeacherExamResultsController(
             ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            AiWritingAssessmentService writingAssessmentService,
+            ILogger<TeacherExamResultsController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _writingAssessmentService = writingAssessmentService;
+            _logger = logger;
         }
 
         // GET: TeacherExamResults
@@ -42,78 +49,6 @@ namespace LanguageCenterManagement.Controllers
 
             return View(exams);
         }
-
-        //// GET: TeacherExamResults/Enter/5
-        //[HttpGet]
-        //public async Task<IActionResult> Enter(int id)
-        //{
-        //    var user = await _userManager.GetUserAsync(User);
-
-        //    if (user == null || !user.TeacherId.HasValue)
-        //    {
-        //        return Forbid();
-        //    }
-
-        //    var exam = await _context.Exams
-        //        .Include(e => e.Class)
-        //        .FirstOrDefaultAsync(e =>
-        //            e.ExamId == id &&
-        //            e.Class != null &&
-        //            e.Class.TeacherId == user.TeacherId.Value);
-
-        //    if (exam == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var students = await _context.Enrollments
-        //        .Include(e => e.Student)
-        //        .Where(e =>
-        //            e.ClassId == exam.ClassId &&
-        //            e.Student != null &&
-        //            e.Status != "Rejected" &&
-        //            e.Status != "Cancelled")
-        //        .OrderBy(e => e.Student!.FullName)
-        //        .Select(e => new TeacherExamResultStudentViewModel
-        //        {
-        //            StudentId = e.Student!.StudentId,
-        //            StudentCode = e.Student.StudentCode,
-        //            FullName = e.Student.FullName,
-        //            Score = 0,
-        //            Status = "Completed"
-        //        })
-        //        .ToListAsync();
-
-        //    var existingResults = await _context.ExamResults
-        //        .Where(r => r.ExamId == id)
-        //        .ToListAsync();
-
-        //    foreach (var student in students)
-        //    {
-        //        var existing = existingResults.FirstOrDefault(r =>
-        //            r.StudentId == student.StudentId);
-
-        //        if (existing != null)
-        //        {
-        //            student.Score = existing.Score;
-        //            student.Status = existing.Status;
-        //            student.SubmittedAt = existing.SubmittedAt;
-        //            student.Note = existing.Note;
-        //        }
-        //    }
-
-        //    var model = new TeacherExamResultsViewModel
-        //    {
-        //        ExamId = exam.ExamId,
-        //        ExamName = exam.ExamName,
-        //        ClassName = exam.Class?.ClassName ?? string.Empty,
-        //        MaxScore = exam.MaxScore,
-        //        ExamDate = exam.ExamDate,
-        //        Students = students
-        //    };
-
-        //    return View(model);
-        //}
 
         // GET: TeacherExamResults/Results/5
         [HttpGet]
@@ -279,9 +214,7 @@ namespace LanguageCenterManagement.Controllers
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null || !user.TeacherId.HasValue)
-            {
                 return Forbid();
-            }
 
             var result = await _context.ExamResults
                 .Include(r => r.Exam)
@@ -293,127 +226,13 @@ namespace LanguageCenterManagement.Controllers
                     .ThenInclude(a => a.Answer)
                 .FirstOrDefaultAsync(r => r.ExamResultId == id);
 
-            if (result == null || result.Exam == null)
-            {
+            if (result == null || result.Exam?.Class == null)
                 return NotFound();
-            }
 
-            var exam = result.Exam;
-
-            if (exam.Class == null ||
-                exam.Class.TeacherId != user.TeacherId.Value)
-            {
+            if (result.Exam.Class.TeacherId != user.TeacherId.Value)
                 return Forbid();
-            }
 
-            var examQuestions = await _context.ExamQuestions
-                .Include(eq => eq.Question)
-                    .ThenInclude(q => q!.Answers)
-                .Include(eq => eq.Question)
-                    .ThenInclude(q => q!.SpeakingContent)
-                .Include(eq => eq.Question)
-                    .ThenInclude(q => q!.WritingContent)
-                .Where(eq => eq.ExamId == exam.ExamId)
-                .OrderBy(eq => eq.QuestionOrder)
-                .ToListAsync();
-
-            var model = new TeacherExamGradeViewModel
-            {
-                ExamResultId = result.ExamResultId,
-                ExamId = exam.ExamId,
-                ExamName = exam.ExamName,
-                ClassName = exam.Class.ClassName,
-                StudentId = result.StudentId,
-                StudentCode = result.Student?.StudentCode ?? string.Empty,
-                StudentName = result.Student?.FullName
-                    ?? $"Student #{result.StudentId}",
-                Score = result.Score,
-                MaxScore = exam.MaxScore,
-                Status = result.Status,
-                SubmittedAt = result.SubmittedAt,
-                Note = result.Note
-            };
-
-            foreach (var examQuestion in examQuestions)
-            {
-                var question = examQuestion.Question;
-
-                if (question == null)
-                {
-                    continue;
-                }
-
-                var submittedAnswer = result.ExamAnswers
-                    .FirstOrDefault(a =>
-                        a.QuestionId == question.QuestionId);
-
-                var item = new TeacherExamGradeQuestionViewModel
-                {
-                    ExamQuestionId = examQuestion.ExamQuestionId,
-                    QuestionId = question.QuestionId,
-                    QuestionOrder = examQuestion.QuestionOrder,
-                    QuestionText = question.QuestionText,
-                    QuestionType = question.QuestionType,
-                    Skill = question.Skill,
-                    MaxScore = question.Score,
-                    Score = submittedAnswer?.Score ?? 0,
-                    AudioAnswerUrl = submittedAnswer?.AudioAnswerUrl,
-                    IsCorrect = submittedAnswer?.IsCorrect,
-
-                    RequiresManualGrading =
-                        question.QuestionType.Equals(
-                            "Speaking",
-                            StringComparison.OrdinalIgnoreCase)
-                        ||
-                        question.QuestionType.Equals(
-                            "Writing",
-                            StringComparison.OrdinalIgnoreCase)
-                        ||
-                        question.Skill.Equals(
-                            "Speaking",
-                            StringComparison.OrdinalIgnoreCase)
-                        ||
-                        question.Skill.Equals(
-                            "Writing",
-                            StringComparison.OrdinalIgnoreCase)
-                };
-
-                if (submittedAnswer?.AnswerId != null)
-                {
-                    item.StudentAnswer = question.Answers
-                        .FirstOrDefault(a =>
-                            a.AnswerId == submittedAnswer.AnswerId)
-                        ?.AnswerText;
-                }
-                else
-                {
-                    item.StudentAnswer = submittedAnswer?.TextAnswer;
-                }
-
-                item.CorrectAnswer = question.Answers
-                    .FirstOrDefault(a => a.IsCorrect)
-                    ?.AnswerText;
-
-                if (question.SpeakingContent != null)
-                {
-                    item.SpeakingPrompt =
-                        question.SpeakingContent.Prompt;
-
-                    item.SpeakingPreparationTime =
-                        question.SpeakingContent.PreparationTime;
-
-                    item.SpeakingResponseTime =
-                        question.SpeakingContent.ResponseTime;
-                }
-
-                if (question.WritingContent != null)
-                {
-                    item.WritingPrompt =
-                        question.WritingContent.Prompt;
-                }
-
-                model.Questions.Add(item);
-            }
+            var model = await BuildGradeViewModelAsync(result);
 
             return View(model);
         }
@@ -604,6 +423,282 @@ namespace LanguageCenterManagement.Controllers
                 new { id = result.ExamResultId });
         }
 
+        // POST: TeacherExamResults/AssessWriting
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssessWriting(
+            int id,
+            int answerId,
+            CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null || !user.TeacherId.HasValue)
+                return Forbid();
+
+            var result = await _context.ExamResults
+                .Include(r => r.Exam)
+                    .ThenInclude(e => e!.Class)
+                .Include(r => r.Student)
+                .Include(r => r.ExamAnswers)
+                    .ThenInclude(a => a.Question)
+                        .ThenInclude(q => q!.WritingContent)
+                .Include(r => r.ExamAnswers)
+                    .ThenInclude(a => a.Answer)
+                .FirstOrDefaultAsync(
+                    r => r.ExamResultId == id,
+                    cancellationToken);
+
+            if (result == null || result.Exam?.Class == null)
+                return NotFound();
+
+            if (result.Exam.Class.TeacherId != user.TeacherId.Value)
+                return Forbid();
+
+            var answer = result.ExamAnswers.FirstOrDefault(
+                a => a.ExamAnswerId == answerId);
+
+            if (answer?.Question == null)
+                return NotFound();
+
+            var question = answer.Question;
+
+            var isWriting =
+                string.Equals(question.Skill, "Writing",
+                    StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(question.QuestionType, "Writing",
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (!isWriting)
+                return BadRequest("This submission is not a writing answer.");
+
+            var studentWriting = answer.TextAnswer;
+            var taskPrompt = question.WritingContent?.Prompt
+                ?? question.QuestionText;
+
+            var model = await BuildGradeViewModelAsync(result);
+
+            var item = model.Questions.FirstOrDefault(
+                q => q.ExamAnswerId == answerId);
+
+            if (item == null)
+                return NotFound();
+
+            if (string.IsNullOrWhiteSpace(studentWriting) ||
+                studentWriting.Trim().Length < 10)
+            {
+                item.AiAssessmentError =
+                    "The student's writing is empty or too short to assess.";
+
+                return View("Grade", model);
+            }
+
+            try
+            {
+                item.AiAssessment =
+                    await _writingAssessmentService.AssessAsync(
+                        taskPrompt,
+                        studentWriting,
+                        cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                item.AiAssessmentError =
+                    "The assessment was cancelled or took too long. Please try again.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "AI writing assessment failed for ExamAnswerId {AnswerId}.",
+                    answerId);
+
+                item.AiAssessmentError =
+                    "The AI assessment failed. Check that Ollama is running and try again.";
+            }
+
+            return View("Grade", model);
+        }
+
+        private async Task PopulateWritingFlagsAsync(TeacherExamGradeViewModel model)
+        {
+            var answerIds = model.Questions
+                .Where(q => q.ExamAnswerId.HasValue)
+                .Select(q => q.ExamAnswerId!.Value)
+                .Distinct()
+                .ToList();
+
+            if (!answerIds.Any())
+                return;
+
+            var aiReviews = await _context.WritingAiReviews
+                .AsNoTracking()
+                .Where(r => answerIds.Contains(r.ExamAnswerId))
+                .OrderByDescending(r => r.CheckedAt)
+                .ToListAsync();
+
+            var similarityReviews = await _context.WritingIntegrityReviews
+                .AsNoTracking()
+                .Where(r =>
+                    answerIds.Contains(r.ExamAnswerId) &&
+                    r.Status != "NoMatch")
+                .OrderBy(r => r.Status == "Pending" ? 0 :
+                              r.Status == "Confirmed" ? 1 : 2)
+                .ThenByDescending(r => r.SimilarityPercent)
+                .ToListAsync();
+
+            foreach (var question in model.Questions)
+            {
+                if (!question.ExamAnswerId.HasValue)
+                    continue;
+
+                var answerId = question.ExamAnswerId.Value;
+
+                var aiReview = aiReviews.FirstOrDefault(
+                    r => r.ExamAnswerId == answerId);
+
+                if (aiReview != null)
+                {
+                    question.AiReviewStatus = aiReview.Status;
+                    question.AiReviewFlagged =
+                        string.Equals(
+                            aiReview.Status,
+                            "Review",
+                            StringComparison.OrdinalIgnoreCase);
+
+                    question.AiReviewIndicators = aiReview.Indicators;
+                    question.AiReviewExplanation = aiReview.Explanation;
+                    question.AiReviewCheckedAt = aiReview.CheckedAt;
+                }
+
+                var similarityReview = similarityReviews.FirstOrDefault(
+                    r => r.ExamAnswerId == answerId);
+
+                if (similarityReview != null)
+                {
+                    question.SimilarityDetected = true;
+                    question.SimilarityPercent =
+                        similarityReview.SimilarityPercent;
+
+                    question.SimilarityStatus = similarityReview.Status;
+                    question.SimilarityMatchingText =
+                        similarityReview.MatchingText;
+
+                    question.SimilarityReviewId =
+                        similarityReview.WritingIntegrityReviewId;
+                }
+            }
+        }
+
+        private async Task<TeacherExamGradeViewModel> BuildGradeViewModelAsync(
+    ExamResult result)
+        {
+            var exam = result.Exam!;
+
+            var examQuestions = await _context.ExamQuestions
+                .Include(eq => eq.Question)
+                    .ThenInclude(q => q!.Answers)
+                .Include(eq => eq.Question)
+                    .ThenInclude(q => q!.SpeakingContent)
+                .Include(eq => eq.Question)
+                    .ThenInclude(q => q!.WritingContent)
+                .Where(eq => eq.ExamId == exam.ExamId)
+                .OrderBy(eq => eq.QuestionOrder)
+                .ToListAsync();
+
+            var model = new TeacherExamGradeViewModel
+            {
+                ExamResultId = result.ExamResultId,
+                ExamId = exam.ExamId,
+                ExamName = exam.ExamName,
+                ClassName = exam.Class?.ClassName ?? string.Empty,
+                StudentId = result.StudentId,
+                StudentCode = result.Student?.StudentCode ?? string.Empty,
+                StudentName = result.Student?.FullName
+                    ?? $"Student #{result.StudentId}",
+                Score = result.Score,
+                MaxScore = exam.MaxScore,
+                Status = result.Status,
+                SubmittedAt = result.SubmittedAt,
+                Note = result.Note
+            };
+
+            foreach (var examQuestion in examQuestions)
+            {
+                var question = examQuestion.Question;
+
+                if (question == null)
+                    continue;
+
+                var answer = result.ExamAnswers.FirstOrDefault(
+                    a => a.QuestionId == question.QuestionId);
+
+                var item = new TeacherExamGradeQuestionViewModel
+                {
+                    ExamAnswerId = answer?.ExamAnswerId,
+                    ExamQuestionId = examQuestion.ExamQuestionId,
+                    QuestionId = question.QuestionId,
+                    QuestionOrder = examQuestion.QuestionOrder,
+                    QuestionText = question.QuestionText,
+                    QuestionType = question.QuestionType,
+                    Skill = question.Skill,
+                    MaxScore = question.Score,
+                    Score = answer?.Score ?? 0,
+                    IsCorrect = answer?.IsCorrect,
+                    AudioAnswerUrl = answer?.AudioAnswerUrl,
+
+                    RequiresManualGrading =
+                        string.Equals(question.QuestionType, "Speaking",
+                            StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(question.QuestionType, "Writing",
+                            StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(question.Skill, "Speaking",
+                            StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(question.Skill, "Writing",
+                            StringComparison.OrdinalIgnoreCase)
+                };
+
+                if (answer?.AnswerId != null)
+                {
+                    item.StudentAnswer = question.Answers
+                        .FirstOrDefault(a => a.AnswerId == answer.AnswerId)
+                        ?.AnswerText;
+                }
+                else
+                {
+                    item.StudentAnswer = answer?.TextAnswer;
+                }
+
+                item.CorrectAnswer = question.Answers
+                    .FirstOrDefault(a => a.IsCorrect)?.AnswerText;
+
+                if (question.SpeakingContent != null)
+                {
+                    item.SpeakingPrompt = question.SpeakingContent.Prompt;
+                    item.SpeakingPreparationTime =
+                        question.SpeakingContent.PreparationTime;
+                    item.SpeakingResponseTime =
+                        question.SpeakingContent.ResponseTime;
+                }
+
+                if (question.WritingContent != null)
+                {
+                    item.WritingPrompt = question.WritingContent.Prompt;
+                    item.WritingTaskPrompt = question.WritingContent.Prompt;
+                }
+                else
+                {
+                    item.WritingTaskPrompt = question.QuestionText;
+                }
+
+                model.Questions.Add(item);
+            }
+
+            await PopulateWritingFlagsAsync(model);
+
+            return model;
+        }
+
         private async Task<IActionResult> ReloadGradeView(
             ExamResult result,
             TeacherExamGradeViewModel model)
@@ -642,6 +737,9 @@ namespace LanguageCenterManagement.Controllers
                 var submittedQuestion = model.Questions
                     .FirstOrDefault(q =>
                         q.QuestionId == question.QuestionId);
+
+                submittedQuestion.ExamAnswerId =
+                    existingAnswer?.ExamAnswerId;
 
                 if (submittedQuestion == null)
                 {
@@ -690,6 +788,7 @@ namespace LanguageCenterManagement.Controllers
                         StringComparison.OrdinalIgnoreCase);
             }
 
+            await PopulateWritingFlagsAsync(model);
             return View("Grade", model);
         }
     }

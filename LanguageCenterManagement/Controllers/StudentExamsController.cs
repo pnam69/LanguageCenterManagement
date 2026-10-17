@@ -17,18 +17,21 @@ namespace LanguageCenterManagement.Controllers
         private readonly AiAnswerReviewService _aiAnswerReviewService;
         private readonly WritingIntegrityService _writingIntegrityService;
         private readonly ILogger<StudentExamsController> _logger;
+        private readonly WritingAiAssessmentService _writingAiAssessmentService;
 
         public StudentExamsController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             AiAnswerReviewService aiAnswerReviewService,
             WritingIntegrityService writingIntegrityService,
+            WritingAiAssessmentService writingAiAssessmentService,
             ILogger<StudentExamsController> logger)
         {
             _context = context;
             _userManager = userManager;
             _aiAnswerReviewService = aiAnswerReviewService;
             _writingIntegrityService = writingIntegrityService;
+            _writingAiAssessmentService = writingAiAssessmentService;
             _logger = logger;
         }
 
@@ -553,15 +556,19 @@ namespace LanguageCenterManagement.Controllers
 
             // Check submitted writing answers after the exam is safely saved.
             // Integrity-check failures must not discard a student's submission.
+
             var writingAnswerIds = await _context.ExamAnswers
                 .Where(a =>
                     a.ExamResultId == examResult.ExamResultId &&
                     a.TextAnswer != null &&
+                    a.TextAnswer.Trim() != "" &&
                     a.Question != null &&
                     a.Question.Skill == "Writing")
                 .Select(a => a.ExamAnswerId)
                 .ToListAsync();
 
+            // Run both checks independently.
+            // Neither failure should affect the saved exam submission.
             foreach (var answerId in writingAnswerIds)
             {
                 try
@@ -572,7 +579,19 @@ namespace LanguageCenterManagement.Controllers
                 {
                     _logger.LogWarning(
                         ex,
-                        "Writing integrity check failed for answer {AnswerId}",
+                        "Writing similarity check failed for answer {AnswerId}",
+                        answerId);
+                }
+
+                try
+                {
+                    await _writingAiAssessmentService.CheckAnswerAsync(answerId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Ollama writing assessment failed for answer {AnswerId}",
                         answerId);
                 }
             }

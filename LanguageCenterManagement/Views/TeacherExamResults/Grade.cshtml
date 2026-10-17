@@ -271,6 +271,231 @@
                                 }
 
                             </div>
+                            @if (question.Skill.Equals(
+                                "Writing",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                <div class="mt-3 p-3 border rounded">
+                                    <h6 class="mb-3">Writing review</h6>
+
+                                    @if (question.AiReviewStatus != null)
+                                    {
+                                        <div class="mb-3">
+                                            <strong>AI-assisted review:</strong>
+
+                                            @if (question.AiReviewFlagged)
+                                            {
+                                                <span class="badge bg-warning text-dark">
+                                                    Review recommended
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">
+                                                    @question.AiReviewStatus
+                                                </span>
+                                            }
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                question.AiReviewIndicators))
+                                            {
+                                                <p class="mt-2 mb-1">
+                                                    <strong>Indicators:</strong>
+                                                    @question.AiReviewIndicators
+                                                </p>
+                                            }
+
+                                            @if (!string.IsNullOrWhiteSpace(
+                                                question.AiReviewExplanation))
+                                            {
+                                                <p class="mb-1 text-muted">
+                                                    @question.AiReviewExplanation
+                                                </p>
+                                            }
+
+                                            @if (question.AiReviewCheckedAt.HasValue)
+                                            {
+                                                <small class="text-muted">
+                                                    Checked: @question.AiReviewCheckedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted mb-3">
+                                            No AI writing review available.
+                                        </p>
+                                    }
+
+                                    <hr />
+
+                                    <strong>Essay similarity:</strong>
+
+                                    @if (question.SimilarityDetected)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            Similarity detected
+                                        </span>
+
+                                        <p class="mt-2 mb-1">
+                                            Similarity:
+                                            <strong>
+                                                @question.SimilarityPercent?.ToString("0.##")%
+                                            </strong>
+                                        </p>
+
+                                        <p class="mb-1">
+                                            Review status:
+                                            <strong>@question.SimilarityStatus</strong>
+                                        </p>
+
+                                        @if (!string.IsNullOrWhiteSpace(
+                                            question.SimilarityMatchingText))
+                                        {
+                                            <details class="mt-2">
+                                                <summary>View matching text</summary>
+                                                <div class="mt-2 p-2 bg-light rounded">
+                                                    @question.SimilarityMatchingText
+                                                </div>
+                                            </details>
+                                        }
+
+                                        <a asp-controller="WritingIntegrityReviews"
+                                           asp-action="Index"
+                                           class="btn btn-sm btn-outline-secondary mt-2">
+                                            Open similarity reviews
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-muted mb-0">
+                                            No recorded essay similarity match.
+                                        </p>
+                                    }
+                                </div>
+                            }
+
+                            @if (string.Equals(question.Skill, "Writing",
+                                StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(question.QuestionType, "Writing",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                <div class="card mt-3 mb-4 border-primary">
+                                    <div class="card-header bg-light">
+                                        <strong>
+                                            <i class="bi bi-robot me-2"></i>
+                                            AI Writing Assessment
+                                        </strong>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <p class="text-muted small">
+                                            AI feedback is advisory. Review it before deciding
+                                            on the student's official score.
+                                        </p>
+
+                                        <button type="submit"
+                                                formaction="@Url.Action(
+                                                "AssessWriting",
+                                                "TeacherExamResults",
+                                                new { id = Model.ExamResultId })"
+                                                formmethod="post"
+                                                name="answerId"
+                                                value="@question.ExamAnswerId"
+                                                class="btn btn-outline-primary"
+                                                disabled="@(question.ExamAnswerId == null)">
+                                            <i class="bi bi-clipboard-check me-1"></i>
+                                            Assess with AI
+                                        </button>
+
+                                        @if (!string.IsNullOrWhiteSpace(question.AiAssessmentError))
+                                        {
+                                            <div class="alert alert-danger mt-3 mb-0">
+                                                @question.AiAssessmentError
+                                            </div>
+                                        }
+
+                                        @if (question.AiAssessment is { } assessment)
+                                        {
+                                            <hr />
+
+                                            <div class="mb-3">
+                                                <span class="text-muted">Suggested writing score</span>
+                                                <h4>
+                                                    @assessment.TotalScore / @assessment.MaxScore
+                                                </h4>
+                                            </div>
+
+                                            <h6>Overall feedback</h6>
+                                            <p>@assessment.OverallFeedback</p>
+
+                                            <h6>Assessment criteria</h6>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Criterion</th>
+                                                            <th>Score</th>
+                                                            <th>Feedback</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var criterion in assessment.Criteria)
+                                                        {
+                                                            <tr>
+                                                                <td>@criterion.Name</td>
+                                                                <td>
+                                                                    @criterion.Score / @criterion.MaxScore
+                                                                </td>
+                                                                <td>@criterion.Feedback</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            @if (assessment.Corrections.Any())
+                                            {
+                                                <h6>Suggested corrections</h6>
+                                                <ul>
+                                                    @foreach (var correction in assessment.Corrections)
+                                                    {
+                                                        <li>@correction</li>
+                                                    }
+                                                </ul>
+                                            }
+
+                                            @if (assessment.Suggestions.Any())
+                                            {
+                                                <h6>Areas to improve</h6>
+                                                <ul>
+                                                    @foreach (var suggestion in assessment.Suggestions)
+                                                    {
+                                                        <li>@suggestion</li>
+                                                    }
+                                                </ul>
+                                            }
+
+                                            @if (!string.IsNullOrWhiteSpace(assessment.ImprovedVersion))
+                                            {
+                                                <details class="mt-3">
+                                                    <summary>View improved version</summary>
+                                                    <div class="border rounded p-3 mt-2">
+                                                        @assessment.ImprovedVersion
+                                                    </div>
+                                                </details>
+                                            }
+
+                                            <div class="alert alert-secondary mt-3 mb-0">
+                                                This score is a suggestion out of 20, not the official
+                                                exam score. Compare the feedback with the rubric and
+                                                enter the final score in the grading field above.
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
 
                             @if (question.RequiresManualGrading)
                             {

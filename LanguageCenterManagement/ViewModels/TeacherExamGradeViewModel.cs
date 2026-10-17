@@ -64,5 +64,25 @@
 
         public string? WritingPrompt { get; set; }
         public string? AudioAnswerUrl { get; set; }
+
+        public int? ExamAnswerId { get; set; }
+
+        // AI writing review
+        public bool AiReviewFlagged { get; set; }
+        public string? AiReviewStatus { get; set; }
+        public string? AiReviewIndicators { get; set; }
+        public string? AiReviewExplanation { get; set; }
+        public DateTime? AiReviewCheckedAt { get; set; }
+
+        // Essay similarity review
+        public bool SimilarityDetected { get; set; }
+        public decimal? SimilarityPercent { get; set; }
+        public string? SimilarityStatus { get; set; }
+        public string? SimilarityMatchingText { get; set; }
+        public int? SimilarityReviewId { get; set; }
+
+        public WritingAssessmentResultViewModel? AiAssessment { get; set; }
+        public string? AiAssessmentError { get; set; }
+        public string? WritingTaskPrompt { get; set; }
     }
 }

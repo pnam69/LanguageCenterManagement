@@ -975,6 +975,40 @@ namespace LanguageCenterManagement.Migrations
                     b.ToTable("Tuitions");
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.WritingAiReview", b =>
+                {
+                    b.Property<int>("WritingAiReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WritingAiReviewId"));
+
+                    b.Property<DateTime>("CheckedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExamAnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Explanation")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Indicators")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("WritingAiReviewId");
+
+                    b.HasIndex("ExamAnswerId");
+
+                    b.ToTable("WritingAiReviews");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.WritingContent", b =>
                 {
                     b.Property<int>("WritingContentId")
@@ -1472,6 +1506,17 @@ namespace LanguageCenterManagement.Migrations
                     b.Navigation("Class");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.WritingAiReview", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.ExamAnswer", "ExamAnswer")
+                        .WithMany()
+                        .HasForeignKey("ExamAnswerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ExamAnswer");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.WritingContent", b =>

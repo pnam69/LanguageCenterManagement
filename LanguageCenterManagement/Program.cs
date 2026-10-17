@@ -52,6 +52,14 @@ builder.Services.AddHttpClient<LanguageCenterManagement.Services.Ai.AiWritingAss
         client.Timeout = TimeSpan.FromSeconds(90);
     });
 
+builder.Services.AddHttpClient<
+    LanguageCenterManagement.Services.Ai.WritingAiAssessmentService>(
+    client =>
+    {
+        client.BaseAddress = new Uri("http://localhost:11434/");
+        client.Timeout = TimeSpan.FromSeconds(120);
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
