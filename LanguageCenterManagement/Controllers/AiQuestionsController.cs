@@ -116,7 +116,7 @@ namespace LanguageCenterManagement.Controllers
                         new AiGeneratedAnswerViewModel
                         {
                             AnswerText = a.AnswerText,
-                            IsCorrect = model.QuestionType == "FillInTheBlank"
+                            IsCorrect = a.IsCorrect
                         }).ToList()
                 }).ToList();
 
@@ -129,19 +129,32 @@ namespace LanguageCenterManagement.Controllers
                 // The browser disconnected or the request was cancelled.
                 return new EmptyResult();
             }
+
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogWarning(ex, "AI question generation timed out.");
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Question generation took too long. Try again with fewer questions.");
+            }
+
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "Ollama question generation failed.");
                 ModelState.AddModelError(
                     "",
-                    "The AI service request failed. Check your API access and billing, then try again.");
+                    "Cannot connect to Ollama. Check that Ollama is running " +
+                    "and that the qwen2.5:3b model is available.");
             }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex, "Invalid AI question response.");
+                _logger.LogWarning(ex, "AI generated invalid questions.");
+
                 ModelState.AddModelError(
                     "",
-                    "The AI returned an invalid response. Please try again.");
+                    "The AI could not generate valid questions after several attempts. " +
+                    "Try again or reduce the number of questions.");
             }
             catch (System.Text.Json.JsonException ex)
             {

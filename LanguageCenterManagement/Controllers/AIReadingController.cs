@@ -1,10 +1,12 @@
-﻿using LanguageCenterManagement.Data;
+﻿
+using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
 using LanguageCenterManagement.Services.Ai;
 using LanguageCenterManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace LanguageCenterManagement.Controllers
 {
@@ -13,13 +15,16 @@ namespace LanguageCenterManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ReadingGenerationService _ollamaService;
+        private readonly ILogger<AIReadingController> _logger;
 
         public AIReadingController(
             ApplicationDbContext context,
-            ReadingGenerationService ollamaService)
+            ReadingGenerationService ollamaService,
+            ILogger<AIReadingController> logger)
         {
             _context = context;
             _ollamaService = ollamaService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -31,9 +36,10 @@ namespace LanguageCenterManagement.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Generate(
-            AIReadingGenerationViewModel model)
+            AIReadingGenerationViewModel model,
+            CancellationToken cancellationToken)
         {
-            // Passage is empty before generation, so validate the inputs first.
+            // Passage is generated, so validate the other inputs first.
             ModelState.Remove(nameof(model.Passage));
 
             if (!ModelState.IsValid)
@@ -46,18 +52,62 @@ namespace LanguageCenterManagement.Controllers
                     model.Level,
                     model.WordCount,
                     model.Focus);
+
+                if (cancellationToken.IsCancellationRequested)
+                    return new EmptyResult();
             }
-            catch (Exception ex) when (
-                ex is HttpRequestException ||
-                ex is TaskCanceledException ||
-                ex is InvalidOperationException ||
-                ex is System.Text.Json.JsonException)
+            catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
             {
+                return new EmptyResult();
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogWarning(ex, "AI reading generation timed out.");
+
                 ModelState.AddModelError(
                     string.Empty,
-                    "Could not generate the passage. " +
-                    "Check that Ollama is running and the configured model " +
-                    "exists. Details: " + ex.Message);
+                    "Passage generation took too long. Please try again.");
+
+                return View("Index", model);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Ollama reading generation failed.");
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Cannot connect to the AI service. Check that Ollama is running and try again.");
+
+                return View("Index", model);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Ollama returned an invalid reading passage.");
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "The AI could not generate a valid passage. Please try again.");
+
+                return View("Index", model);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Could not parse the AI reading response.");
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "The AI response could not be processed. Please try again.");
+
+                return View("Index", model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected AI reading generation error.");
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "An unexpected error occurred while generating the passage. Please try again.");
 
                 return View("Index", model);
             }

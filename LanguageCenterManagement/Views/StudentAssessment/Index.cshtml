@@ -1,0 +1,179 @@
+﻿@model LanguageCenterManagement.ViewModels.StudentAssessmentViewModel
+
+@{
+    ViewData["Title"] = "Study Assessment";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">My Study Assessment</h2>
+        <p class="text-muted">
+            Understand your progress and identify skills to improve.
+        </p>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Completed Exams</p>
+                    <h3 class="fw-bold">@Model.CompletedExams</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Graded Questions</p>
+                    <h3 class="fw-bold">@Model.GradedAnswers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-2">Overall Accuracy</p>
+
+                    @if (Model.GradedAnswers > 0)
+                    {
+                        <h3 class="fw-bold">
+                            @Model.OverallPercentage%
+                        </h3>
+                    }
+                    else
+                    {
+                        <h3 class="fw-bold">N/A</h3>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3">Performance by Skill</h5>
+
+            @foreach (var skill in Model.Skills)
+            {
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong>@skill.Skill</strong>
+
+                        @if (skill.PossibleScore > 0)
+                        {
+                            <span>
+                                @skill.Percentage%
+                                <small class="text-muted">
+                                    (@skill.GradedQuestions questions)
+                                </small>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">
+                                Not enough graded data
+                            </span>
+                        }
+                    </div>
+
+                    @if (skill.PossibleScore > 0)
+                    {
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 style="width: @(Math.Clamp(skill.Percentage, 0, 100))%"
+                                 aria-valuenow="@skill.Percentage"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (Model.GradedAnswers == 0)
+            {
+                <div class="alert alert-info mb-0">
+                    Your assessment will appear when you have
+                    completed exams with graded questions.
+                </div>
+            }
+            else
+            {
+                var weakestSkill = Model.Skills
+                    .Where(s => s.PossibleScore > 0)
+                    .OrderBy(s => s.Percentage)
+                    .FirstOrDefault();
+
+                if (weakestSkill != null)
+                {
+                    <div class="alert alert-light border mb-0">
+                        <strong>Suggested focus:</strong>
+                        Practice more @weakestSkill.Skill questions.
+                        Your current accuracy in this skill is
+                        @weakestSkill.Percentage%.
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="p-4">
+                <h5 class="fw-bold mb-0">Recent Exam Results</h5>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Exam</th>
+                            <th>Score</th>
+                            <th>Submitted</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var exam in Model.RecentExams)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <strong>@exam.ExamName</strong>
+                                </td>
+                                <td>
+                                    @exam.Score / @exam.MaxScore
+                                </td>
+                                <td>
+                                    @(exam.SubmittedAt?.ToString(
+                                        "dd/MM/yyyy HH:mm") ?? "-")
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a asp-controller="StudentExams"
+                                       asp-action="Result"
+                                       asp-route-id="@exam.ExamResultId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                        @if (!Model.RecentExams.Any())
+                        {
+                            <tr>
+                                <td colspan="4"
+                                    class="text-center text-muted py-4">
+                                    No completed exams yet.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

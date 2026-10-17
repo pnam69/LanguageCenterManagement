@@ -1,0 +1,149 @@
+﻿@model LanguageCenterManagement.Models.LanguageClass
+
+@{
+    ViewData["Title"] = "Class Details";
+}
+
+<div class="container-fluid py-4 px-lg-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">@Model.ClassName</h1>
+            <p class="text-muted mb-0">Class code: @Model.ClassCode</p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Classes
+        </a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Course</p>
+                    <h2 class="h5 mb-0">
+                        @(Model.Course?.CourseName ?? "Not assigned")
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Student Capacity</p>
+                    <h2 class="h5 mb-0">
+                        @Model.Enrollments.Count / @Model.MaxStudents
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Class Status</p>
+                    <h2 class="h5 mb-0">@Model.Status</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h2 class="h5 mb-1">Enrolled Students</h2>
+                <p class="text-muted small mb-0">
+                    View student contact information and attendance records.
+                </p>
+            </div>
+            <span class="badge bg-primary rounded-pill">
+                @Model.Enrollments.Count student(s)
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Student</th>
+                        <th>Contact Information</th>
+                        <th>Enrollment Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var enrollment in Model.Enrollments)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-semibold">
+                                    @(enrollment.Student?.FullName ?? "Student")
+                                </div>
+                                <small class="text-muted">
+                                    @(enrollment.Student?.StudentCode ?? "No student code")
+                                </small>
+                            </td>
+
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(enrollment.Student?.Email))
+                                {
+                                    <div>
+                                        <i class="bi bi-envelope me-1 text-muted"></i>
+                                        @enrollment.Student.Email
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(enrollment.Student?.Phone))
+                                {
+                                    <div>
+                                        <i class="bi bi-telephone me-1 text-muted"></i>
+                                        @enrollment.Student.Phone
+                                    </div>
+                                }
+
+                                @if (string.IsNullOrWhiteSpace(enrollment.Student?.Email)
+                                    && string.IsNullOrWhiteSpace(enrollment.Student?.Phone))
+                                {
+                                    <span class="text-muted">No contact information</span>
+                                }
+                            </td>
+
+                            <td>
+                                <span class="badge @(enrollment.Status == "Enrolled"
+                                      ? "bg-success-subtle text-success"
+                                      : "bg-secondary-subtle text-secondary")">
+                                    @(enrollment.Status ?? "Enrolled")
+                                </span>
+                            </td>
+
+                            <td class="text-end pe-4">
+                                @if (enrollment.Student != null)
+                                {
+                                    <a asp-controller="TeacherStudents"
+                                       asp-action="Details"
+                                       asp-route-studentId="@enrollment.StudentId"
+                                       asp-route-classId="@Model.LanguageClassId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-person-vcard me-1"></i>
+                                        View profile
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+
+                    @if (!Model.Enrollments.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-5">
+                                <i class="bi bi-people display-6 d-block mb-2"></i>
+                                No students are enrolled in this class yet.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

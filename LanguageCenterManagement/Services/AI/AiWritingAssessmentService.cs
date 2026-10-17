@@ -13,73 +13,76 @@ namespace LanguageCenterManagement.Services.Ai
             _httpClient = httpClient;
         }
 
+
         public async Task<WritingAssessmentResultViewModel> AssessAsync(
             string taskPrompt,
             string studentWriting,
             CancellationToken cancellationToken = default)
         {
             var prompt = $$"""
-            You are an English writing tutor and assessment assistant.
+                You are an English writing tutor and assessment assistant.
 
-            Assess the student's writing against this task:
-            {{taskPrompt}}
+                Assess the student's writing against this task:
+                {{taskPrompt}}
 
-            Student's writing:
-            {{studentWriting}}
+                Student's writing:
+                {{studentWriting}}
 
-            Score the writing using exactly four criteria, each from 0 to 5:
-            1. Task Achievement and Relevance
-            2. Organization and Coherence
-            3. Vocabulary
-            4. Grammar and Sentence Structure
+                Score exactly four criteria, each from 0 to 5:
+                1. Task Achievement and Relevance
+                2. Organization and Coherence
+                3. Vocabulary
+                4. Grammar and Sentence Structure
 
-            TotalScore must equal the sum of the four criterion scores.
-            MaxScore must be 20.
+                TotalScore must equal the sum of the four criterion scores.
+                MaxScore must be 20.
+                Do not invent mistakes. Quote actual phrases when correcting.
+                Suggestions must be actionable.
+                ImprovedVersion must preserve the student's meaning.
+                If there are no errors, do not invent any.
 
-            Give specific, constructive feedback. Do not invent mistakes.
-            Corrections should quote an actual phrase from the student's writing
-            and explain a correction when possible.
-            Suggestions should be actionable.
-            ImprovedVersion should preserve the student's original meaning and
-            use language appropriate to the apparent proficiency level.
-            If the writing is already correct, say so instead of inventing errors.
-
-            Return only valid JSON using this exact structure:
-            {
-              "totalScore": 0,
-              "maxScore": 20,
-              "overallFeedback": "Overall feedback",
-              "criteria": [
+                Return only valid JSON with this structure:
                 {
-                  "name": "Task Achievement and Relevance",
-                  "score": 0,
-                  "maxScore": 5,
-                  "feedback": "Feedback"
-                },
-                {
-                  "name": "Organization and Coherence",
-                  "score": 0,
-                  "maxScore": 5,
-                  "feedback": "Feedback"
-                },
-                {
-                  "name": "Vocabulary",
-                  "score": 0,
-                  "maxScore": 5,
-                  "feedback": "Feedback"
-                },
-                {
-                  "name": "Grammar and Sentence Structure",
-                  "score": 0,
-                  "maxScore": 5,
-                  "feedback": "Feedback"
+                  "totalScore": 0,
+                  "maxScore": 20,
+                  "overallFeedback": "Overall feedback",
+                  "criteria": [
+                    {
+                      "name": "Task Achievement and Relevance",
+                      "score": 0,
+                      "maxScore": 5,
+                      "feedback": "Feedback"
+                    },
+                    {
+                      "name": "Organization and Coherence",
+                      "score": 0,
+                      "maxScore": 5,
+                      "feedback": "Feedback"
+                    },
+                    {
+                      "name": "Vocabulary",
+                      "score": 0,
+                      "maxScore": 5,
+                      "feedback": "Feedback"
+                    },
+                    {
+                      "name": "Grammar and Sentence Structure",
+                      "score": 0,
+                      "maxScore": 5,
+                      "feedback": "Feedback"
+                    }
+                  ],
+                  "corrections": [
+                    {
+                      "original": "Exact original phrase",
+                      "corrected": "Corrected phrase",
+                      "explanation": "Reason"
+                    }
+                  ],
+                  "suggestions": ["Actionable suggestion"],
+                  "improvedVersion": "Revised writing"
                 }
-              ],
-              "corrections": ["Original phrase -> corrected phrase and reason"],
-              "suggestions": ["Actionable suggestion"],
-              "improvedVersion": "Revised version of the student's writing"
-            }
-            """;
+                """;
 
             var request = new
             {
@@ -90,9 +93,7 @@ namespace LanguageCenterManagement.Services.Ai
             };
 
             using var response = await _httpClient.PostAsJsonAsync(
-                "api/generate",
-                request,
-                cancellationToken);
+                "api/generate", request, cancellationToken);
 
             response.EnsureSuccessStatusCode();
 
@@ -106,16 +107,87 @@ namespace LanguageCenterManagement.Services.Ai
                     "Ollama returned an empty writing assessment.");
             }
 
-            var result =
-                JsonSerializer.Deserialize<WritingAssessmentResultViewModel>(
-                    ollamaResponse.Response,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+            using var document = JsonDocument.Parse(ollamaResponse.Response);
+            var root = document.RootElement;
 
-            if (result == null || result.Criteria == null ||
-                result.Criteria.Count != 4)
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                throw new InvalidOperationException(
+                    "Ollama returned an invalid JSON object.");
+            }
+
+            var normalizedCorrections = new List<string>();
+
+            if (root.TryGetProperty("corrections", out var corrections) &&
+                corrections.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var item in corrections.EnumerateArray())
+                {
+                    if (item.ValueKind == JsonValueKind.String)
+                    {
+                        var text = item.GetString();
+                        if (!string.IsNullOrWhiteSpace(text))
+                            normalizedCorrections.Add(text);
+                    }
+                    else if (item.ValueKind == JsonValueKind.Object)
+                    {
+                        string GetText(string name) =>
+                            item.TryGetProperty(name, out var value) &&
+                            value.ValueKind == JsonValueKind.String
+                                ? value.GetString() ?? string.Empty
+                                : string.Empty;
+
+                        var original = GetText("original");
+                        var corrected = GetText("corrected");
+                        var explanation = GetText("explanation");
+
+                        var correction = string.IsNullOrWhiteSpace(original)
+                            ? corrected
+                            : $"{original} -> {corrected}";
+
+                        if (!string.IsNullOrWhiteSpace(explanation))
+                            correction += $" ({explanation})";
+
+                        if (!string.IsNullOrWhiteSpace(correction))
+                            normalizedCorrections.Add(correction);
+                    }
+                }
+            }
+
+            using var normalizedStream = new MemoryStream();
+
+            using (var writer = new Utf8JsonWriter(normalizedStream))
+            {
+                writer.WriteStartObject();
+
+                foreach (var property in root.EnumerateObject())
+                {
+                    if (property.Name.Equals(
+                        "corrections", StringComparison.OrdinalIgnoreCase))
+                    {
+                        writer.WritePropertyName("corrections");
+                        JsonSerializer.Serialize(writer, normalizedCorrections);
+                    }
+                    else
+                    {
+                        property.WriteTo(writer);
+                    }
+                }
+
+                writer.WriteEndObject();
+            }
+
+            var normalizedJson =
+                System.Text.Encoding.UTF8.GetString(normalizedStream.ToArray());
+
+            var result = JsonSerializer.Deserialize<WritingAssessmentResultViewModel>(
+                normalizedJson,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            if (result?.Criteria == null || result.Criteria.Count != 4)
             {
                 throw new InvalidOperationException(
                     "Ollama returned an invalid writing assessment.");
@@ -129,7 +201,6 @@ namespace LanguageCenterManagement.Services.Ai
 
             result.TotalScore = result.Criteria.Sum(c => c.Score);
             result.MaxScore = 20;
-
             result.OverallFeedback ??= string.Empty;
             result.Corrections ??= new List<string>();
             result.Suggestions ??= new List<string>();
@@ -137,6 +208,7 @@ namespace LanguageCenterManagement.Services.Ai
 
             return result;
         }
+
 
         private class OllamaResponse
         {

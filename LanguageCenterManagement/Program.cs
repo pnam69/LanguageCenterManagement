@@ -35,13 +35,20 @@ builder.Services.AddHttpClient<
     });
 
 builder.Services.AddHttpClient<AiAnswerReviewService>(
-    client => client.Timeout = TimeSpan.FromSeconds(90));
+    client => client.Timeout = TimeSpan.FromMinutes(3));
 
-builder.Services.AddHttpClient<
-    LanguageCenterManagement.Services.Ai.ReadingGenerationService>();
 
-builder.Services.AddScoped<
-    LanguageCenterManagement.Services.Ai.WritingIntegrityService>();
+builder.Services.AddHttpClient<ReadingGenerationService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:11434/");
+    client.Timeout = TimeSpan.FromMinutes(3);
+});
+
+builder.Services.AddHttpClient<AiWritingAssessmentService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:11434/");
+    client.Timeout = TimeSpan.FromMinutes(3);
+});
 
 builder.Services.AddMemoryCache();
 
@@ -59,6 +66,8 @@ builder.Services.AddHttpClient<
         client.BaseAddress = new Uri("http://localhost:11434/");
         client.Timeout = TimeSpan.FromSeconds(120);
     });
+
+builder.Services.AddScoped<WritingIntegrityService>();
 
 var app = builder.Build();
 

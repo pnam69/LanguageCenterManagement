@@ -88,6 +88,19 @@
 							</td>
 
 							<td>
+								@if (attendance.Schedule != null)
+								{
+									@attendance.Schedule.StartTime.ToString(@"hh\:mm")
+									<text> – </text>
+									@attendance.Schedule.EndTime.ToString(@"hh\:mm")
+								}
+								else
+								{
+									<span class="text-muted">Historical record</span>
+								}
+							</td>
+
+							<td>
 								@(string.IsNullOrWhiteSpace(attendance.Note)
 									? "-"
 									: attendance.Note)

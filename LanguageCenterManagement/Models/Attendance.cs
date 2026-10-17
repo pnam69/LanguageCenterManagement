@@ -12,6 +12,9 @@ namespace LanguageCenterManagement.Models
         public int ClassId { get; set; }
         public LanguageClass? Class { get; set; }
 
+        public int? ScheduleId { get; set; }
+        public Schedule? Schedule { get; set; }
+
         public DateTime AttendanceDate { get; set; }
 
         [StringLength(20)]

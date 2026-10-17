@@ -1,31 +1,49 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using LanguageCenterManagement.Models;
 
 namespace LanguageCenterManagement.ViewModels
 {
+    public class TeacherAttendanceScheduleViewModel
+    {
+        public int ScheduleId { get; set; }
+        public string ClassCode { get; set; } = "";
+        public string ClassName { get; set; } = "";
+        public string CourseName { get; set; } = "";
+        public string RoomName { get; set; } = "";
+        public DateTime StudyDate { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
+        public string Status { get; set; } = "";
+        public int StudentCount { get; set; }
+        public int RecordedCount { get; set; }
+    }
+
     public class TeacherAttendanceViewModel
     {
-        [Required]
-        public int ClassId { get; set; }
+        public int ScheduleId { get; set; }
+
+        public string ClassName { get; set; } = "";
+        public string ClassCode { get; set; } = "";
+        public string CourseName { get; set; } = "";
+        public string RoomName { get; set; } = "";
 
         [Required]
         [DataType(DataType.Date)]
-        public DateTime AttendanceDate { get; set; } = DateTime.Today;
+        public DateTime AttendanceDate { get; set; }
 
-        public string? ClassName { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
 
         public List<TeacherAttendanceStudentViewModel> Students { get; set; }
-            = new List<TeacherAttendanceStudentViewModel>();
+            = new();
     }
 
     public class TeacherAttendanceStudentViewModel
     {
         public int StudentId { get; set; }
+        public string StudentCode { get; set; } = "";
+        public string FullName { get; set; } = "";
 
-        public string StudentCode { get; set; } = string.Empty;
-
-        public string FullName { get; set; } = string.Empty;
-
+        [Required]
         public string Status { get; set; } = "Present";
 
         public string? Note { get; set; }

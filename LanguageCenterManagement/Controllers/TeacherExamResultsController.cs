@@ -1,11 +1,12 @@
 ﻿using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
+using LanguageCenterManagement.Services.Ai;
 using LanguageCenterManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LanguageCenterManagement.Services.Ai;
 
 namespace LanguageCenterManagement.Controllers
 {
@@ -95,7 +96,9 @@ namespace LanguageCenterManagement.Controllers
                         ?? $"Student #{r.StudentId}",
 
                     Score = r.Score,
-                    MaxScore = exam.MaxScore,
+                    MaxScore = exam.ExamQuestions
+                        .Where(eq => eq.Question != null)
+                        .Sum(eq => eq.Question!.Score),
                     Status = r.Status,
                     SubmittedAt = r.SubmittedAt
                 })
@@ -590,8 +593,7 @@ namespace LanguageCenterManagement.Controllers
             }
         }
 
-        private async Task<TeacherExamGradeViewModel> BuildGradeViewModelAsync(
-    ExamResult result)
+        private async Task<TeacherExamGradeViewModel> BuildGradeViewModelAsync(ExamResult result)
         {
             var exam = result.Exam!;
 
@@ -617,7 +619,9 @@ namespace LanguageCenterManagement.Controllers
                 StudentName = result.Student?.FullName
                     ?? $"Student #{result.StudentId}",
                 Score = result.Score,
-                MaxScore = exam.MaxScore,
+                MaxScore = examQuestions
+                    .Where(eq => eq.Question != null)
+                    .Sum(eq => eq.Question!.Score),
                 Status = result.Status,
                 SubmittedAt = result.SubmittedAt,
                 Note = result.Note

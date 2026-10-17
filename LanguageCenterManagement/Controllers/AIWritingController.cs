@@ -45,11 +45,22 @@ namespace LanguageCenterManagement.Controllers
 
                 return View("Results", model);
             }
+
             catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
             {
-                ModelState.AddModelError(string.Empty,
+                // The browser disconnected or the request was cancelled.
+                return new EmptyResult();
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogWarning(ex, "AI writing assessment timed out.");
+
+                ModelState.AddModelError(
+                    string.Empty,
                     "The assessment took too long. Please try again.");
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "AI student writing assessment failed.");
@@ -87,11 +98,22 @@ namespace LanguageCenterManagement.Controllers
 
                 return View("Results", model);
             }
+
             catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
             {
-                ModelState.AddModelError(string.Empty,
+                // The browser disconnected or the request was cancelled.
+                return new EmptyResult();
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogWarning(ex, "AI writing assessment timed out.");
+
+                ModelState.AddModelError(
+                    string.Empty,
                     "The assessment took too long. Please try again.");
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "AI teacher writing assessment failed.");

@@ -238,14 +238,35 @@ namespace LanguageCenterManagement.Data
                 })
                 .IsUnique();
 
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Student)
+                .WithMany(s => s.Attendances)
+                .HasForeignKey(a => a.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Class)
+                .WithMany(c => c.Attendances)
+                .HasForeignKey(a => a.ClassId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Schedule)
+                .WithMany()
+                .HasForeignKey(a => a.ScheduleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // One attendance record per student per scheduled lesson.
             modelBuilder.Entity<Attendance>()
                 .HasIndex(a => new
                 {
                     a.StudentId,
-                    a.ClassId,
-                    a.AttendanceDate
+                    a.ScheduleId
                 })
-                .IsUnique();
+                .IsUnique()
+                .HasFilter("[ScheduleId] IS NOT NULL");
+
 
             modelBuilder.Entity<ExamQuestion>()
                 .HasIndex(eq => new
@@ -316,12 +337,6 @@ namespace LanguageCenterManagement.Data
                 .ToTable("WritingContent");
             modelBuilder.Entity<ReadingContent>()
                 .ToTable("ReadingContent");
-
-            //modelBuilder.Entity<ReadingContent>()
-            //    .HasOne(r => r.Question)
-            //    .WithOne(q => q.ReadingContent)
-            //    .HasForeignKey<ReadingContent>(r => r.QuestionId)
-            //    .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Question>()
                 .HasOne(q => q.ReadingContent)

@@ -22,55 +22,199 @@ namespace LanguageCenterManagement.Controllers
             _userManager = userManager;
         }
 
-        // GET: TeacherAttendance
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user == null || !user.TeacherId.HasValue)
-            {
+            if (user?.TeacherId == null)
                 return Forbid();
-            }
 
-            var classes = await _context.Classes
-                .Include(c => c.Course)
-                .Where(c => c.TeacherId == user.TeacherId.Value)
-                .OrderBy(c => c.ClassName)
+            var teacherId = user.TeacherId.Value;
+
+            var schedules = await _context.Schedules
+                .AsNoTracking()
+                .Include(s => s.Class)
+                    .ThenInclude(c => c!.Course)
+                .Include(s => s.Room)
+                .Where(s =>
+                    s.Class != null &&
+                    s.Class.TeacherId == teacherId)
+                .OrderByDescending(s => s.StudyDate)
+                .ThenBy(s => s.StartTime)
+                .Select(s => new TeacherAttendanceScheduleViewModel
+                {
+                    ScheduleId = s.ScheduleId,
+                    ClassCode = s.Class!.ClassCode,
+                    ClassName = s.Class.ClassName,
+                    CourseName = s.Class.Course != null
+                        ? s.Class.Course.CourseName : "",
+                    RoomName = s.Room != null
+                        ? s.Room.RoomName : "No room",
+                    StudyDate = s.StudyDate,
+                    StartTime = s.StartTime,
+                    EndTime = s.EndTime,
+                    Status = s.Status,
+                    StudentCount = _context.Enrollments.Count(e =>
+                        e.ClassId == s.ClassId &&
+                        e.Student != null &&
+                        e.Status != "Rejected" &&
+                        e.Status != "Cancelled"),
+                    RecordedCount = _context.Attendances.Count(a =>
+                        a.ScheduleId == s.ScheduleId)
+                })
                 .ToListAsync();
 
-            return View(classes);
+            return View(schedules);
         }
 
-        // GET: TeacherAttendance/Take
         [HttpGet]
+        public async Task<IActionResult> Take(int scheduleId)
+        {
+            var schedule = await GetTeacherScheduleAsync(scheduleId);
+
+            if (schedule == null)
+                return NotFound();
+
+            if (!CanTakeAttendance(schedule.Status))
+            {
+                TempData["ErrorMessage"] =
+                    "Attendance cannot be taken for a cancelled or inactive session.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = await BuildAttendanceModelAsync(schedule);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Take(
-            int classId,
-            DateTime? attendanceDate)
+            TeacherAttendanceViewModel model)
+        {
+            var schedule = await GetTeacherScheduleAsync(model.ScheduleId);
+
+            if (schedule == null)
+                return NotFound();
+
+            if (!CanTakeAttendance(schedule.Status))
+                return Forbid();
+
+            var enrolledStudents = await _context.Enrollments
+                .Where(e =>
+                    e.ClassId == schedule.ClassId &&
+                    e.Student != null &&
+                    e.Status != "Rejected" &&
+                    e.Status != "Cancelled")
+                .Select(e => e.StudentId)
+                .Distinct()
+                .ToListAsync();
+
+            var postedIds = model.Students
+                .Select(s => s.StudentId)
+                .ToList();
+
+            // Do not accept missing, duplicate, or unenrolled students.
+            if (postedIds.Count != postedIds.Distinct().Count() ||
+                !postedIds.OrderBy(id => id)
+                    .SequenceEqual(enrolledStudents.OrderBy(id => id)))
+            {
+                return BadRequest(
+                    "The submitted student list does not match this class's enrollment.");
+            }
+
+            var validStatuses = new[] { "Present", "Absent", "Late" };
+
+            if (model.Students.Any(s =>
+                !validStatuses.Contains(s.Status)))
+            {
+                ModelState.AddModelError(
+                    "", "One or more attendance statuses are invalid.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var rebuilt = await BuildAttendanceModelAsync(schedule);
+
+                // Retain the teacher's submitted status and note values.
+                foreach (var student in rebuilt.Students)
+                {
+                    var submitted = model.Students.FirstOrDefault(
+                        s => s.StudentId == student.StudentId);
+
+                    if (submitted != null)
+                    {
+                        student.Status = submitted.Status;
+                        student.Note = submitted.Note;
+                    }
+                }
+
+                return View(rebuilt);
+            }
+
+            var existing = await _context.Attendances
+                .Where(a => a.ScheduleId == schedule.ScheduleId)
+                .ToDictionaryAsync(a => a.StudentId);
+
+            foreach (var student in model.Students)
+            {
+                if (!existing.TryGetValue(
+                    student.StudentId, out var attendance))
+                {
+                    attendance = new Attendance
+                    {
+                        StudentId = student.StudentId,
+                        ClassId = schedule.ClassId,
+                        ScheduleId = schedule.ScheduleId,
+                        AttendanceDate = schedule.StudyDate.Date
+                    };
+
+                    _context.Attendances.Add(attendance);
+                }
+
+                // Keep the class/date consistent with the actual session.
+                attendance.ClassId = schedule.ClassId;
+                attendance.AttendanceDate = schedule.StudyDate.Date;
+                attendance.Status = student.Status;
+                attendance.Note = student.Note;
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] =
+                $"Attendance for {schedule.Class!.ClassName} " +
+                $"on {schedule.StudyDate:dd/MM/yyyy} saved successfully.";
+
+            return RedirectToAction(nameof(Take), new
+            {
+                scheduleId = schedule.ScheduleId
+            });
+        }
+
+        private async Task<Schedule?> GetTeacherScheduleAsync(int scheduleId)
         {
             var user = await _userManager.GetUserAsync(User);
 
-            if (user == null || !user.TeacherId.HasValue)
-            {
-                return Forbid();
-            }
+            if (user?.TeacherId == null)
+                return null;
 
-            var selectedDate = attendanceDate?.Date ?? DateTime.Today;
+            return await _context.Schedules
+                .Include(s => s.Class)
+                    .ThenInclude(c => c!.Course)
+                .Include(s => s.Room)
+                .FirstOrDefaultAsync(s =>
+                    s.ScheduleId == scheduleId &&
+                    s.Class != null &&
+                    s.Class.TeacherId == user.TeacherId.Value);
+        }
 
-            var languageClass = await _context.Classes
-                .Include(c => c.Course)
-                .FirstOrDefaultAsync(c =>
-                    c.LanguageClassId == classId &&
-                    c.TeacherId == user.TeacherId.Value);
-
-            if (languageClass == null)
-            {
-                return NotFound();
-            }
-
+        private async Task<TeacherAttendanceViewModel>
+            BuildAttendanceModelAsync(Schedule schedule)
+        {
             var students = await _context.Enrollments
-                .Include(e => e.Student)
                 .Where(e =>
-                    e.ClassId == classId &&
+                    e.ClassId == schedule.ClassId &&
                     e.Student != null &&
                     e.Status != "Rejected" &&
                     e.Status != "Cancelled")
@@ -84,119 +228,40 @@ namespace LanguageCenterManagement.Controllers
                 })
                 .ToListAsync();
 
-            var existingAttendance = await _context.Attendances
-                .Where(a =>
-                    a.ClassId == classId &&
-                    a.AttendanceDate.Date == selectedDate)
-                .ToListAsync();
+            var existing = await _context.Attendances
+                .Where(a => a.ScheduleId == schedule.ScheduleId)
+                .ToDictionaryAsync(a => a.StudentId);
 
             foreach (var student in students)
             {
-                var existing = existingAttendance.FirstOrDefault(a =>
-                    a.StudentId == student.StudentId);
-
-                if (existing != null)
+                if (existing.TryGetValue(student.StudentId, out var record))
                 {
-                    student.Status = existing.Status;
-                    student.Note = existing.Note;
+                    student.Status = record.Status;
+                    student.Note = record.Note;
                 }
             }
 
-            var model = new TeacherAttendanceViewModel
+            return new TeacherAttendanceViewModel
             {
-                ClassId = classId,
-                AttendanceDate = selectedDate,
-                ClassName = languageClass.ClassName,
+                ScheduleId = schedule.ScheduleId,
+                ClassName = schedule.Class?.ClassName ?? "",
+                ClassCode = schedule.Class?.ClassCode ?? "",
+                CourseName = schedule.Class?.Course?.CourseName ?? "",
+                RoomName = schedule.Room?.RoomName ?? "No room",
+                AttendanceDate = schedule.StudyDate.Date,
+                StartTime = schedule.StartTime,
+                EndTime = schedule.EndTime,
                 Students = students
             };
-
-            return View(model);
         }
 
-        // POST: TeacherAttendance/Take
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Take(
-            TeacherAttendanceViewModel model)
+        private static bool CanTakeAttendance(string? status)
         {
-            var user = await _userManager.GetUserAsync(User);
-
-            if (user == null || !user.TeacherId.HasValue)
-            {
-                return Forbid();
-            }
-
-            var languageClass = await _context.Classes
-                .FirstOrDefaultAsync(c =>
-                    c.LanguageClassId == model.ClassId &&
-                    c.TeacherId == user.TeacherId.Value);
-
-            if (languageClass == null)
-            {
-                return NotFound();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                model.ClassName = languageClass.ClassName;
-                return View(model);
-            }
-
-            var studentIds = await _context.Enrollments
-                .Where(e =>
-                    e.ClassId == model.ClassId &&
-                    e.Status != "Rejected" &&
-                    e.Status != "Cancelled")
-                .Select(e => e.StudentId)
-                .ToListAsync();
-
-            var invalidStudent = model.Students
-                .FirstOrDefault(s => !studentIds.Contains(s.StudentId));
-
-            if (invalidStudent != null)
-            {
-                return BadRequest();
-            }
-
-            var attendanceDate = model.AttendanceDate.Date;
-
-            var existingAttendance = await _context.Attendances
-                .Where(a =>
-                    a.ClassId == model.ClassId &&
-                    a.AttendanceDate.Date == attendanceDate)
-                .ToListAsync();
-
-            foreach (var student in model.Students)
-            {
-                var attendance = existingAttendance.FirstOrDefault(a =>
-                    a.StudentId == student.StudentId);
-
-                if (attendance == null)
-                {
-                    attendance = new Attendance
-                    {
-                        StudentId = student.StudentId,
-                        ClassId = model.ClassId,
-                        AttendanceDate = attendanceDate
-                    };
-
-                    _context.Attendances.Add(attendance);
-                }
-
-                attendance.Status = student.Status;
-                attendance.Note = student.Note;
-            }
-
-            await _context.SaveChangesAsync();
-
-            TempData["SuccessMessage"] =
-                $"Attendance for {languageClass.ClassName} on {attendanceDate:dd/MM/yyyy} was saved successfully.";
-
-            return RedirectToAction(nameof(Take), new
-            {
-                classId = model.ClassId,
-                attendanceDate
-            });
+            // Cancelled sessions must never receive attendance.
+            return !string.IsNullOrWhiteSpace(status) &&
+                   status.Equals(
+                       "Scheduled",
+                       StringComparison.OrdinalIgnoreCase);
         }
     }
 }

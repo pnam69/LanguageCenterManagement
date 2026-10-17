@@ -140,6 +140,9 @@ namespace LanguageCenterManagement.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int?>("ScheduleId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -151,6 +154,12 @@ namespace LanguageCenterManagement.Migrations
                     b.HasKey("AttendanceId");
 
                     b.HasIndex("ClassId");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.HasIndex("StudentId", "ScheduleId")
+                        .IsUnique()
+                        .HasFilter("[ScheduleId] IS NOT NULL");
 
                     b.HasIndex("StudentId", "ClassId", "AttendanceDate")
                         .IsUnique();
@@ -1248,6 +1257,11 @@ namespace LanguageCenterManagement.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LanguageCenterManagement.Models.Schedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LanguageCenterManagement.Models.Student", "Student")
                         .WithMany("Attendances")
                         .HasForeignKey("StudentId")
@@ -1255,6 +1269,8 @@ namespace LanguageCenterManagement.Migrations
                         .IsRequired();
 
                     b.Navigation("Class");
+
+                    b.Navigation("Schedule");
 
                     b.Navigation("Student");
                 });

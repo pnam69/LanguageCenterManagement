@@ -30,12 +30,18 @@ namespace LanguageCenterManagement.Controllers
                 return Forbid();
             }
 
+
             var attendance = await _context.Attendances
+                .AsNoTracking()
                 .Include(a => a.Class)
                     .ThenInclude(c => c!.Course)
+                .Include(a => a.Schedule)
+                    .ThenInclude(s => s!.Room)
                 .Where(a => a.StudentId == user.StudentId.Value)
                 .OrderByDescending(a => a.AttendanceDate)
+                .ThenByDescending(a => a.Schedule!.StartTime)
                 .ToListAsync();
+
 
             return View(attendance);
         }

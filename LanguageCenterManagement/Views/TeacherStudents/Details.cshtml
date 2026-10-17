@@ -1,0 +1,202 @@
+﻿@model LanguageCenterManagement.Models.ViewModels.TeacherStudentDetailsViewModel
+
+@{
+    ViewData["Title"] = "Student Details";
+}
+
+<div class="container-fluid mt-4 mb-5 px-lg-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <a asp-action="Index" asp-route-classId="@Model.ClassId"
+               class="text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i> Back to My Students
+            </a>
+            <h1 class="h3 mt-2 mb-1">@Model.FullName</h1>
+            <p class="text-muted mb-0">
+                @Model.StudentCode · @Model.ClassCode - @Model.ClassName
+            </p>
+        </div>
+        <span class="badge @(Model.StudentStatus == "Active"
+              ? "bg-success" : "bg-secondary") rounded-pill px-3 py-2">
+            @Model.StudentStatus
+        </span>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-person-vcard me-2 text-primary"></i>
+                        Student Information
+                    </h2>
+                </div>
+                <div class="card-body px-4">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Full name</small>
+                            <span class="fw-semibold">@Model.FullName</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Student code</small>
+                            <span>@Model.StudentCode</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Email</small>
+                            @if (!string.IsNullOrWhiteSpace(Model.Email))
+                            {
+                                <a href="mailto:@Model.Email">@Model.Email</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not provided</span>
+                            }
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Phone</small>
+                            @if (!string.IsNullOrWhiteSpace(Model.Phone))
+                            {
+                                <a href="tel:@Model.Phone">@Model.Phone</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not provided</span>
+                            }
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Date of birth</small>
+                            <span>
+                                @(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Not provided")
+                            </span>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted d-block">Gender</small>
+                            <span>@(Model.Gender ?? "Not provided")</span>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block">Address</small>
+                            <span>@(Model.Address ?? "Not provided")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h2 class="h5 mb-0">
+                        <i class="bi bi-clipboard-check me-2 text-primary"></i>
+                        Class & Attendance
+                    </h2>
+                </div>
+                <div class="card-body px-4">
+                    <p class="mb-1 text-muted small">Enrolled class</p>
+                    <div class="fw-semibold">@Model.ClassName</div>
+                    <div class="text-muted small mb-3">
+                        @Model.ClassCode · @Model.CourseName
+                    </div>
+
+                    <p class="mb-1 text-muted small">Enrollment status</p>
+                    <div class="mb-4">@Model.EnrollmentStatus</div>
+
+                    <div class="row g-2 text-center">
+                        <div class="col-6">
+                            <div class="rounded bg-light p-3">
+                                <div class="h3 text-success mb-0">
+                                    @Model.PresentCount
+                                </div>
+                                <small class="text-muted">Present</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="rounded bg-light p-3">
+                                <div class="h3 text-danger mb-0">
+                                    @Model.AbsentCount
+                                </div>
+                                <small class="text-muted">Absent</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="rounded bg-light p-3">
+                                <div class="h3 text-warning mb-0">
+                                    @Model.LateCount
+                                </div>
+                                <small class="text-muted">Late</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="rounded bg-light p-3">
+                                <div class="h3 mb-0">
+                                    @Model.TotalLessonsRecorded
+                                </div>
+                                <small class="text-muted">Recorded lessons</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h2 class="h5 mb-0">Attendance History</h2>
+            <p class="text-muted small mb-0">
+                Recorded attendance for this student in this class.
+            </p>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.AttendanceHistory.Count == 0)
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-calendar2-x display-6 text-muted"></i>
+                    <p class="text-muted mt-3 mb-0">
+                        No attendance has been recorded for this class yet.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Date</th>
+                                <th>Status</th>
+                                <th class="pe-4">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.AttendanceHistory)
+                            {
+                                var badgeClass = item.Status switch
+                                {
+                                    "Present" => "bg-success",
+                                    "Absent" => "bg-danger",
+                                    "Late" => "bg-warning text-dark",
+                                    _ => "bg-secondary"
+                                };
+
+                                <tr>
+                                    <td class="ps-4">
+                                        @item.AttendanceDate.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>
+                                        <span class="badge @badgeClass">
+                                            @item.Status
+                                        </span>
+                                    </td>
+                                    <td class="pe-4">
+                                        @(string.IsNullOrWhiteSpace(item.Note)
+                                            ? "—" : item.Note)
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
