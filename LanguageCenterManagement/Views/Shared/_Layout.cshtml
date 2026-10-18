@@ -155,6 +155,7 @@
                                     </li>
 
 
+
                                     <li><hr class="dropdown-divider"></li>
 
                                     <li class="dropdown-header">
@@ -692,14 +693,36 @@
 
                                     <li>
                                         <a class="dropdown-item"
+                                           asp-controller="Account"
+                                           asp-action="Profile">
+                                            <i class="bi bi-person me-2"></i> My Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Account"
+                                           asp-action="Settings">
+                                            <i class="bi bi-gear me-2"></i> Account Settings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Account"
+                                           asp-action="ChangePassword">
+                                            <i class="bi bi-shield-lock me-2"></i> Change Password
+                                        </a>
+                                    </li>
+
+                                  @*   <li>
+                                        <a class="dropdown-item"
                                            asp-controller="Home"
                                            asp-action="Privacy">
 
                                             <i class="bi bi-person-circle"></i>
-                                            Profile
+                                            Privacy Policy
 
                                         </a>
-                                    </li>
+                                    </li> *@
 
                                     <li><hr class="dropdown-divider"></li>
 

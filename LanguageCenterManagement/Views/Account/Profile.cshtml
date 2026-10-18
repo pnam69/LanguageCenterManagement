@@ -1,0 +1,89 @@
+﻿@model LanguageCenterManagement.ViewModels.AccountProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container-fluid py-4 px-lg-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Profile</h2>
+            <p class="text-muted mb-0">View your account information.</p>
+        </div>
+        <a asp-action="EditProfile" class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1"></i> Edit Profile
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="rounded-circle bg-primary-subtle text-primary
+                    d-flex align-items-center justify-content-center"
+                     style="width:64px;height:64px;font-size:26px;">
+                    <i class="bi bi-person"></i>
+                </div>
+                <div>
+                    <h4 class="mb-1">
+                        @(string.IsNullOrWhiteSpace(Model.LinkedName)
+                        ? Model.Email : Model.LinkedName)
+                    </h4>
+                    <span class="badge bg-primary">@Model.Role</span>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Email Address</label>
+                    <div class="fw-semibold">@Model.Email</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label text-muted">Phone Number</label>
+                    <div class="fw-semibold">
+                        @(string.IsNullOrWhiteSpace(Model.PhoneNumber)
+                            ? "Not provided" : Model.PhoneNumber)
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.LinkedType))
+                {
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">
+                            @Model.LinkedType Name
+                        </label>
+                        <div class="fw-semibold">@Model.LinkedName</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">
+                            @Model.LinkedType Code
+                        </label>
+                        <div class="fw-semibold">@Model.LinkedCode</div>
+                    </div>
+                }
+            </div>
+
+            <hr class="my-4" />
+
+            <a asp-action="ChangePassword"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-shield-lock me-1"></i> Change Password
+            </a>
+
+            <a asp-action="Settings"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-gear me-1"></i> Account Settings
+            </a>
+        </div>
+    </div>
+</div>

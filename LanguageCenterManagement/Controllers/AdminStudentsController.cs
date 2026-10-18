@@ -1,5 +1,4 @@
-﻿
-using LanguageCenterManagement.Data;
+﻿using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

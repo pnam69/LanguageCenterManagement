@@ -4,6 +4,7 @@ using LanguageCenterManagement.Services;
 using LanguageCenterManagement.Services.Ai;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using LanguageCenterManagement.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +69,8 @@ builder.Services.AddHttpClient<
     });
 
 builder.Services.AddScoped<WritingIntegrityService>();
+
+builder.Services.AddScoped<IAppEmailSender, SmtpEmailSender>();
 
 var app = builder.Build();
 

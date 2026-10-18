@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Account Settings";
+}
+
+<div class="container-fluid py-4 px-lg-5">
+    <h2 class="fw-bold mb-1">Account Settings</h2>
+    <p class="text-muted mb-4">
+        Manage your profile and account security.
+    </p>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <i class="bi bi-person-gear fs-3 text-primary"></i>
+                    <h5 class="fw-bold mt-3">Personal Information</h5>
+                    <p class="text-muted">
+                        View your account details and update your phone number.
+                    </p>
+                    <a asp-action="EditProfile"
+                       class="btn btn-outline-primary">
+                        Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <i class="bi bi-shield-lock fs-3 text-primary"></i>
+                    <h5 class="fw-bold mt-3">Account Security</h5>
+                    <p class="text-muted">
+                        Change your password to keep your account secure.
+                    </p>
+                    <a asp-action="ChangePassword"
+                       class="btn btn-outline-primary">
+                        Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
