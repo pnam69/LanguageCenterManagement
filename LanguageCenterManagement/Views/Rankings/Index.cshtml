@@ -1,0 +1,250 @@
+﻿@model LanguageCenterManagement.ViewModels.RankingsViewModel
+
+@{
+    ViewData["Title"] = "Academic Rankings";
+}
+
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h2>Academic Rankings</h2>
+        <p class="text-muted">
+            Compare student performance, class results, and teacher
+            class outcomes using completed exam scores.
+        </p>
+    </div>
+
+    <div class="alert alert-info">
+        Scores are normalized to percentages. Rankings are based
+        on available completed results and should be interpreted
+        alongside the number of students and exams.
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="rankingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active"
+                    data-bs-toggle="tab"
+                    data-bs-target="#students"
+                    type="button"
+                    role="tab">
+                Student Rankings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link"
+                    data-bs-toggle="tab"
+                    data-bs-target="#classes"
+                    type="button"
+                    role="tab">
+                Class Comparison
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link"
+                    data-bs-toggle="tab"
+                    data-bs-target="#teachers"
+                    type="button"
+                    role="tab">
+                Teacher Comparison
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade show active"
+             id="students"
+             role="tabpanel">
+
+            <form method="get"
+                  asp-controller="Rankings"
+                  asp-action="Index"
+                  class="row g-3 mb-3">
+
+                <div class="col-md-6">
+                    <label for="classId" class="form-label">
+                        Select class
+                    </label>
+                    <select id="classId"
+                            name="classId"
+                            class="form-select">
+                        <option value="">Choose a class</option>
+                        @foreach (var item in Model.AvailableClasses)
+                        {
+                            <option value="@item.ClassId"
+                                    selected="@(Model.SelectedClassId == item.ClassId)">
+                                @item.ClassName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">
+                        View Rankings
+                    </button>
+                </div>
+            </form>
+
+            @if (!Model.SelectedClassId.HasValue)
+            {
+                <div class="alert alert-secondary">
+                    Select a class to view its student rankings.
+                </div>
+            }
+            else if (Model.Students.Count == 0)
+            {
+                <div class="alert alert-secondary">
+                    No completed exam results are available for this class.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Student code</th>
+                                <th>Student name</th>
+                                <th>Average score</th>
+                                <th>Completed exams</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var student in Model.Students)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (student.Rank == 1)
+                                        {
+                                            <strong>1st</strong>
+                                        }
+                                        else
+                                        {
+                                            @student.Rank
+                                        }
+                                    </td>
+                                    <td>@student.StudentCode</td>
+                                    <td>@student.StudentName</td>
+                                    <td>
+                                        <strong>
+                                            @student.AveragePercentage.ToString("F1")%
+                                        </strong>
+                                    </td>
+                                    <td>@student.CompletedExams</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="tab-pane fade"
+             id="classes"
+             role="tabpanel">
+
+            @if (Model.Classes.Count == 0)
+            {
+                <div class="alert alert-secondary">
+                    No classes have completed exam results yet.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Class</th>
+                                <th>Course</th>
+                                <th>Teacher</th>
+                                <th>Average score</th>
+                                <th>Students assessed</th>
+                                <th>Completed results</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Classes)
+                            {
+                                <tr>
+                                    <td>@item.Rank</td>
+                                    <td>
+                                        <a asp-controller="Rankings"
+                                           asp-action="Index"
+                                           asp-route-classId="@item.ClassId">
+                                            @item.ClassCode - @item.ClassName
+                                        </a>
+                                    </td>
+                                    <td>@item.CourseName</td>
+                                    <td>@item.TeacherName</td>
+                                    <td>
+                                        <strong>
+                                            @item.AveragePercentage.ToString("F1")%
+                                        </strong>
+                                    </td>
+                                    <td>@item.StudentCount</td>
+                                    <td>@item.CompletedResults</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="tab-pane fade"
+             id="teachers"
+             role="tabpanel">
+
+            <div class="alert alert-warning">
+                Teacher results reflect student exam outcomes in their
+                classes. They are not adjusted for exam difficulty,
+                course level, or students' starting performance.
+            </div>
+
+            @if (Model.Teachers.Count == 0)
+            {
+                <div class="alert alert-secondary">
+                    No teacher results are available yet.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Teacher code</th>
+                                <th>Teacher name</th>
+                                <th>Average score</th>
+                                <th>Classes assessed</th>
+                                <th>Students assessed</th>
+                                <th>Completed results</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Teachers)
+                            {
+                                <tr>
+                                    <td>@item.Rank</td>
+                                    <td>@item.TeacherCode</td>
+                                    <td>@item.TeacherName</td>
+                                    <td>
+                                        <strong>
+                                            @item.AveragePercentage.ToString("F1")%
+                                        </strong>
+                                    </td>
+                                    <td>@item.ClassCount</td>
+                                    <td>@item.StudentCount</td>
+                                    <td>@item.CompletedResults</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

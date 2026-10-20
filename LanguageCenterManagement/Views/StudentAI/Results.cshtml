@@ -2,9 +2,10 @@
 
 @{
     ViewData["Title"] = "Practice Results";
-    var percentage = Model.TotalQuestions == 0
-        ? 0
-        : (int)Math.Round(Model.Score * 100.0 / Model.TotalQuestions);
+    var percentage = Model.TotalQuestions > 0
+        ? (int)Math.Round(
+            Model.Score * 100.0 / Model.TotalQuestions)
+        : 0;
 }
 
 <div class="container py-4">

@@ -30,6 +30,8 @@
             Back to Exams
         </a>
 
+
+
     </div>
 
     <form id="aiReviewTokenForm" class="d-none">
@@ -65,6 +67,31 @@
 
         </div>
 
+        <div class="d-flex flex-wrap gap-2 my-3">
+            <a asp-controller="StudentExams"
+               asp-action="DownloadAiReview"
+               asp-route-id="@Model.ExamResultId"
+               class="btn btn-outline-primary">
+                <i class="bi bi-download me-1"></i>
+                Download AI Review
+            </a>
+
+            <a asp-controller="StudentExams"
+               asp-action="DownloadTeacherReview"
+               asp-route-id="@Model.ExamResultId"
+               class="btn btn-outline-success">
+                <i class="bi bi-download me-1"></i>
+                Download Teacher Review
+            </a>
+
+            <a asp-controller="StudentAI"
+               asp-action="Practice"
+               asp-route-sourceExamResultId="@Model.ExamResultId"
+               class="btn btn-primary">
+                <i class="bi bi-stars me-1"></i>
+                Practise My Mistakes
+            </a>
+        </div>
 
         <div class="col-md-4">
 
@@ -125,6 +152,79 @@
         </div>
 
     </div>
+
+    
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">AI Exam Review</h5>
+                    <p class="text-muted mb-0">
+                        Understand your overall performance and what to practise next.
+                    </p>
+                </div>
+
+                <form id="fullExamReviewForm"
+                      asp-controller="StudentExams"
+                      asp-action="ReviewEntireExam"
+                      method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden"
+                           name="resultId"
+                           value="@Model.ExamResultId" />
+
+                    <button type="submit"
+                            id="fullExamReviewButton"
+                            class="btn btn-primary">
+                        Review Entire Exam
+                    </button>
+                </form>
+            </div>
+
+            <div id="fullExamReviewLoading"
+                 class="alert alert-info d-none"
+                 role="status">
+                Analysing your graded answers. Please wait...
+            </div>
+
+            <div id="fullExamReviewError"
+                 class="alert alert-warning d-none"
+                 role="alert"></div>
+
+            <div id="fullExamReviewContent" class="d-none">
+                <div class="border rounded-3 p-3 mb-4">
+                    <h6 class="fw-bold">Overall Review</h6>
+                    <p id="fullExamReviewSummary" class="mb-0"></p>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h6 class="fw-bold">Strengths</h6>
+                            <ul id="fullExamReviewStrengths" class="mb-0"></ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                            <h6 class="fw-bold">Areas to Improve</h6>
+                            <ul id="fullExamReviewAreas" class="mb-0"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold">Recommended Next Steps</h6>
+                <ul id="fullExamReviewRecommendations" class="mb-3"></ul>
+
+                <p class="text-muted small mb-0">
+                    This review is AI-generated guidance based on available
+                    graded answers. It does not replace official scores or
+                    teacher feedback.
+                </p>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- Question Results -->
@@ -458,4 +558,100 @@
             }
         });
     });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("fullExamReviewForm");
+            if (!form) return;
+
+            const button = document.getElementById("fullExamReviewButton");
+            const loading = document.getElementById("fullExamReviewLoading");
+            const error = document.getElementById("fullExamReviewError");
+            const content = document.getElementById("fullExamReviewContent");
+
+            function populateList(elementId, values) {
+                const list = document.getElementById(elementId);
+                list.replaceChildren();
+
+                if (!values || values.length === 0) {
+                    const item = document.createElement("li");
+                    item.textContent = "Not enough evidence to identify this yet.";
+                    list.appendChild(item);
+                    return;
+                }
+
+                values.forEach(function (value) {
+                    const item = document.createElement("li");
+                    item.textContent = value;
+                    item.className = "mb-2";
+                    list.appendChild(item);
+                });
+            }
+
+            form.addEventListener("submit", async function (event) {
+                event.preventDefault();
+
+                button.disabled = true;
+                button.textContent = "Reviewing...";
+                loading.classList.remove("d-none");
+                error.classList.add("d-none");
+                content.classList.add("d-none");
+
+                try {
+                    const token = form.querySelector(
+                        'input[name="__RequestVerificationToken"]'
+                    ).value;
+
+                    const body = new URLSearchParams(
+                        new FormData(form)
+                    );
+
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        headers: {
+                            "RequestVerificationToken": token
+                        },
+                        body: body
+                    });
+
+                    const data = await response.json().catch(() => null);
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data?.message ||
+                            "The AI exam review could not be generated."
+                        );
+                    }
+
+                    document.getElementById("fullExamReviewSummary").textContent =
+                        data.overallReview || "No overall summary was returned.";
+
+                    populateList(
+                        "fullExamReviewStrengths",
+                        data.strengths
+                    );
+
+                    populateList(
+                        "fullExamReviewAreas",
+                        data.areasToImprove
+                    );
+
+                    populateList(
+                        "fullExamReviewRecommendations",
+                        data.recommendations
+                    );
+
+                    content.classList.remove("d-none");
+                } catch (err) {
+                    error.textContent =
+                        err.message || "An unexpected error occurred.";
+                    error.classList.remove("d-none");
+                } finally {
+                    loading.classList.add("d-none");
+                    button.disabled = false;
+                    button.textContent = "Review Entire Exam";
+                }
+            });
+        });
 </script>
+
+

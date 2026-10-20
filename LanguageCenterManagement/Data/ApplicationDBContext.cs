@@ -48,6 +48,7 @@ namespace LanguageCenterManagement.Data
         public DbSet<ExamAnswer> ExamAnswers { get; set; }
         public DbSet<WritingIntegrityReview> WritingIntegrityReviews => Set<WritingIntegrityReview>();
 
+        public DbSet<ExamMonitoringEvent> ExamMonitoringEvents { get; set; }
         public DbSet<WritingAiReview> WritingAiReviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -371,6 +372,24 @@ namespace LanguageCenterManagement.Data
             modelBuilder.Entity<ExamAnswer>()
                 .Property(e => e.Score)
                 .HasPrecision(18, 2);
+
+            modelBuilder.Entity<ExamMonitoringEvent>()
+                .HasOne(e => e.Exam)
+                .WithMany()
+                .HasForeignKey(e => e.ExamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExamMonitoringEvent>()
+                .HasOne(e => e.Student)
+                .WithMany()
+                .HasForeignKey(e => e.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ExamMonitoringEvent>()
+                .HasOne(e => e.ExamResult)
+                .WithMany()
+                .HasForeignKey(e => e.ExamResultId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

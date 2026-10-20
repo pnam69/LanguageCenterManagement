@@ -120,6 +120,169 @@
         </div>
     </div>
 
+    
+    <!-- Progress Trend -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <h5 class="mb-3">Progress Trend</h5>
+
+            @if (Model.HasProgressComparison)
+            {
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded bg-light">
+                            <small class="text-muted">Latest 3 exams</small>
+                            <h3 class="mb-0">
+                                @Model.RecentAveragePercentage%
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="p-3 rounded bg-light">
+                            <small class="text-muted">
+                                Previous exams (up to 3)
+                            </small>
+                            <h3 class="mb-0">
+                                @Model.PreviousAveragePercentage%
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="p-3 rounded bg-light">
+                            <small class="text-muted">Change</small>
+                            <h3 class="mb-0">
+                                @(Model.ProgressDifference > 0 ? "+" : "")@Model.ProgressDifference%
+                            </h3>
+                            <small>
+                                @(Model.ProgressDifference > 0
+                                    ? "Improving"
+                                    : Model.ProgressDifference < 0
+                                        ? "Needs attention"
+                                        : "No change")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    Complete at least four exams to compare your recent
+                    performance with earlier results.
+                </p>
+            }
+        </div>
+    </div>
+
+    <!-- Recurring Errors -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <h5 class="mb-2">Recurring Mistakes</h5>
+            <p class="text-muted">
+                Questions answered incorrectly multiple times
+                across completed exams.
+            </p>
+
+            @if (Model.RecurringErrors.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Skill</th>
+                                <th>Question</th>
+                                <th>Incorrect attempts</th>
+                                <th>Total graded attempts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var error in Model.RecurringErrors)
+                            {
+                                <tr>
+                                    <td>@error.Skill</td>
+                                    <td style="min-width: 240px;">
+                                        @error.QuestionText
+                                    </td>
+                                    <td>
+                                        @error.IncorrectAttempts
+                                    </td>
+                                    <td>
+                                        @error.TotalGradedAttempts
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    No repeated mistakes found in the available graded
+                    answers yet. More completed exams will make this
+                    report more useful.
+                </p>
+            }
+        </div>
+    </div>
+
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div>
+                    <h5 class="fw-bold mb-1">AI Study Recommendations</h5>
+                    <p class="text-muted mb-0">
+                        Get practical study advice based on your graded results.
+                    </p>
+                </div>
+
+                <form id="aiRecommendationForm"
+                      asp-controller="StudentAssessment"
+                      asp-action="GenerateRecommendations"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            id="generateRecommendationsButton"
+                            class="btn btn-primary">
+                        Generate Recommendations
+                    </button>
+                </form>
+            </div>
+
+            <div id="recommendationLoading"
+                 class="alert alert-info d-none mb-3"
+                 role="status">
+                Generating your recommendations. This may take a little while.
+            </div>
+
+            <div id="recommendationError"
+                 class="alert alert-warning d-none mb-3"
+                 role="alert"></div>
+
+            <div id="recommendationContent" class="d-none">
+                <div class="rounded-3 border bg-light p-3 mb-3">
+                    <div class="text-muted small mb-1">Your main focus</div>
+                    <p id="recommendationMainFocus" class="fw-semibold mb-0"></p>
+                </div>
+
+                <h6 class="fw-bold">Recommended actions</h6>
+                <ul id="recommendationList" class="mb-4"></ul>
+
+                <h6 class="fw-bold">Suggested study plan</h6>
+                <p id="recommendationStudyPlan" class="mb-0"></p>
+
+                <p class="text-muted small mt-3 mb-0">
+                    AI-generated guidance based on available graded results.
+                    Use it as a study aid, not as a definitive assessment.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <div class="p-4">
@@ -177,3 +340,79 @@
         </div>
     </div>
 </div>
+
+                        
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("aiRecommendationForm");
+        const button = document.getElementById(
+            "generateRecommendationsButton"
+        );
+        const loading = document.getElementById("recommendationLoading");
+        const error = document.getElementById("recommendationError");
+        const content = document.getElementById("recommendationContent");
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            button.disabled = true;
+            button.textContent = "Generating...";
+            loading.classList.remove("d-none");
+            error.classList.add("d-none");
+            content.classList.add("d-none");
+
+            try {
+                const token = form.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                ).value;
+
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": token
+                    },
+                    body: new URLSearchParams({
+                        "__RequestVerificationToken": token
+                    })
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (!response.ok) {
+                    throw new Error(
+                        data?.message ||
+                        "Could not generate recommendations. Please try again."
+                    );
+                }
+
+                document.getElementById(
+                    "recommendationMainFocus"
+                ).textContent = data.mainFocus || "";
+
+                document.getElementById(
+                    "recommendationStudyPlan"
+                ).textContent = data.studyPlan || "";
+
+                const list = document.getElementById("recommendationList");
+                list.replaceChildren();
+
+                (data.recommendations || []).forEach(function (recommendation) {
+                    const item = document.createElement("li");
+                    item.textContent = recommendation;
+                    item.className = "mb-2";
+                    list.appendChild(item);
+                });
+
+                content.classList.remove("d-none");
+            } catch (err) {
+                error.textContent =
+                    err.message || "Something went wrong. Please try again.";
+                error.classList.remove("d-none");
+            } finally {
+                loading.classList.add("d-none");
+                button.disabled = false;
+                button.textContent = "Generate Recommendations";
+            }
+        });
+    });
+</script>

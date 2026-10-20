@@ -1,4 +1,5 @@
-﻿namespace LanguageCenterManagement.ViewModels
+﻿
+namespace LanguageCenterManagement.ViewModels
 {
     public class StudentAssessmentViewModel
     {
@@ -12,6 +13,19 @@
             = new();
 
         public List<StudentRecentExamViewModel> RecentExams { get; set; }
+            = new();
+
+        // Progress comparison
+        public decimal RecentAveragePercentage { get; set; }
+
+        public decimal PreviousAveragePercentage { get; set; }
+
+        public decimal ProgressDifference { get; set; }
+
+        public bool HasProgressComparison { get; set; }
+
+        // Repeated mistakes across completed exams
+        public List<StudentRecurringErrorViewModel> RecurringErrors { get; set; }
             = new();
     }
 
@@ -42,5 +56,23 @@
         public decimal MaxScore { get; set; }
 
         public DateTime? SubmittedAt { get; set; }
+
+        public decimal Percentage =>
+            MaxScore > 0
+                ? Math.Round(Score / MaxScore * 100, 1)
+                : 0;
+    }
+
+    public class StudentRecurringErrorViewModel
+    {
+        public int QuestionId { get; set; }
+
+        public string QuestionText { get; set; } = string.Empty;
+
+        public string Skill { get; set; } = string.Empty;
+
+        public int IncorrectAttempts { get; set; }
+
+        public int TotalGradedAttempts { get; set; }
     }
 }

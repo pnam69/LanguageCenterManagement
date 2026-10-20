@@ -30,8 +30,20 @@
         <div class="card-body p-4">
             <form asp-controller="StudentAI"
                   asp-action="Generate"
-                  method="post">
+                  method="post"
+                  enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
+
+                @if (Model.SourceExamResultId.HasValue)
+                {
+                    <input type="hidden"
+                           asp-for="SourceExamResultId" />
+                    <div class="alert alert-info">
+                        <i class="bi bi-bullseye me-1"></i>
+                        Your quiz will target mistakes from exam result
+                        #@Model.SourceExamResultId.
+                    </div>
+                }
 
                 <div class="mb-3">
                     <label asp-for="Skill" class="form-label fw-semibold">
@@ -96,7 +108,24 @@
                             <option value="10">10 questions</option>
                         </select>
                     </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MaterialFile" class="form-label">
+                            Upload study material or a downloaded review (.txt)
+                        </label>
+
+                        <input asp-for="MaterialFile"
+                               type="file"
+                               class="form-control"
+                               accept=".txt,text/plain" />
+
+                        <div class="form-text">
+                            The uploaded text will be used as the source for practice questions.
+                        </div>
+                    </div>
                 </div>
+
+
 
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-stars me-1"></i> Generate Quiz

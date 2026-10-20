@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace LanguageCenterManagement.ViewModels
 {
@@ -15,6 +14,8 @@ namespace LanguageCenterManagement.ViewModels
 
         [Range(1, 10)]
         public int Count { get; set; } = 5;
+        public IFormFile? MaterialFile { get; set; }
+        public int? SourceExamResultId { get; set; }
 
         public List<ReadingPassageOptionViewModel> Passages { get; set; } = new();
     }
@@ -57,6 +58,7 @@ namespace LanguageCenterManagement.ViewModels
         public string? Explanation { get; set; }
 
         public bool IsCorrect { get; set; }
+
     }
 
 

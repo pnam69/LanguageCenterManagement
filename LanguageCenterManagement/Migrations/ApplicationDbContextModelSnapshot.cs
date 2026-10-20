@@ -333,6 +333,64 @@ namespace LanguageCenterManagement.Migrations
                     b.ToTable("ExamAnswers");
                 });
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.ExamMonitoringEvent", b =>
+                {
+                    b.Property<int>("ExamMonitoringEventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ExamMonitoringEventId"));
+
+                    b.Property<string>("Details")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("DurationSeconds")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ExamResultId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ReviewStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReviewedByUserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExamMonitoringEventId");
+
+                    b.HasIndex("ExamId");
+
+                    b.HasIndex("ExamResultId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ExamMonitoringEvents");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.ExamQuestion", b =>
                 {
                     b.Property<int>("ExamQuestionId")
@@ -1329,6 +1387,32 @@ namespace LanguageCenterManagement.Migrations
                     b.Navigation("ExamResult");
 
                     b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.ExamMonitoringEvent", b =>
+                {
+                    b.HasOne("LanguageCenterManagement.Models.Exam", "Exam")
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LanguageCenterManagement.Models.ExamResult", "ExamResult")
+                        .WithMany()
+                        .HasForeignKey("ExamResultId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("LanguageCenterManagement.Models.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("ExamResult");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("LanguageCenterManagement.Models.ExamQuestion", b =>

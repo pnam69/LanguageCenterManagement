@@ -72,6 +72,22 @@ builder.Services.AddScoped<WritingIntegrityService>();
 
 builder.Services.AddScoped<IAppEmailSender, SmtpEmailSender>();
 
+
+builder.Services.AddHttpClient<AiStudyRecommendationService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:11434/");
+    client.Timeout = TimeSpan.FromSeconds(90);
+});
+
+
+builder.Services.AddHttpClient<AiExamReviewService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:11434/");
+    client.Timeout = TimeSpan.FromSeconds(90);
+});
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

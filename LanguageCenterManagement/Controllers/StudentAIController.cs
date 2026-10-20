@@ -1,13 +1,13 @@
-﻿
-using System.Text.Json;
-using LanguageCenterManagement.Data;
+﻿using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
 using LanguageCenterManagement.Services.Ai;
 using LanguageCenterManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Text.Json;
 
 namespace LanguageCenterManagement.Controllers
 {
@@ -18,6 +18,8 @@ namespace LanguageCenterManagement.Controllers
         private readonly QuestionGenerationService _generationService;
         private readonly AiAnswerReviewService _answerReviewService;
         private readonly IMemoryCache _cache;
+        private readonly UserManager<ApplicationUser> _userManager;
+
         private readonly ILogger<StudentAIController> _logger;
 
         public StudentAIController(
@@ -25,21 +27,37 @@ namespace LanguageCenterManagement.Controllers
             QuestionGenerationService generationService,
             AiAnswerReviewService answerReviewService,
             IMemoryCache cache,
+            UserManager<ApplicationUser> userManager,
             ILogger<StudentAIController> logger)
         {
             _context = context;
             _generationService = generationService;
             _answerReviewService = answerReviewService;
             _cache = cache;
+            _userManager = userManager;
             _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Practice()
+        public async Task<IActionResult> Practice(int? sourceExamResultId)
         {
-            var model = new StudentPracticeViewModel();
+            var model = new StudentPracticeViewModel
+            {
+                SourceExamResultId = sourceExamResultId,
+                Difficulty = "Medium",
+                Count = 5
+            };
+
+            if (sourceExamResultId.HasValue)
+            {
+                model.Topic =
+                    $"Practise mistakes from exam result #{sourceExamResultId.Value}";
+            }
+
             await LoadPassagesAsync(model);
             return View(model);
+
+
         }
 
         [HttpPost]
@@ -49,6 +67,205 @@ namespace LanguageCenterManagement.Controllers
             CancellationToken cancellationToken)
         {
             await LoadPassagesAsync(model);
+            string? examMistakeContext = null;
+
+            if (model.SourceExamResultId.HasValue)
+            {
+                var user = await _userManager.GetUserAsync(User);
+
+                if (user?.StudentId == null)
+                    return Forbid();
+
+                _logger.LogInformation(
+                    "Practice generation: loading exam result {ResultId}",
+                    model.SourceExamResultId);
+
+                var result = await _context.ExamResults
+                    .AsNoTracking()
+                    .AsSplitQuery()
+                    .Include(r => r.Exam)
+                    .Include(r => r.ExamAnswers)
+                        .ThenInclude(a => a.Question)
+                            .ThenInclude(q => q!.Answers)
+                    .FirstOrDefaultAsync(
+                        r => r.ExamResultId == model.SourceExamResultId.Value
+                             && r.StudentId == user.StudentId.Value
+                             && (r.Status == "Completed"
+                                || r.Status == "Passed"
+                                || r.Status == "Failed"),
+                        cancellationToken);
+
+                _logger.LogInformation(
+                    "Practice generation: exam result loaded. Found result: {Found}",
+                    result != null);
+                if (result == null)
+                    return NotFound();
+
+
+                var mistakes = result.ExamAnswers
+                    .Where(a =>
+                        a.Question != null &&
+                        a.IsCorrect == false &&
+                        (a.Question.QuestionType == "MultipleChoice" ||
+                         a.Question.QuestionType == "TrueFalse" ||
+                         a.Question.QuestionType == "FillInTheBlank"))
+                    .Take(20)
+                    .ToList();
+
+                _logger.LogInformation(
+                    "Practice generation: result {ResultId} has {AnswerCount} saved answers and {MistakeCount} eligible mistakes.",
+                    result.ExamResultId,
+                    result.ExamAnswers.Count,
+                    mistakes.Count);
+
+                if (mistakes.Count == 0)
+                {
+                    var examQuestions = await _context.ExamQuestions
+                        .AsNoTracking()
+                        .Where(eq => eq.ExamId == result.ExamId)
+                        .Select(eq => new
+                        {
+                            eq.Question!.Skill,
+                            eq.Question.QuestionText,
+                            eq.Question.QuestionType,
+                            CorrectAnswers = eq.Question.Answers
+                                .Where(a => a.IsCorrect)
+                                .Select(a => a.AnswerText)
+                                .ToList()
+                        })
+                        .Take(20)
+                        .ToListAsync(cancellationToken);
+
+                    if (examQuestions.Count == 0)
+                    {
+                        ModelState.AddModelError(
+                            string.Empty,
+                            "This exam has no questions available for practice.");
+
+                        return View("Practice", model);
+                    }
+
+                    var fallbackLines = new List<string>
+                        {
+                            $"Original exam: {result.Exam?.ExamName}",
+                            "No saved individual answers were available.",
+                            "Use these original exam questions to identify the topics and concepts for NEW practice questions.",
+                            "Do not copy the original questions verbatim."
+                        };
+
+                    foreach (var question in examQuestions)
+                    {
+                        fallbackLines.Add($"Skill: {question.Skill}");
+                        fallbackLines.Add($"Question type: {question.QuestionType}");
+                        fallbackLines.Add($"Question: {question.QuestionText}");
+                        fallbackLines.Add(
+                            $"Configured correct answers: {string.Join(" / ", question.CorrectAnswers)}");
+                        fallbackLines.Add("");
+                    }
+
+                    examMistakeContext = string.Join(
+                        Environment.NewLine,
+                        fallbackLines);
+                }
+                else
+                {
+                    var fallbackLines = new List<string>
+                        {
+                            $"Original exam: {result.Exam?.ExamName}",
+                            $"Original score: {result.Score} / {result.Exam?.MaxScore}",
+                            "Generate NEW questions that practise the concepts the student got wrong.",
+                            "Do not copy the original questions verbatim."
+                        };
+
+                    foreach (var answer in mistakes)
+                    {
+                        var question = answer.Question!;
+
+                        var selectedAnswer = question.Answers?
+                            .FirstOrDefault(a => a.AnswerId == answer.AnswerId)
+                            ?.AnswerText;
+
+                        var correctAnswers = question.Answers?
+                            .Where(a => a.IsCorrect)
+                            .Select(a => a.AnswerText)
+                            .ToList() ?? new List<string>();
+
+                        fallbackLines.Add($"Skill: {question.Skill}");
+                        fallbackLines.Add($"Question: {question.QuestionText}");
+                        fallbackLines.Add(
+                            $"Student answer: {answer.TextAnswer ?? selectedAnswer ?? "(No answer recorded)"}");
+                        fallbackLines.Add(
+                            $"Correct answer: {string.Join(" / ", correctAnswers)}");
+                        fallbackLines.Add("");
+                    }
+
+                    examMistakeContext = string.Join(
+                        Environment.NewLine,
+                        fallbackLines);
+                }
+
+                if (examMistakeContext.Length > 10000)
+                {
+                    examMistakeContext = examMistakeContext[..10000];
+                }
+
+                var lines = new List<string>
+                    {
+                        $"Original exam: {result.Exam?.ExamName}",
+                        $"Original score: {result.Score} / {result.Exam?.MaxScore}",
+                        "Generate NEW questions that practise the concepts the student got wrong.",
+                        "Do not copy the original questions verbatim."
+                    };
+
+                foreach (var answer in mistakes)
+                {
+                    var question = answer.Question!;
+
+                    var selectedAnswer = question.Answers?
+                        .FirstOrDefault(a => a.AnswerId == answer.AnswerId)
+                        ?.AnswerText;
+
+                    var correctAnswers = question.Answers?
+                        .Where(a => a.IsCorrect)
+                        .Select(a => a.AnswerText)
+                        .ToList() ?? new List<string>();
+
+                    var studentAnswer = !string.IsNullOrWhiteSpace(answer.TextAnswer)
+                        ? answer.TextAnswer
+                        : selectedAnswer ?? "(No answer recorded)";
+
+                    lines.Add($"Skill: {question.Skill}");
+                    lines.Add($"Question: {question.QuestionText}");
+                    lines.Add($"Student answer: {studentAnswer}");
+                    lines.Add(
+                        $"Correct answer: {(correctAnswers.Count > 0 ? string.Join(" / ", correctAnswers) : "(No correct answer configured)")}");
+                    lines.Add("");
+                }
+
+                examMistakeContext = string.Join(
+                    Environment.NewLine,
+                    lines);
+
+                if (examMistakeContext.Length > 10000)
+                {
+                    examMistakeContext = examMistakeContext[..10000];
+                }
+
+                // Use the skill from the mistakes instead of the form's default.
+                var mostCommonSkill = mistakes
+                    .GroupBy(a => a.Question!.Skill)
+                    .OrderByDescending(g => g.Count())
+                    .Select(g => g.Key)
+                    .FirstOrDefault();
+
+                if (!string.IsNullOrWhiteSpace(mostCommonSkill) &&
+                    new[] { "Reading", "Listening", "Speaking", "Writing" }
+                        .Contains(mostCommonSkill))
+                {
+                    model.Skill = mostCommonSkill;
+                }
+
+            }
 
             var validSkills = new[]
             {
@@ -105,11 +322,12 @@ namespace LanguageCenterManagement.Controllers
                     }
                 }
             }
-            else if (string.IsNullOrWhiteSpace(model.Topic))
+            else if (string.IsNullOrWhiteSpace(model.Topic) &&
+                string.IsNullOrWhiteSpace(examMistakeContext))
             {
                 ModelState.AddModelError(
                     nameof(model.Topic),
-                    "Enter a topic or select a reading passage.");
+                    "Enter a topic, select a reading passage, or practise mistakes from an exam.");
             }
 
             if (!ModelState.IsValid)
@@ -119,18 +337,81 @@ namespace LanguageCenterManagement.Controllers
 
             try
             {
+                string? uploadedText = null;
+
+                if (model.MaterialFile is { Length: > 0 } file)
+                {
+                    if (!string.Equals(
+                            Path.GetExtension(file.FileName),
+                            ".txt",
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.MaterialFile),
+                            "Only .txt files are supported.");
+                    }
+                    else if (file.Length > 100 * 1024)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.MaterialFile),
+                            "The uploaded file must be 100 KB or smaller.");
+                    }
+                    else
+                    {
+                        using var reader = new StreamReader(file.OpenReadStream());
+                        uploadedText = await reader.ReadToEndAsync(cancellationToken);
+
+                        if (string.IsNullOrWhiteSpace(uploadedText))
+                        {
+                            ModelState.AddModelError(
+                                nameof(model.MaterialFile),
+                                "The uploaded file contains no readable text.");
+                        }
+                        else if (uploadedText.Length > 15000)
+                        {
+                            uploadedText = uploadedText[..15000];
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(uploadedText) &&
+                    model.Skill != "Reading")
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Skill),
+                        "Uploaded materials can currently be used for Reading practice only.");
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    await LoadPassagesAsync(model);
+                    return View("Practice", model);
+                }
+
                 var request = new QuestionGenerationRequest
                 {
-                    Topic = passage != null
-                        ? "Reading comprehension"
-                        : model.Topic.Trim(),
+                    Topic = examMistakeContext != null
+                        ? $"Generate new {model.Skill} practice questions at {model.Difficulty} difficulty based on these exam mistakes:\n{examMistakeContext}"
+                        : passage != null
+                            ? "Reading comprehension"
+                            : model.Topic?.Trim() ?? string.Empty,
+
                     Skill = model.Skill,
                     Difficulty = model.Difficulty,
                     QuestionType = "MultipleChoice",
                     Count = model.Count,
-                    ReadingContentId = passage?.ReadingContentId,
-                    PassageText = passage?.Passage
+
+                    ReadingContentId = uploadedText == null
+                        ? passage?.ReadingContentId
+                        : null,
+
+                    PassageText = uploadedText ?? passage?.Passage
                 };
+
+                _logger.LogInformation(
+                    "Practice generation: calling AI service. Skill={Skill}, Count={Count}",
+                    model.Skill,
+                    model.Count);
 
                 var generatedQuestions = await _generationService.GenerateAsync(
                     request,
@@ -150,7 +431,7 @@ namespace LanguageCenterManagement.Controllers
                 {
                     Skill = model.Skill,
                     Difficulty = model.Difficulty,
-                    Passage = passage?.Passage,
+                    Passage = uploadedText ?? passage?.Passage,
                     Questions = generatedQuestions.Select(q =>
                     {
                         var answers = q.Answers
@@ -159,9 +440,11 @@ namespace LanguageCenterManagement.Controllers
 
                         var correctIndex = q.Answers.FindIndex(a => a.IsCorrect);
 
-                        if (correctIndex < 0)
+                        if (correctIndex < 0 ||
+                            q.Answers.Count(a => a.IsCorrect) != 1)
                         {
-                            correctIndex = 0;
+                            throw new InvalidOperationException(
+                                "A generated question must have exactly one correct answer.");
                         }
 
                         return new CachedPracticeQuestion
@@ -254,7 +537,8 @@ namespace LanguageCenterManagement.Controllers
                 }
 
                 var isCorrect =
-                    selectedIndex == question.CorrectAnswerIndex;
+                    selectedIndex.HasValue &&
+                    selectedIndex.Value == question.CorrectAnswerIndex;
 
                 if (isCorrect)
                 {

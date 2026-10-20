@@ -52,7 +52,8 @@
 	<form asp-action="Take"
 		  method="post"
 		  id="examForm"
-		  enctype="multipart/form-data">
+		  enctype="multipart/form-data"
+		  data-monitor-url="@Url.Action("LogMonitoringEvent", "StudentExams")">
 
 		@Html.AntiForgeryToken()
 
@@ -82,6 +83,12 @@
 
 
 		<!-- Questions -->
+		@{
+			var renderedReadingPassages = new HashSet<string>(
+				StringComparer.Ordinal
+			);
+		}
+
 		@for (int i = 0; i < Model.Questions.Count; i++)
 		{
 			var question = Model.Questions[i];
@@ -104,6 +111,30 @@
 								@question.Skill
 							</span>
 
+							@if (question.Skill.Equals(
+								"Reading",
+								StringComparison.OrdinalIgnoreCase))
+							{
+								var passage = question.ReadingPassage?.Trim();
+
+								var showPassage =
+									!string.IsNullOrWhiteSpace(passage) &&
+									renderedReadingPassages.Add(passage);
+
+								@if (showPassage)
+								{
+									<div class="reading-passage bg-light border rounded p-4 mb-4">
+										<h3 class="h6 fw-bold mb-3">
+											Reading Passage
+										</h3>
+
+										<div style="white-space: pre-line;">
+											@passage
+										</div>
+									</div>
+								}
+							}
+
 							<h2 class="h5 mb-0">
 								@question.QuestionText
 							</h2>
@@ -123,39 +154,20 @@
 							   placeholder="Type your answer"
 							   data-question="@question.QuestionId" />
 					}
-					else if (question.Skill.Equals(
-						"Reading", StringComparison.OrdinalIgnoreCase))
-					{
-						@* Keep your existing Reading block here unchanged. *@
-					}
 
 					<!-- READING -->
-					@if (question.Skill.Equals("Reading",
+					@if (question.Skill.Equals(
+						"Reading",
 						StringComparison.OrdinalIgnoreCase))
 					{
-						@if (!string.IsNullOrWhiteSpace(question.ReadingPassage))
-						{
-							<div class="reading-passage bg-light border rounded p-4 mb-4">
 
-								<h3 class="h6 fw-bold mb-3">
-									Reading Passage
-								</h3>
-
-								<div style="white-space: pre-line;">
-									@question.ReadingPassage
-								</div>
-
-							</div>
-						}
-
-						@if (question.QuestionType != "FillInTheBlank" && question.Answers.Any())
+						@if (question.QuestionType != "FillInTheBlank"
+							&& question.Answers.Any())
 						{
 							<div class="answer-list">
-
 								@foreach (var answer in question.Answers)
 								{
 									<div class="form-check border rounded p-3 mb-2">
-
 										<input class="form-check-input answer-input"
 											   type="radio"
 											   name="Answers[@i].AnswerId"
@@ -167,10 +179,8 @@
 											   for="answer_@(i)_@(answer.AnswerId)">
 											@answer.AnswerText
 										</label>
-
 									</div>
 								}
-
 							</div>
 						}
 					}
@@ -469,6 +479,20 @@
 @section Scripts {
 
 	<script>
+		// Restrict copy, cut, paste, and the context menu during exams.
+		["copy", "cut", "paste", "contextmenu"].forEach(eventType => {
+			examForm.addEventListener(eventType, event => {
+				event.preventDefault();
+			});
+		});
+
+		// Also block common keyboard shortcuts.
+		examForm.addEventListener("keydown", event => {
+			if ((event.ctrlKey || event.metaKey) &&
+				["c", "x", "v", "a"].includes(event.key.toLowerCase())) {
+				event.preventDefault();
+			}
+		});
 		document.addEventListener("DOMContentLoaded", function () {
 
 			/*
@@ -480,7 +504,109 @@
 			const examForm = document.getElementById("examForm");
 			const submitButton = document.getElementById("submitExamButton");
 
-			let remainingSeconds = examDuration * 60;
+			// EXAM MONITORING
+			const examId = examForm.querySelector(
+				'input[name="ExamId"]'
+			).value;
+
+			const antiforgeryToken = examForm.querySelector(
+				'input[name="__RequestVerificationToken"]'
+			).value;
+
+			const monitorUrl = examForm.dataset.monitorUrl;
+
+			let interruptionStartedAt = null;
+			let lastEventAt = 0;
+			let examSubmitted = false;
+
+			function reportMonitoringEvent(eventType, durationSeconds = null) {
+				const now = Date.now();
+
+				// Suppress duplicate focus-loss events.
+				if (
+					(eventType === "TabHidden" ||
+						eventType === "WindowBlurred") &&
+					now - lastEventAt < 1500
+				) {
+					return;
+				}
+
+				lastEventAt = now;
+
+				const body = new URLSearchParams({
+					examId: examId,
+					eventType: eventType
+				});
+
+				if (durationSeconds !== null) {
+					body.set("durationSeconds", String(durationSeconds));
+				}
+
+				return fetch(monitorUrl, {
+					method: "POST",
+					credentials: "same-origin",
+					keepalive: true,
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+						"RequestVerificationToken": antiforgeryToken
+					},
+					body: body.toString()
+				}).catch(function (error) {
+					console.error("Could not report monitoring event.", error);
+				});
+			}
+
+			function handleFocusLost(eventType) {
+				if (examSubmitted || document.hidden && eventType === "WindowBlurred") {
+					return;
+				}
+
+				// One interruption can trigger both browser events.
+				if (interruptionStartedAt !== null) {
+					return;
+				}
+
+				interruptionStartedAt = Date.now();
+				reportMonitoringEvent(eventType);
+			}
+
+			function handleFocusRegained() {
+				if (interruptionStartedAt === null) {
+					return;
+				}
+
+				const durationSeconds = Math.min(
+					86400,
+					Math.max(
+						0,
+						Math.round((Date.now() - interruptionStartedAt) / 1000)
+					)
+				);
+
+				interruptionStartedAt = null;
+
+				reportMonitoringEvent("FocusRegained", durationSeconds);
+			}
+
+			document.addEventListener("visibilitychange", function () {
+				if (document.hidden) {
+					handleFocusLost("TabHidden");
+				} else {
+					handleFocusRegained();
+				}
+			});
+
+			window.addEventListener("blur", function () {
+				if (!document.hidden) {
+					handleFocusLost("WindowBlurred");
+				}
+			});
+
+			window.addEventListener("focus", function () {
+				if (!document.hidden) {
+					handleFocusRegained();
+				}
+			});
 
 			function updateExamTimer() {
 
@@ -542,10 +668,21 @@
 							".writing-answer"
 						);
 
+
 					if (radio) {
 						answered++;
 					}
 					else if (text && text.value.trim().length > 0) {
+						answered++;
+					}
+
+					const fillBlank = card.querySelector(".fill-blank-answer");
+
+					if (radio) {
+						answered++;
+					} else if (text && text.value.trim().length > 0) {
+						answered++;
+					} else if (fillBlank && fillBlank.value.trim().length > 0) {
 						answered++;
 					}
 
@@ -610,19 +747,6 @@
 
 
 			updateProgress();
-
-		const fillBlank = card.querySelector(".fill-blank-answer");
-
-		if (radio) {
-			answered++;
-		}
-		else if (text && text.value.trim().length > 0) {
-			answered++;
-		}
-		else if (fillBlank && fillBlank.value.trim().length > 0) {
-			answered++;
-		}
-
 
 					/*
 		 * SPEAKING RECORDING
@@ -931,5 +1055,40 @@
 			);
 
 		});
+
+		// Clicking anywhere in an answer row selects its radio button.
+		document.querySelectorAll(".form-check.border.rounded").forEach(row => {
+			row.addEventListener("click", event => {
+				const radio = row.querySelector(".answer-input");
+
+				if (!radio || event.target.closest("input, label, button")) {
+					return;
+				}
+
+				if (!radio.checked) {
+					radio.checked = true;
+					radio.dispatchEvent(new Event("change", { bubbles: true }));
+				}
+			});
+		});
 	</script>
+}
+
+.form-check.border.rounded {
+cursor: pointer;
+transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.form-check.border.rounded:hover {
+background-color: #f0f5ff;
+border-color: #86a8e7 !important;
+}
+
+.form-check.border.rounded:has(.answer-input:checked) {
+background-color: #eaf2ff;
+border-color: #4778d0 !important;
+}
+
+.form-check.border.rounded .form-check-label {
+cursor: pointer;
 }

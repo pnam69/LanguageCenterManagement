@@ -1,0 +1,391 @@
+﻿@model LanguageCenterManagement.ViewModels.ExamMonitoringDashboardViewModel
+
+@{
+    ViewData["Title"] = "Exam Integrity Dashboard";
+}
+
+<div class="container-fluid py-4 px-lg-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Exam Integrity Dashboard</h2>
+            <p class="text-muted mb-0">
+                Review exam interruptions and manage monitoring incidents.
+            </p>
+        </div>
+    </div>
+
+    <form asp-action="Index" method="get"
+          class="card border-0 shadow-sm mb-4">
+        <div class="card-body d-flex flex-wrap gap-3 align-items-end">
+            <div style="min-width:260px">
+                <label for="examId" class="form-label fw-semibold">
+                    Exam
+                </label>
+                <select id="examId" name="examId" class="form-select"
+                        asp-items="Model.Exams">
+                    <option value="">All exams</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-funnel me-1"></i> Apply Filter
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Total incidents</div>
+                    <div class="fs-2 fw-bold">@Model.TotalIncidents</div>
+                    <div class="text-muted small">Recorded events</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Students flagged</div>
+                    <div class="fs-2 fw-bold">@Model.StudentsFlagged</div>
+                    <div class="text-muted small">Students with recorded events</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Pending reviews</div>
+                    <div class="fs-2 fw-bold text-warning">
+                        @Model.PendingReviews
+                    </div>
+                    <div class="text-muted small">Events awaiting review</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Reviewed / resolved</div>
+                    <div class="fs-2 fw-bold text-success">
+                        @Model.ReviewedIncidents
+                    </div>
+                    <div class="text-muted small">Events with a review decision</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <div class="d-flex flex-wrap justify-content-between gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1">Student monitoring overview</h5>
+                    <p class="text-muted small mb-0">
+                        Students are ranked by incident count.
+                        Risk labels indicate review priority, not proof of misconduct.
+                    </p>
+                </div>
+                <span class="badge bg-light text-dark align-self-start">
+                    @Model.Students.Count students
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-0 mt-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Student</th>
+                            <th>Exam / Class</th>
+                            <th>Incidents</th>
+                            <th>Tab hidden</th>
+                            <th>Focus lost</th>
+                            <th>Last incident (UTC)</th>
+                            <th>Priority</th>
+                            <th>Review</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Students.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="8"
+                                    class="text-center text-muted py-5">
+                                    <i class="bi bi-shield-check fs-2 d-block mb-2"></i>
+                                    No monitoring events found for this selection.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var student in Model.Students)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-semibold">
+                                            @student.StudentName
+                                        </div>
+                                        <div class="text-muted small">
+                                            Student ID: @student.StudentId
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>@student.ExamName</div>
+                                        <div class="text-muted small">
+                                            @student.ClassName
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold">
+                                            @student.TotalIncidents
+                                        </span>
+                                    </td>
+                                    <td>@student.TabHiddenCount</td>
+                                    <td>@student.FocusLostCount</td>
+                                    <td class="text-nowrap">
+                                        @student.LastIncident.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </td>
+                                    <td>
+                                        @if (student.RiskLevel == "High")
+                                        {
+                                            <span class="badge bg-danger">High</span>
+                                        }
+                                        else if (student.RiskLevel == "Medium")
+                                        {
+                                            <span class="badge bg-warning text-dark">Medium</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Low</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (student.ReviewStatus == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+                                        }
+                                        else if (student.ReviewStatus == "Reviewed")
+                                        {
+                                            <span class="badge bg-primary">
+                                                Reviewed
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                Resolved
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-1">Recent incidents</h5>
+            <p class="text-muted small mb-0">
+                Latest 100 events. Review each event individually.
+            </p>
+        </div>
+
+        <div class="card-body p-0 mt-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Time (UTC)</th>
+                            <th>Student</th>
+                            <th>Exam</th>
+                            <th>Event</th>
+                            <th>Details</th>
+                            <th>Review status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RecentEvents.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7"
+                                    class="text-center text-muted py-4">
+                                    No incidents recorded.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model.RecentEvents)
+                            {
+                                <tr>
+                                    <td class="ps-4 text-nowrap">
+                                        @item.OccurredAt.ToString("dd/MM/yyyy HH:mm:ss")
+                                    </td>
+                                    <td>
+                                        @(item.Student?.FullName ?? "Unknown student")
+                                    </td>
+                                    <td>
+                                        @(item.Exam?.ExamName ?? "Unknown exam")
+                                    </td>
+                                    <td>
+                                        @if (item.EventType == "TabHidden")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Tab hidden
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                Window lost focus
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @(string.IsNullOrWhiteSpace(item.Details)
+                                            ? "—"
+                                            : item.Details)
+                                    </td>
+                                    <td>
+                                        @item.ReviewStatus
+                                        @if (!string.IsNullOrWhiteSpace(item.ReviewNotes))
+                                        {
+                                            <div class="text-muted small mt-1">
+                                                @item.ReviewNotes
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#reviewModal"
+                                                data-event-id="@item.ExamMonitoringEventId"
+                                                data-event-name="@item.EventType"
+                                                data-current-status="@item.ReviewStatus"
+                                                data-notes="@item.ReviewNotes"
+                                                data-exam-id="@Model.SelectedExamId">
+                                            Review
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-muted small mt-3">
+        Monitoring events are indicators for review, not proof of cheating.
+        All displayed event timestamps are UTC.
+    </p>
+</div>
+
+<div class="modal fade" id="reviewModal" tabindex="-1"
+     aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UpdateReview" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="reviewModalLabel">
+                        Review incident
+                    </h5>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="reviewEventId" />
+                    <input type="hidden" name="examId" id="reviewExamId" />
+
+                    <div class="mb-3">
+                        <label for="reviewEventName" class="form-label">
+                            Incident type
+                        </label>
+                        <input id="reviewEventName" class="form-control"
+                               readonly />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reviewStatus" class="form-label">
+                            Review decision
+                        </label>
+                        <select id="reviewStatus" name="status"
+                                class="form-select" required>
+                            <option value="Pending">Pending</option>
+                            <option value="Reviewed">Reviewed</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reviewNotes" class="form-label">
+                            Teacher notes
+                        </label>
+                        <textarea id="reviewNotes" name="notes"
+                                  class="form-control" rows="4"
+                                  maxlength="1000"
+                                  placeholder="Record the evidence and review decision..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Save review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("reviewModal");
+
+            modal.addEventListener("show.bs.modal", function (event) {
+                const button = event.relatedTarget;
+
+                document.getElementById("reviewEventId").value =
+                    button.getAttribute("data-event-id") || "";
+
+                document.getElementById("reviewEventName").value =
+                    button.getAttribute("data-event-name") || "";
+
+                document.getElementById("reviewStatus").value =
+                    button.getAttribute("data-current-status") || "Pending";
+
+                document.getElementById("reviewNotes").value =
+                    button.getAttribute("data-notes") || "";
+
+                document.getElementById("reviewExamId").value =
+                    button.getAttribute("data-exam-id") || "";
+            });
+        });
+    </script>
+}

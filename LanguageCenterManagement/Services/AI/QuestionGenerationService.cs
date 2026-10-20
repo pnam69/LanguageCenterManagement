@@ -1,6 +1,6 @@
-﻿
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace LanguageCenterManagement.Services.Ai
 {
@@ -29,108 +29,126 @@ namespace LanguageCenterManagement.Services.Ai
             ValidateRequest(request);
 
             var questions = new List<GeneratedQuestion>();
-
-            for (int i = 0; i < request.Count; i++)
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                string? lastError = null;
-                bool generated = false;
-
-                for (int attempt = 1; attempt <= MaxAttempts; attempt++)
+                for (int i = 0; i < request.Count; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    try
+                    string? lastError = null;
+                    bool generated = false;
+
+                    for (int attempt = 1; attempt <= MaxAttempts; attempt++)
                     {
-                        // Request exactly one question at a time.
-                        var singleRequest = new QuestionGenerationRequest
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        try
                         {
-                            Topic = request.Topic,
-                            Skill = request.Skill,
-                            Difficulty = request.Difficulty,
-                            QuestionType = request.QuestionType,
-                            Count = 1,
-                            ReadingContentId = request.ReadingContentId,
-                            PassageText = request.PassageText
-                        };
-
-                        string prompt = BuildPrompt(singleRequest, lastError);
-
-                        using var response = await _httpClient.PostAsJsonAsync(
-                            "api/generate",
-                            new
+                            // Request exactly one question at a time.
+                            var singleRequest = new QuestionGenerationRequest
                             {
-                                model = Model,
-                                prompt,
-                                stream = false,
-                                format = "json"
-                            },
-                            cancellationToken);
+                                Topic = request.Topic,
+                                Skill = request.Skill,
+                                Difficulty = request.Difficulty,
+                                QuestionType = request.QuestionType,
+                                Count = 1,
+                                ReadingContentId = request.ReadingContentId,
+                                PassageText = request.PassageText
+                            };
 
-                        response.EnsureSuccessStatusCode();
+                            string prompt = BuildPrompt(singleRequest, lastError, questions);
 
-                        using var responseJson = JsonDocument.Parse(
-                            await response.Content.ReadAsStringAsync(
-                                cancellationToken));
+                            using var response = await _httpClient.PostAsJsonAsync(
+                                "api/generate",
+                                new
+                                {
+                                    model = Model,
+                                    prompt,
+                                    stream = false,
+                                    format = "json",
+                                    options = new
+                                    {
+                                        temperature = 0.7
+                                    }
+                                },
+                                cancellationToken);
 
-                        if (!responseJson.RootElement.TryGetProperty(
-                            "response", out var responseElement))
-                        {
-                            throw new JsonException(
-                                "Ollama response is missing the response field.");
+                            response.EnsureSuccessStatusCode();
+
+                            using var responseJson = JsonDocument.Parse(
+                                await response.Content.ReadAsStringAsync(
+                                    cancellationToken));
+
+                            if (!responseJson.RootElement.TryGetProperty(
+                                "response", out var responseElement))
+                            {
+                                throw new JsonException(
+                                    "Ollama response is missing the response field.");
+                            }
+
+                            string? generatedText = responseElement.GetString();
+
+                            if (string.IsNullOrWhiteSpace(generatedText))
+                                throw new JsonException("Ollama returned empty output.");
+
+                            using var resultJson = JsonDocument.Parse(generatedText);
+
+                            if (!resultJson.RootElement.TryGetProperty(
+                                "questions", out var questionsElement))
+                            {
+                                throw new JsonException(
+                                    "The generated JSON has no questions array.");
+                            }
+
+                            var batch =
+                                JsonSerializer.Deserialize<List<GeneratedQuestion>>(
+                                    questionsElement.GetRawText(),
+                                    JsonOptions);
+
+                            if (batch == null || batch.Count != 1)
+                            {
+                                throw new InvalidOperationException(
+                                    "Expected exactly one question.");
+                            }
+
+                            ValidateQuestion(batch[0], request.QuestionType);
+
+                            if (IsDuplicateQuestion(batch[0], questions))
+                            {
+                                throw new InvalidOperationException(
+                                    "This question is too similar to a question already generated. " +
+                                    "Generate a question testing a different concept with a different structure.");
+                            }
+
+                            questions.Add(batch[0]);
+                            generated = true;
+                            break;
                         }
-
-                        string? generatedText = responseElement.GetString();
-
-                        if (string.IsNullOrWhiteSpace(generatedText))
-                            throw new JsonException("Ollama returned empty output.");
-
-                        using var resultJson = JsonDocument.Parse(generatedText);
-
-                        if (!resultJson.RootElement.TryGetProperty(
-                            "questions", out var questionsElement))
+                        catch (JsonException ex)
                         {
-                            throw new JsonException(
-                                "The generated JSON has no questions array.");
+                            lastError = ex.Message;
                         }
-
-                        var batch =
-                            JsonSerializer.Deserialize<List<GeneratedQuestion>>(
-                                questionsElement.GetRawText(),
-                                JsonOptions);
-
-                        if (batch == null || batch.Count != 1)
+                        catch (InvalidOperationException ex)
                         {
-                            throw new InvalidOperationException(
-                                "Expected exactly one question.");
+                            lastError = ex.Message;
                         }
-
-                        ValidateQuestion(batch[0], request.QuestionType);
-
-                        questions.Add(batch[0]);
-                        generated = true;
-                        break;
                     }
-                    catch (JsonException ex)
+
+                    if (!generated)
                     {
-                        lastError = ex.Message;
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        lastError = ex.Message;
+                        throw new InvalidOperationException(
+                            $"Could not generate question {i + 1} of {request.Count} " +
+                            $"after {MaxAttempts} attempts. Last error: {lastError}");
                     }
                 }
 
-                if (!generated)
-                {
-                    throw new InvalidOperationException(
-                        $"Could not generate question {i + 1} of {request.Count} " +
-                        $"after {MaxAttempts} attempts. Last error: {lastError}");
-                }
+                return questions;
             }
-
-            return questions;
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // Cancellation is expected when the user stops or leaves the operation.
+                throw;
+            }
         }
 
 
@@ -161,40 +179,37 @@ namespace LanguageCenterManagement.Services.Ai
             }
         }
 
+
         private static string BuildPrompt(
             QuestionGenerationRequest request,
-            string? previousError)
+            string? previousError,
+            List<GeneratedQuestion> previousQuestions)
         {
             string typeRules = request.QuestionType switch
             {
                 "MultipleChoice" => """
                     QUESTION TYPE: MultipleChoice
-                    - Write a normal question that asks the student to choose an answer.
-                    - Provide exactly four distinct, meaningful answer options.
+                    - Provide between 2 and 4 distinct answer options.
                     - Exactly one option must be correct.
-                    - Do not use True/False format.
-                    - Do not ask the student to fill in a blank.
-                    - Do not put ____ in the question text.
+                    - The question must have ONE unambiguously correct answer.
+                    - Incorrect options must contain a clear grammatical or factual error.
+                    - Never include multiple sentences that are all correct.
+                    - For grammar questions, make distractors test common grammar mistakes.
+                    - Check every option independently before returning the question.
                     """,
 
                 "TrueFalse" => """
-                    QUESTION TYPE: TrueFalse
-                    - Write a factual statement that can be judged True or False.
-                    - Provide exactly two answers: True and False.
-                    - Exactly one answer must be correct.
-                    - Use the exact answer texts "True" and "False".
-                    - Do not provide other answer options.
-                    - Do not use fill-in-the-blank format.
-                    """,
+            QUESTION TYPE: TrueFalse
+            - Write a factual statement.
+            - Provide exactly two answers: "True" and "False".
+            - Exactly one answer must be correct.
+            """,
 
                 "FillInTheBlank" => """
-                    QUESTION TYPE: FillInTheBlank
-                    - Write a sentence with exactly one missing word or phrase.
-                    - Mark the missing part with ____ in the question text.
-                    - Provide exactly one answer containing the correct word or phrase.
-                    - Set that answer's isCorrect value to true.
-                    - Do not provide multiple-choice distractors.
-                    """,
+            QUESTION TYPE: FillInTheBlank
+            - Include exactly one missing word or phrase marked ____.
+            - Provide exactly one answer, with "isCorrect": true.
+            """,
 
                 _ => throw new InvalidOperationException(
                     "Unsupported question type.")
@@ -203,67 +218,121 @@ namespace LanguageCenterManagement.Services.Ai
             string passageRules =
                 request.Skill == "Reading" &&
                 !string.IsNullOrWhiteSpace(request.PassageText)
-                ? $"""
-                   
-                   READING PASSAGE:
-                   {request.PassageText}
+                ? $$"""
 
-                   - Base questions and correct answers on this passage.
-                   - Do not require outside knowledge.
-                   - Ensure the correct answer is supported by the passage.
-                   """
+          READING PASSAGE:
+          {{request.PassageText}}
+
+          Base the question on this passage.
+          Do not copy existing exam questions.
+          Ensure the correct answer is supported by the passage.
+          """
                 : "";
+
+            string previousQuestionRules = previousQuestions.Count == 0
+                ? "Create a useful question for the requested topic."
+                : $$"""
+
+          PREVIOUSLY GENERATED QUESTIONS:
+          {{JsonSerializer.Serialize(previousQuestions.Select(q => new
+                {
+                    Question = q.QuestionText,
+                    Answers = q.Answers.Select(a => a.AnswerText).ToList()
+                }))}}
+
+          Do not repeat these questions or make minor wording changes.
+          You may test the same grammar concept using a new sentence.
+          Prioritize useful questions over forced variety.
+          """;
 
             string retryRules = string.IsNullOrWhiteSpace(previousError)
                 ? ""
-                : $"""
+                : $$"""
 
-                   YOUR PREVIOUS RESPONSE WAS INVALID:
-                   {previousError}
+          YOUR PREVIOUS ATTEMPT WAS REJECTED:
+          {{previousError}}
 
-                   Generate a completely new response.
-                   Follow every rule. Do not repeat the previous mistake.
-                   """;
+          Correct this specific problem. Generate a valid, new question.
+          Check the answer count and correct-answer flags before responding.
+          """;
 
             return $$"""
-                You are an English teacher generating assessment questions.
+        You are an experienced English teacher creating a practice quiz.
 
-                Generate exactly {{request.Count}} questions.
-                Topic: {{request.Topic}}
-                Skill: {{request.Skill}}
-                Difficulty: {{request.Difficulty}}
+        Generate exactly ONE new question.
 
-                {{typeRules}}
+        Topic: {{request.Topic}}
+        Skill: {{request.Skill}}
+        Difficulty: {{request.Difficulty}}
 
-                GENERAL RULES:
-                - All questions must use the requested question type.
-                - Never mix question types.
-                - Every question must have non-empty question text.
-                - Answer texts must be non-empty and distinct.
-                - Mark exactly one answer as correct, except that the
-                  single FillInTheBlank answer must be correct.
-                - Decide the correct answer before writing the distractors.
-                - Do not fabricate answers or use placeholders.
-                - Return valid JSON only, without markdown or explanations.
+        PURPOSE:
+        Test the student's underlying English knowledge, not reproduce
+        an existing examination.
 
-                {{passageRules}}
-                {{retryRules}}
+        - For grammar, test rules using new sentences and examples.
+        - For vocabulary, test meaning and appropriate word usage.
+        - For reading, test comprehension, inference, or vocabulary in context.
+        - Do not copy existing exam questions or their answer options.
+        - Use natural English appropriate to the requested difficulty.
+        - Questions may test the same general topic, but must not repeat
+          an earlier question with trivial changes.
 
-                REQUIRED JSON:
+        {{typeRules}}
+
+        {{previousQuestionRules}}
+
+        {{passageRules}}
+
+        {{retryRules}}
+
+        OUTPUT REQUIREMENTS:
+        Return valid JSON only. No Markdown, code fences, or explanations.
+        The root object MUST contain a property named "questions".
+        "questions" MUST be an array containing exactly one question.
+        Each question MUST contain "questionText" and "answers".
+        Each answer MUST contain "answerText" and "isCorrect".
+        "isCorrect" MUST be a JSON boolean: true or false, not a string.
+
+        Required structure:
+        {
+          "questions": [
+            {
+              "questionText": "A new question",
+              "answers": [
                 {
-                  "questions": [
-                    {
-                      "questionText": "Question text",
-                      "answers": [
-                        {
-                          "answerText": "Answer text",
-                          "isCorrect": true
-                        }
-                      ]
-                    }
-                  ]
+                  "answerText": "An answer",
+                  "isCorrect": true
+                },
+                {
+                  "answerText": "Another answer",
+                  "isCorrect": false
                 }
-                """;
+              ]
+            }
+          ]
+        }
+        """;
+        }
+
+
+        private static bool IsDuplicateQuestion(
+    GeneratedQuestion candidate,
+    List<GeneratedQuestion> existingQuestions)
+        {
+            string candidateText = NormalizeQuestion(candidate.QuestionText);
+
+            return existingQuestions.Any(existing =>
+                NormalizeQuestion(existing.QuestionText) == candidateText);
+        }
+
+        private static string NormalizeQuestion(string question)
+        {
+            string normalized = question.Trim().ToLowerInvariant();
+
+            normalized = Regex.Replace(normalized, @"[^\p{L}\p{N}\s]", " ");
+            normalized = Regex.Replace(normalized, @"\s+", " ");
+
+            return normalized.Trim();
         }
 
         private static void ValidateQuestion(
@@ -296,28 +365,50 @@ namespace LanguageCenterManagement.Services.Ai
             foreach (var answer in question.Answers)
                 answer.AnswerText = answer.AnswerText.Trim();
 
-            if (question.Answers
-                .Select(a => a.AnswerText)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Count() != question.Answers.Count)
-            {
-                throw new InvalidOperationException(
-                    "A question contains duplicate answers.");
-            }
+            // Merge duplicate answer options, preserving a correct answer if present.
+            question.Answers = question.Answers
+                .GroupBy(
+                    a => a.AnswerText.Trim(),
+                    StringComparer.OrdinalIgnoreCase)
+                .Select(g =>
+                {
+                    var first = g.First();
+                    first.AnswerText = first.AnswerText.Trim();
+                    first.IsCorrect = g.Any(a => a.IsCorrect);
+                    return first;
+                })
+                .ToList();
 
-            int expectedCount = questionType switch
+            switch (questionType)
             {
-                "MultipleChoice" => 4,
-                "TrueFalse" => 2,
-                "FillInTheBlank" => 1,
-                _ => throw new InvalidOperationException(
-                    "Unsupported question type.")
-            };
+                case "MultipleChoice":
+                    if (question.Answers.Count < 2 ||
+                        question.Answers.Count > 4)
+                    {
+                        throw new InvalidOperationException(
+                            "MultipleChoice requires between 2 and 4 answers.");
+                    }
+                    break;
 
-            if (question.Answers.Count != expectedCount)
-            {
-                throw new InvalidOperationException(
-                    $"{questionType} requires exactly {expectedCount} answers.");
+                case "TrueFalse":
+                    if (question.Answers.Count != 2)
+                    {
+                        throw new InvalidOperationException(
+                            "TrueFalse requires exactly 2 answers.");
+                    }
+                    break;
+
+                case "FillInTheBlank":
+                    if (question.Answers.Count != 1)
+                    {
+                        throw new InvalidOperationException(
+                            "FillInTheBlank requires exactly 1 answer.");
+                    }
+                    break;
+
+                default:
+                    throw new InvalidOperationException(
+                        "Unsupported question type.");
             }
 
             if (question.Answers.Count(a => a.IsCorrect) != 1)
