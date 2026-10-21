@@ -1,0 +1,273 @@
+﻿@model LanguageCenterManagement.ViewModels.AiUsageDashboardViewModel
+
+@{
+    ViewData["Title"] = "AI Usage Dashboard";
+
+    var limit = Math.Max(1, Model.DailyQuestionLimit);
+    var usagePercent = Math.Min(
+        100,
+        (int)Math.Round(Model.QuestionsUsedToday * 100.0 / limit));
+}
+
+<div class="container-fluid py-4 px-lg-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">AI Usage Dashboard</h2>
+            <p class="text-muted mb-0">
+                Monitor AI question generation and daily quota consumption.
+            </p>
+        </div>
+
+        <a asp-controller="AiQuestions"
+           asp-action="Index"
+           class="btn btn-primary">
+            <i class="bi bi-stars me-1"></i>
+            Open AI Generator
+        </a>
+    </div>
+
+    <div class="alert alert-light border mb-4">
+        <i class="bi bi-info-circle me-2"></i>
+        Usage statistics are for today in UTC. The current default daily
+        question limit is @Model.DailyQuestionLimit questions per account.
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">
+                        Questions charged today
+                    </div>
+                    <div class="fs-2 fw-bold">
+                        @Model.QuestionsUsedToday
+                    </div>
+                    <div class="text-muted small">
+                        Across all accounts
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">
+                        Successful requests
+                    </div>
+                    <div class="fs-2 fw-bold text-success">
+                        @Model.SuccessfulRequestsToday
+                    </div>
+                    <div class="text-muted small">
+                        Completed generations
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">
+                        Failed requests
+                    </div>
+                    <div class="fs-2 fw-bold text-danger">
+                        @Model.FailedRequestsToday
+                    </div>
+                    <div class="text-muted small">
+                        Generation errors
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">
+                        In-progress requests
+                    </div>
+                    <div class="fs-2 fw-bold text-primary">
+                        @Model.InProgressRequestsToday
+                    </div>
+                    <div class="text-muted small">
+                        Awaiting completion
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="fw-bold mb-0">Daily quota consumption</h5>
+                <span class="text-muted">
+                    @Model.QuestionsUsedToday questions
+                </span>
+            </div>
+
+            <div class="progress" style="height: 12px;">
+                <div class="progress-bar @(usagePercent >= 90 ? "bg-danger" : "bg-primary")"
+                     role="progressbar"
+                     style="width: @usagePercent%;"
+                     aria-valuenow="@usagePercent"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-2 small text-muted">
+                <span>@usagePercent% of the displayed daily limit</span>
+                <span>@Model.DailyQuestionLimit questions per account</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Usage by account</h5>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Account</th>
+                            <th>Questions charged</th>
+                            <th>Questions generated</th>
+                            <th>Successful</th>
+                            <th>Failed</th>
+                            <th>In progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.UserUsage.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No AI usage recorded today.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var user in Model.UserUsage)
+                            {
+                                var userPercent = Math.Min(
+                                    100,
+                                    (int)Math.Round(
+                                        user.QuestionsUsed * 100.0 / limit));
+
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-semibold">@user.UserName</div>
+                                        <div class="small text-muted">@user.Email</div>
+                                    </td>
+                                    <td style="min-width: 180px;">
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span>@user.QuestionsUsed</span>
+                                            <span class="text-muted">/ @limit</span>
+                                        </div>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar @(userPercent >= 90 ? "bg-danger" : "bg-primary")"
+                                                 style="width: @userPercent%;"></div>
+                                        </div>
+                                    </td>
+                                    <td>@user.QuestionsGenerated</td>
+                                    <td>
+                                        <span class="text-success fw-semibold">
+                                            @user.SuccessfulRequests
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-danger fw-semibold">
+                                            @user.FailedRequests
+                                        </span>
+                                    </td>
+                                    <td>@user.InProgressRequests</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Recent AI requests</h5>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Account</th>
+                            <th>Feature</th>
+                            <th>Status</th>
+                            <th>Requested</th>
+                            <th>Generated</th>
+                            <th>Started (UTC)</th>
+                            <th>Error</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RecentLogs.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    No requests to display today.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var log in Model.RecentLogs)
+                            {
+                                var statusClass = log.Status switch
+                                {
+                                    "Succeeded" => "text-bg-success",
+                                    "Failed" => "text-bg-danger",
+                                    "Cancelled" => "text-bg-secondary",
+                                    "Started" => "text-bg-primary",
+                                    _ => "text-bg-light"
+                                };
+
+                                <tr>
+                                    <td class="ps-3">@log.UserName</td>
+                                    <td>@log.Feature</td>
+                                    <td>
+                                        <span class="badge @statusClass">
+                                            @log.Status
+                                        </span>
+                                    </td>
+                                    <td>@log.RequestedCount</td>
+                                    <td>@log.GeneratedCount</td>
+                                    <td class="text-nowrap">
+                                        @log.StartedAt.ToString("HH:mm:ss")
+                                    </td>
+                                    <td style="min-width: 180px;">
+                                        @if (!string.IsNullOrWhiteSpace(log.ErrorMessage))
+                                        {
+                                            <span class="text-danger small">
+                                                @log.ErrorMessage
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

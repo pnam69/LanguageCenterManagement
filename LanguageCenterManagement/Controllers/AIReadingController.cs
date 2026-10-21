@@ -13,25 +13,31 @@ namespace LanguageCenterManagement.Controllers
     [Authorize(Roles = "Admin,Teacher")]
     public class AIReadingController : Controller
     {
+
         private readonly ApplicationDbContext _context;
         private readonly ReadingGenerationService _ollamaService;
         private readonly ILogger<AIReadingController> _logger;
+        private readonly AiUsageTrackingService _usageTracking;
 
         public AIReadingController(
             ApplicationDbContext context,
             ReadingGenerationService ollamaService,
-            ILogger<AIReadingController> logger)
+            ILogger<AIReadingController> logger,
+            AiUsageTrackingService usageTracking)
         {
             _context = context;
             _ollamaService = ollamaService;
             _logger = logger;
+            _usageTracking = usageTracking;
         }
+
 
         [HttpGet]
         public IActionResult Index()
         {
             return View(new AIReadingGenerationViewModel());
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -45,8 +51,21 @@ namespace LanguageCenterManagement.Controllers
             if (!ModelState.IsValid)
                 return View("Index", model);
 
+            int? usageLogId = null;
+            var userId = User.FindFirst(
+                System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             try
             {
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    usageLogId = await _usageTracking.StartAsync(
+                        userId,
+                        "ReadingGeneration",
+                        1,
+                        cancellationToken);
+                }
+
                 model.Passage = await _ollamaService.GeneratePassageAsync(
                     model.Topic,
                     model.Level,
@@ -54,15 +73,54 @@ namespace LanguageCenterManagement.Controllers
                     model.Focus);
 
                 if (cancellationToken.IsCancellationRequested)
+                {
+                    if (usageLogId.HasValue)
+                    {
+                        await _usageTracking.CompleteAsync(
+                            usageLogId.Value,
+                            "Cancelled",
+                            0,
+                            "The request was cancelled.");
+                    }
+
                     return new EmptyResult();
+                }
+
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Succeeded",
+                        1);
+
+                    usageLogId = null;
+                }
             }
             catch (OperationCanceledException)
                 when (cancellationToken.IsCancellationRequested)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Cancelled",
+                        0,
+                        "The request was cancelled.");
+                }
+
                 return new EmptyResult();
             }
             catch (OperationCanceledException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        ex.Message);
+                }
+
                 _logger.LogWarning(ex, "AI reading generation timed out.");
 
                 ModelState.AddModelError(
@@ -73,6 +131,15 @@ namespace LanguageCenterManagement.Controllers
             }
             catch (HttpRequestException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        ex.Message);
+                }
+
                 _logger.LogError(ex, "Ollama reading generation failed.");
 
                 ModelState.AddModelError(
@@ -83,6 +150,15 @@ namespace LanguageCenterManagement.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        ex.Message);
+                }
+
                 _logger.LogWarning(ex, "Ollama returned an invalid reading passage.");
 
                 ModelState.AddModelError(
@@ -93,6 +169,15 @@ namespace LanguageCenterManagement.Controllers
             }
             catch (JsonException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        ex.Message);
+                }
+
                 _logger.LogError(ex, "Could not parse the AI reading response.");
 
                 ModelState.AddModelError(
@@ -103,6 +188,15 @@ namespace LanguageCenterManagement.Controllers
             }
             catch (Exception ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        ex.Message);
+                }
+
                 _logger.LogError(ex, "Unexpected AI reading generation error.");
 
                 ModelState.AddModelError(
@@ -115,6 +209,7 @@ namespace LanguageCenterManagement.Controllers
             ViewBag.Generated = true;
             return View("Index", model);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -86,7 +86,9 @@ builder.Services.AddHttpClient<AiExamReviewService>(client =>
     client.Timeout = TimeSpan.FromSeconds(90);
 });
 
+builder.Services.AddScoped<AiQuotaService>();
 
+builder.Services.AddScoped<AiUsageTrackingService>();
 
 var app = builder.Build();
 

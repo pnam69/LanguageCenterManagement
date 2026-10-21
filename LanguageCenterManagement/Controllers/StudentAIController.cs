@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace LanguageCenterManagement.Controllers
@@ -19,7 +20,7 @@ namespace LanguageCenterManagement.Controllers
         private readonly AiAnswerReviewService _answerReviewService;
         private readonly IMemoryCache _cache;
         private readonly UserManager<ApplicationUser> _userManager;
-
+        private readonly AiUsageTrackingService _usageTracking;
         private readonly ILogger<StudentAIController> _logger;
 
         public StudentAIController(
@@ -28,6 +29,7 @@ namespace LanguageCenterManagement.Controllers
             AiAnswerReviewService answerReviewService,
             IMemoryCache cache,
             UserManager<ApplicationUser> userManager,
+            AiUsageTrackingService usageTracking,
             ILogger<StudentAIController> logger)
         {
             _context = context;
@@ -35,6 +37,7 @@ namespace LanguageCenterManagement.Controllers
             _answerReviewService = answerReviewService;
             _cache = cache;
             _userManager = userManager;
+            _usageTracking = usageTracking;
             _logger = logger;
         }
 
@@ -335,6 +338,8 @@ namespace LanguageCenterManagement.Controllers
                 return View("Practice", model);
             }
 
+            int? usageLogId = null;
+
             try
             {
                 string? uploadedText = null;
@@ -413,6 +418,17 @@ namespace LanguageCenterManagement.Controllers
                     model.Skill,
                     model.Count);
 
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrWhiteSpace(userId))
+                    return Forbid();
+
+                usageLogId = await _usageTracking.StartAsync(
+                    userId,
+                    "StudentPracticeGeneration",
+                    model.Count,
+                    cancellationToken);
+
                 var generatedQuestions = await _generationService.GenerateAsync(
                     request,
                     cancellationToken);
@@ -477,11 +493,25 @@ namespace LanguageCenterManagement.Controllers
                         }).ToList()
                 };
 
+                await _usageTracking.CompleteAsync(
+                    usageLogId.Value,
+                    "Succeeded",
+                    generatedQuestions.Count);
+
                 return View("Quiz", quizViewModel);
             }
             catch (OperationCanceledException)
-                when (cancellationToken.IsCancellationRequested)
+    when (cancellationToken.IsCancellationRequested)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Cancelled",
+                        0,
+                        "The student cancelled the practice-generation request.");
+                }
+
                 throw;
             }
             catch (Exception ex) when (
@@ -489,7 +519,18 @@ namespace LanguageCenterManagement.Controllers
                 ex is InvalidOperationException ||
                 ex is JsonException)
             {
-                _logger.LogError(ex, "Failed to generate a student practice quiz.");
+                if (usageLogId.HasValue)
+                {
+                    await _usageTracking.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        ex.Message);
+                }
+
+                _logger.LogError(
+                    ex,
+                    "Failed to generate a student practice quiz.");
 
                 ModelState.AddModelError(
                     "",
@@ -564,9 +605,22 @@ namespace LanguageCenterManagement.Controllers
                         question.Options[question.CorrectAnswerIndex];
 
                     string? explanation = null;
+                    int? explanationLogId = null;
+
+                    var userId = User.FindFirstValue(
+                        System.Security.Claims.ClaimTypes.NameIdentifier);
 
                     try
                     {
+                        if (!string.IsNullOrWhiteSpace(userId))
+                        {
+                            explanationLogId = await _usageTracking.StartAsync(
+                                userId,
+                                "AnswerExplanation",
+                                1,
+                                cancellationToken);
+                        }
+
                         using var cts = new CancellationTokenSource(
                             TimeSpan.FromSeconds(15));
 
@@ -579,7 +633,27 @@ namespace LanguageCenterManagement.Controllers
 
                         if (string.IsNullOrWhiteSpace(explanation))
                         {
+                            if (explanationLogId.HasValue)
+                            {
+                                await _usageTracking.CompleteAsync(
+                                    explanationLogId.Value,
+                                    "Failed",
+                                    0,
+                                    "The AI returned an empty explanation.");
+
+                                explanationLogId = null;
+                            }
+
                             explanation = $"The correct answer is: {correctAnswer}.";
+                        }
+                        else if (explanationLogId.HasValue)
+                        {
+                            await _usageTracking.CompleteAsync(
+                                explanationLogId.Value,
+                                "Succeeded",
+                                1);
+
+                            explanationLogId = null;
                         }
                     }
                     catch (Exception ex) when (
@@ -589,7 +663,17 @@ namespace LanguageCenterManagement.Controllers
                         ex is System.Net.Sockets.SocketException ||
                         ex is System.Text.Json.JsonException)
                     {
-                        _logger.LogWarning(ex,
+                        if (explanationLogId.HasValue)
+                        {
+                            await _usageTracking.CompleteAsync(
+                                explanationLogId.Value,
+                                ex is OperationCanceledException ? "Cancelled" : "Failed",
+                                0,
+                                ex.Message);
+                        }
+
+                        _logger.LogWarning(
+                            ex,
                             "Could not generate an AI explanation for a practice answer.");
 
                         explanation =
@@ -598,56 +682,6 @@ namespace LanguageCenterManagement.Controllers
 
                     resultQuestion.Explanation = explanation;
 
-                    //string? explanation = null;
-
-                    //try
-                    //{
-                    //    using var cts = new CancellationTokenSource(
-                    //        TimeSpan.FromSeconds(10));
-
-                    //    explanation = await _answerReviewService.ExplainAsync(
-                    //        question.QuestionText,
-                    //        studentAnswer,
-                    //        correctAnswer,
-                    //        question.Options,
-                    //        cts.Token);
-                    //}
-                    //catch (OperationCanceledException)
-                    //{
-                    //    explanation = "AI explanation timed out. Please try again later.";
-                    //}
-                    //catch (HttpRequestException ex)
-                    //{
-                    //    _logger.LogWarning(ex, "Ollama was unavailable during answer review.");
-                    //    explanation = "AI explanation is temporarily unavailable.";
-                    //}
-                    //catch (System.Net.Sockets.SocketException ex)
-                    //{
-                    //    _logger.LogWarning(ex, "Connection to Ollama failed during answer review.");
-                    //    explanation = "AI explanation is temporarily unavailable.";
-                    //}
-                    //try
-                    //{
-                    //    resultQuestion.Explanation =
-                    //        await _answerReviewService.ExplainAsync(
-                    //            question.QuestionText,
-                    //            studentAnswer,
-                    //            correctAnswer,
-                    //            question.Options,
-                    //            cancellationToken);
-                    //}
-                    //catch (Exception ex) when (
-                    //    ex is HttpRequestException ||
-                    //    ex is InvalidOperationException ||
-                    //    ex is JsonException)
-                    //{
-                    //    _logger.LogWarning(
-                    //        ex,
-                    //        "Could not generate an explanation for a practice answer.");
-
-                    //    resultQuestion.Explanation =
-                    //        "AI explanation is temporarily unavailable. Review the correct answer above.";
-                    //}
                 }
 
                 result.Questions.Add(resultQuestion);

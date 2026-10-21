@@ -279,7 +279,6 @@
                                     </li>
 
                                 </ul>
-
                             </li>
                         }
 
@@ -496,14 +495,36 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li>
-                                <a asp-controller="Rankings"
-                                   asp-action="Index"
-                                   class="nav-link">
-                                    <i class="bi bi-bar-chart-line me-2"></i>
-                                    Academic Rankings
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle lc-nav-link"
+                                   href="#"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    <span>Others</span>
                                 </a>
+
+                                <ul class="dropdown-menu lc-dropdown-menu">
+                                    <li class="dropdown-header">Others</li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           asp-controller="Rankings"
+                                           asp-action="Index">
+                                           <i class="bi bi-clipboard-check"></i>
+                                            Rankings
+                                        </a>
+                                        <a class="dropdown-item"
+                                           asp-controller="AiUsage"
+                                           asp-action="Index">
+                                            <i class="bi bi-shield-check me-2"></i>
+                                            AI Usage Dashboard
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
+
 
                         }
 

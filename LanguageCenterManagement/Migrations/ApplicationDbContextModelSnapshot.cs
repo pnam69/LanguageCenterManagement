@@ -22,6 +22,73 @@ namespace LanguageCenterManagement.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("LanguageCenterManagement.Models.AiQuotaSettings", b =>
+                {
+                    b.Property<int>("AiQuotaSettingsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AiQuotaSettingsId"));
+
+                    b.Property<int>("StudentDailyQuestionLimit")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherDailyQuestionLimit")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("AiQuotaSettingsId");
+
+                    b.ToTable("AiQuotaSettings");
+                });
+
+            modelBuilder.Entity("LanguageCenterManagement.Models.AiUsageLog", b =>
+                {
+                    b.Property<int>("AiUsageLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AiUsageLogId"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Feature")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("GeneratedCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RequestedCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("AiUsageLogId");
+
+                    b.HasIndex("UserId", "StartedAt");
+
+                    b.ToTable("AiUsageLogs");
+                });
+
             modelBuilder.Entity("LanguageCenterManagement.Models.Answer", b =>
                 {
                     b.Property<int>("AnswerId")

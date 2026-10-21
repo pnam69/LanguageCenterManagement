@@ -50,6 +50,8 @@ namespace LanguageCenterManagement.Data
 
         public DbSet<ExamMonitoringEvent> ExamMonitoringEvents { get; set; }
         public DbSet<WritingAiReview> WritingAiReviews { get; set; }
+        public DbSet<AiUsageLog> AiUsageLogs { get; set; }
+        public DbSet<AiQuotaSettings> AiQuotaSettings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -390,6 +392,9 @@ namespace LanguageCenterManagement.Data
                 .WithMany()
                 .HasForeignKey(e => e.ExamResultId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<AiUsageLog>()
+                .HasIndex(log => new { log.UserId, log.StartedAt });
         }
     }
 }

@@ -5,6 +5,7 @@ using LanguageCenterManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace LanguageCenterManagement.Controllers
@@ -14,15 +15,18 @@ namespace LanguageCenterManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly QuestionGenerationService _generationService;
+        private readonly AiQuotaService _quotaService;
         private readonly ILogger<AiQuestionsController> _logger;
 
         public AiQuestionsController(
             ApplicationDbContext context,
             QuestionGenerationService generationService,
+            AiQuotaService quotaService,
             ILogger<AiQuestionsController> logger)
         {
             _context = context;
             _generationService = generationService;
+            _quotaService = quotaService;
             _logger = logger;
         }
 
@@ -60,7 +64,7 @@ namespace LanguageCenterManagement.Controllers
         {
             if (!ValidateOptions(model))
                 return View("Index", model);
-
+            int? usageLogId = null;
             try
             {
                 ReadingContent? selectedPassage = null;
@@ -105,9 +109,41 @@ namespace LanguageCenterManagement.Controllers
                     PassageText = selectedPassage?.Passage
                 };
 
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                    return Forbid();
+
+                var quota = await _quotaService.ReserveTeacherQuotaAsync(
+                    userId,
+                    request.Count,
+                    cancellationToken);
+
+                if (!quota.Allowed)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        $"Daily AI quota exceeded. You have used {quota.Used} of " +
+                        $"{quota.Limit} questions today. Try again tomorrow.");
+
+                    ViewBag.SelectedPassage = selectedPassage?.Passage;
+                    return View("Index", model);
+                }
+
+                usageLogId = quota.LogId;
+
                 var generated = await _generationService.GenerateAsync(
                     request,
                     cancellationToken);
+
+                if (usageLogId.HasValue)
+                {
+                    await _quotaService.CompleteAsync(
+                        usageLogId.Value,
+                        "Succeeded",
+                        generated.Count,
+                        cancellationToken: cancellationToken);
+                }
 
                 model.Questions = generated.Select(q => new AiGeneratedQuestionViewModel
                 {
@@ -126,12 +162,30 @@ namespace LanguageCenterManagement.Controllers
             catch (OperationCanceledException)
                 when (cancellationToken.IsCancellationRequested)
             {
-                // The browser disconnected or the request was cancelled.
+                if (usageLogId.HasValue)
+                {
+                    await _quotaService.CompleteAsync(
+                        usageLogId.Value,
+                        "Cancelled",
+                        0,
+                        "Request was cancelled.",
+                        CancellationToken.None);
+                }
+
                 return new EmptyResult();
             }
 
             catch (OperationCanceledException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _quotaService.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        "Question generation failed.",
+                        CancellationToken.None);
+                }
                 _logger.LogWarning(ex, "AI question generation timed out.");
 
                 ModelState.AddModelError(
@@ -141,6 +195,15 @@ namespace LanguageCenterManagement.Controllers
 
             catch (HttpRequestException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _quotaService.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        "Question generation failed.",
+                        CancellationToken.None);
+                }
                 _logger.LogError(ex, "Ollama question generation failed.");
                 ModelState.AddModelError(
                     "",
@@ -149,6 +212,15 @@ namespace LanguageCenterManagement.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _quotaService.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        "Question generation failed.",
+                        CancellationToken.None);
+                }
                 _logger.LogWarning(ex, "AI generated invalid questions.");
 
                 ModelState.AddModelError(
@@ -158,6 +230,15 @@ namespace LanguageCenterManagement.Controllers
             }
             catch (System.Text.Json.JsonException ex)
             {
+                if (usageLogId.HasValue)
+                {
+                    await _quotaService.CompleteAsync(
+                        usageLogId.Value,
+                        "Failed",
+                        0,
+                        "Question generation failed.",
+                        CancellationToken.None);
+                }
                 _logger.LogError(ex, "Could not parse AI response.");
                 ModelState.AddModelError(
                     "",
