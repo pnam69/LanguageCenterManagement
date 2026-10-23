@@ -479,20 +479,6 @@
 @section Scripts {
 
 	<script>
-		// Restrict copy, cut, paste, and the context menu during exams.
-		["copy", "cut", "paste", "contextmenu"].forEach(eventType => {
-			examForm.addEventListener(eventType, event => {
-				event.preventDefault();
-			});
-		});
-
-		// Also block common keyboard shortcuts.
-		examForm.addEventListener("keydown", event => {
-			if ((event.ctrlKey || event.metaKey) &&
-				["c", "x", "v", "a"].includes(event.key.toLowerCase())) {
-				event.preventDefault();
-			}
-		});
 		document.addEventListener("DOMContentLoaded", function () {
 
 			/*
@@ -503,6 +489,25 @@
 			const timerElement = document.getElementById("examTimer");
 			const examForm = document.getElementById("examForm");
 			const submitButton = document.getElementById("submitExamButton");
+
+			let remainingSeconds = Math.max(0, Number(examDuration) * 60);
+
+			// Restrict copy, cut, paste, and the context menu inside the exam form.
+			["copy", "cut", "paste", "contextmenu"].forEach(eventType => {
+				examForm.addEventListener(eventType, event => {
+					event.preventDefault();
+				});
+			});
+
+			// Block common keyboard shortcuts inside the exam form.
+			examForm.addEventListener("keydown", event => {
+				if (
+					(event.ctrlKey || event.metaKey) &&
+					["c", "x", "v", "a"].includes(event.key.toLowerCase())
+				) {
+					event.preventDefault();
+				}
+			});
 
 			// EXAM MONITORING
 			const examId = examForm.querySelector(
@@ -653,53 +658,39 @@
 				document.getElementById("progressBar");
 
 			function updateProgress() {
-
 				let answered = 0;
 
 				questionCards.forEach(function (card) {
+					const radio = card.querySelector(
+						'input[type="radio"]:checked'
+					);
 
-					const radio =
-						card.querySelector(
-							'input[type="radio"]:checked'
-						);
+					const textAnswer = card.querySelector(
+						'textarea.writing-answer, input.fill-blank-answer'
+					);
 
-					const text =
-						card.querySelector(
-							".writing-answer"
-						);
+					const audioFile = card.querySelector(
+						'input[type="file"][name$=".AudioFile"]'
+					);
 
+					const hasText = textAnswer &&
+						textAnswer.value.trim().length > 0;
 
-					if (radio) {
+					const hasAudio = audioFile &&
+						audioFile.files &&
+						audioFile.files.length > 0;
+
+					if (radio || hasText || hasAudio) {
 						answered++;
 					}
-					else if (text && text.value.trim().length > 0) {
-						answered++;
-					}
-
-					const fillBlank = card.querySelector(".fill-blank-answer");
-
-					if (radio) {
-						answered++;
-					} else if (text && text.value.trim().length > 0) {
-						answered++;
-					} else if (fillBlank && fillBlank.value.trim().length > 0) {
-						answered++;
-					}
-
 				});
 
 				const total = questionCards.length;
+				const percentage = total === 0 ? 0 : (answered / total) * 100;
 
-				const percentage =
-					total === 0
-						? 0
-						: (answered / total) * 100;
-
-				progressText.textContent =
-					answered + " / " + total + " answered";
-
-				progressBar.style.width =
-					percentage + "%";
+				progressText.textContent = `${answered} / ${total} answered`;
+				progressBar.style.width = `${percentage}%`;
+				progressBar.setAttribute("aria-valuenow", percentage);
 			}
 
 
@@ -1072,23 +1063,4 @@
 			});
 		});
 	</script>
-}
-
-.form-check.border.rounded {
-cursor: pointer;
-transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.form-check.border.rounded:hover {
-background-color: #f0f5ff;
-border-color: #86a8e7 !important;
-}
-
-.form-check.border.rounded:has(.answer-input:checked) {
-background-color: #eaf2ff;
-border-color: #4778d0 !important;
-}
-
-.form-check.border.rounded .form-check-label {
-cursor: pointer;
 }

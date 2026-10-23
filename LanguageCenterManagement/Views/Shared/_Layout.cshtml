@@ -105,7 +105,6 @@
                                     <span>Management</span>
 
                                 </a>
-
                                 <ul class="dropdown-menu lc-dropdown-menu">
 
                                     <li class="dropdown-header">
@@ -153,8 +152,6 @@
 
                                         </a>
                                     </li>
-
-
 
                                     <li><hr class="dropdown-divider"></li>
 
@@ -236,6 +233,18 @@
                                     </li>
 
                                 </ul>
+                                
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link px-3 rounded hover-bg-light"
+                                           asp-controller="AiChat"
+                                           asp-action="Index">
+                                            <i class="bi bi-robot me-1"></i>
+                                            AI Study Coach
+                                        </a>
+                                    </li>
+                                }
 
                             </li>
 

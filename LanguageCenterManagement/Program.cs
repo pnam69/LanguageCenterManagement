@@ -5,6 +5,7 @@ using LanguageCenterManagement.Services.Ai;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using LanguageCenterManagement.Services.Email;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,6 +90,10 @@ builder.Services.AddHttpClient<AiExamReviewService>(client =>
 builder.Services.AddScoped<AiQuotaService>();
 
 builder.Services.AddScoped<AiUsageTrackingService>();
+
+builder.Services.AddHttpClient<AiChatService>();
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 

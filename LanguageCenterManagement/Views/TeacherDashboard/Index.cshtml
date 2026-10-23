@@ -21,6 +21,188 @@
         </div>
     </div>
 
+    <h5 class="fw-bold text-secondary mb-3">
+        <i class="bi bi-speedometer2 me-2"></i>Teaching Overview
+    </h5>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3 d-flex
+            justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-calendar-week me-2 text-primary"></i>
+                Upcoming Classes
+            </h5>
+
+            <a asp-controller="TeacherSchedules"
+               asp-action="Index"
+               class="btn btn-sm btn-outline-primary">
+                Full Schedule
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+            @{
+                var upcomingClasses =
+                    ViewBag.UpcomingClasses
+                    as IEnumerable<LanguageCenterManagement.Models.Schedule>;
+            }
+
+            @if (upcomingClasses == null || !upcomingClasses.Any())
+            {
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-calendar-check fs-3 d-block mb-2"></i>
+                    No upcoming classes scheduled.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Date</th>
+                                <th>Time</th>
+                                <th>Class</th>
+                                <th>Room</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var schedule in upcomingClasses)
+                            {
+                                <tr>
+                                    <td class="ps-3">
+                                        @schedule.StudyDate.ToString("dd/MM/yyyy")
+                                    </td>
+                                    <td>
+                                        @schedule.StartTime.ToString(@"hh\:mm")
+                                        –
+                                        @schedule.EndTime.ToString(@"hh\:mm")
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">
+                                            @schedule.Class?.ClassName
+                                        </div>
+                                        <small class="text-muted">
+                                            @schedule.Class?.ClassCode
+                                        </small>
+                                    </td>
+                                    <td>
+                                        @(schedule.Room?.RoomName ?? "Not assigned")
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-subtle
+                                            text-primary">
+                                            @schedule.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3">
+                    <div class="text-muted small mb-2">Upcoming Exams</div>
+                    <div class="fs-2 fw-bold text-primary">
+                        @ViewBag.UpcomingExams
+                    </div>
+                    <a asp-controller="Exams"
+                       asp-action="Index"
+                       class="small text-decoration-none">
+                        View exams <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3">
+                    <div class="text-muted small mb-2">All My Exams</div>
+                    <div class="fs-2 fw-bold text-info">
+                        @ViewBag.TotalExams
+                    </div>
+                    <a asp-controller="Exams"
+                       asp-action="Index"
+                       class="small text-decoration-none">
+                        Manage exams <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3">
+                    <div class="text-muted small mb-2">Awaiting Grading</div>
+                    <div class="fs-2 fw-bold text-warning">
+                        @ViewBag.PendingGrading
+                    </div>
+                    <a asp-controller="TeacherExamResults"
+                       asp-action="Index"
+                       class="small text-decoration-none">
+                        Review results <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-3">
+                    <div class="text-muted small mb-2">Integrity Reviews</div>
+                    <div class="fs-2 fw-bold text-danger">
+                        @ViewBag.PendingIntegrityReviews
+                    </div>
+                    <a asp-controller="WritingIntegrityReviews"
+                       asp-action="Index"
+                       class="small text-decoration-none">
+                        Review flags <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-md-row
+                justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        <i class="bi bi-stars text-primary me-2"></i>
+                        AI Teaching Tools
+                    </h5>
+                    <p class="text-muted mb-0">
+                        Generate questions, review student writing, and
+                        inspect assessment integrity.
+                    </p>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="AiQuestions"
+                       asp-action="Index"
+                       class="btn btn-primary rounded-pill">
+                        <i class="bi bi-magic me-1"></i> AI Questions
+                    </a>
+
+                    <a asp-controller="WritingIntegrityReviews"
+                       asp-action="Index"
+                       class="btn btn-outline-primary rounded-pill">
+                        <i class="bi bi-shield-check me-1"></i> Integrity Reviews
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Khối thẻ chức năng (Dashboard Widgets) -->
     <div class="row g-4">
         
