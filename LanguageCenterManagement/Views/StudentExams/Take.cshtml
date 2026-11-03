@@ -187,25 +187,17 @@
 
 
 					<!-- LISTENING -->
-					@if (question.Skill.Equals("Listening",
-						StringComparison.OrdinalIgnoreCase))
+					@if (question.Skill.Equals("Listening", StringComparison.OrdinalIgnoreCase))
 					{
 						@if (!string.IsNullOrWhiteSpace(question.ListeningAudioUrl))
 						{
 							<div class="bg-light border rounded p-4 mb-4">
+								<h3 class="h6 fw-bold mb-3">Listening</h3>
 
-								<h3 class="h6 fw-bold mb-3">
-									Listening
-								</h3>
-
-								<audio controls
-									   class="w-100">
-									<source src="@question.ListeningAudioUrl"
-											type="audio/mpeg" />
-
+								<audio controls class="w-100">
+									<source src="@question.ListeningAudioUrl" type="audio/mpeg" />
 									Your browser does not support the audio element.
 								</audio>
-
 							</div>
 						}
 

@@ -1,0 +1,98 @@
+﻿@model List<LanguageCenterManagement.ViewModels.ConversationListItemViewModel>
+
+@{
+    ViewData["Title"] = "Messages";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Messages</h2>
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Teacher") || User.IsInRole("Student"))
+        {
+            <a asp-action="Create" class="btn btn-primary">
+                New message
+            </a>
+        }
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-light border">
+            No conversations yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        @if (!User.IsInRole("Student"))
+                        {
+                            <th>Student</th>
+                        }
+                        <th>Contact</th>
+                        <th>Latest message</th>
+                        <th>Updated</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.Subject</strong>
+                                @if (item.UnreadCount > 0)
+                                {
+                                    <span class="badge bg-primary ms-1">
+                                        @item.UnreadCount unread
+                                    </span>
+                                }
+                            </td>
+
+                            @if (!User.IsInRole("Student"))
+                            {
+                                <td>@item.StudentName</td>
+                            }
+
+                            <td>
+                                @(User.IsInRole("Student")
+                                    ? item.RecipientName
+                                    : item.StudentName)
+                            </td>
+
+                            <td>
+                                @{
+                                    var preview = item.LastMessage.Length > 90
+                                        ? item.LastMessage[..90] + "..."
+                                        : item.LastMessage;
+                                }
+                                @preview
+                            </td>
+
+                            <td>
+                                @item.UpdatedAt.ToLocalTime().ToString("g")
+                            </td>
+
+                            <td class="text-end">
+                                <a asp-action="Details"
+                                   asp-route-id="@item.ConversationId"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Open
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

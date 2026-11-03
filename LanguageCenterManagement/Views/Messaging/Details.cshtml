@@ -1,0 +1,86 @@
+﻿@model LanguageCenterManagement.ViewModels.ConversationDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Subject;
+}
+
+<div class="container py-4" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2>@Model.Subject</h2>
+            <p class="text-muted mb-0">
+                Student: @Model.StudentName
+                <span class="mx-2">|</span>
+                Assigned contact: @Model.RecipientName
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Back to messages
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            @if (Model.Messages.Count == 0)
+            {
+                <p class="text-muted">No messages yet.</p>
+            }
+
+            @foreach (var message in Model.Messages)
+            {
+                <div class="d-flex mb-3
+                    @(message.IsOwnMessage ? "justify-content-end" : "justify-content-start")">
+                    <div class="p-3 rounded border"
+                         style="max-width: 80%; overflow-wrap: anywhere;
+                        background-color: @(message.IsOwnMessage ? "#eef5ff" : "#f8f9fa");">
+                        <div class="small fw-semibold mb-1">
+                            @message.SenderName
+                        </div>
+
+                        <div style="white-space: pre-wrap;">@message.Content</div>
+
+                        <div class="small text-muted mt-2">
+                            @message.SentAt.ToLocalTime().ToString("g")
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3">Reply</h5>
+
+            <form asp-action="Reply"
+                  asp-route-id="@Model.ConversationId"
+                  method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <textarea name="ReplyContent"
+                              class="form-control"
+                              rows="4"
+                              maxlength="5000"
+                              required
+                              placeholder="Write your reply"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Send reply
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

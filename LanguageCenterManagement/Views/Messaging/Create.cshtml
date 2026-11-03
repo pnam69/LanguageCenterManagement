@@ -1,0 +1,67 @@
+﻿@model LanguageCenterManagement.ViewModels.CreateConversationViewModel
+
+@{
+    ViewData["Title"] = "New Message";
+}
+
+<div class="container py-4" style="max-width: 800px;">
+    <h2 class="mb-4">New message</h2>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="RecipientUserId" class="form-label">
+                Send to
+            </label>
+
+            <select asp-for="RecipientUserId"
+                    asp-items="Model.Recipients"
+                    class="form-select">
+                <option value="">Choose a recipient</option>
+            </select>
+
+            <span asp-validation-for="RecipientUserId"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Subject" class="form-label"></label>
+            <input asp-for="Subject"
+                   class="form-control"
+                   placeholder="Message subject" />
+            <span asp-validation-for="Subject"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label">
+                Message
+            </label>
+
+            <textarea asp-for="Content"
+                      class="form-control"
+                      rows="6"
+                      placeholder="Write your message"></textarea>
+
+            <span asp-validation-for="Content"
+                  class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Send Message
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

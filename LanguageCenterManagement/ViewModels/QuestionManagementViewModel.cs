@@ -35,6 +35,7 @@ namespace LanguageCenterManagement.ViewModels
         [Range(0, 10000)]
         public int MaximumWords { get; set; } = 300;
 
+        public int? ListeningContentId { get; set; }
         public List<AnswerManagementViewModel> Answers { get; set; }
             = new List<AnswerManagementViewModel>();
     }

@@ -249,6 +249,36 @@
 
     </div>
 
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-xl-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-1">Class Performance</h5>
+                    <p class="text-muted small mb-3">
+                        Average exam scores by class, up to 10 classes.
+                    </p>
+                    <div style="position: relative; height: 320px;">
+                        <canvas id="classPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title mb-1">AI Usage</h5>
+                    <p class="text-muted small mb-3">
+                        Successful and failed AI requests over the last 7 days.
+                    </p>
+                    <div style="position: relative; height: 320px;">
+                        <canvas id="aiUsageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <h5 class="fw-bold text-secondary mb-3 mt-2">Quick Access</h5>
     <div class="row g-4">
         
@@ -285,12 +315,12 @@
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100 rounded-4 hover-effect">
                 <div class="card-body p-4 d-flex flex-column text-center align-items-center">
-                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
                         <i class="bi bi-calendar-week fs-2"></i>
                     </div>
                     <h5 class="fw-bold mb-2">Schedules</h5>
                     <p class="text-muted small mb-4">View and manage class timetables and rooms.</p>
-                    <a asp-controller="Schedules" asp-action="Index" class="btn btn-outline-warning rounded-pill px-4 mt-auto fw-medium w-100 text-dark">
+                    <a asp-controller="Schedules" asp-action="Index" class="btn btn-outline-danger rounded-pill px-4 mt-auto fw-medium w-100 text-dark">
                         View Schedules
                     </a>
                 </div>
@@ -330,14 +360,125 @@
     </div>
 </div>
 
+
 @section Scripts {
     <style>
         .hover-effect {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .hover-effect:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-        }
+
+            .hover-effect:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+            }
     </style>
+
+    @{
+        var chartJsonOptions = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy =
+                System.Text.Json.JsonNamingPolicy.CamelCase
+        };
+    }
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const classPerformanceData =
+                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            ViewBag.ClassPerformanceChart, chartJsonOptions));
+
+        const aiUsageData =
+                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            ViewBag.AiUsageChart, chartJsonOptions));
+
+        console.log("Class performance chart data:", classPerformanceData);
+        console.log("AI usage chart data:", aiUsageData);
+
+        const classCanvas = document.getElementById('classPerformanceChart');
+
+        if (classCanvas && classPerformanceData.length > 0) {
+            new Chart(classCanvas, {
+                type: 'bar',
+                data: {
+                    labels: classPerformanceData.map(x => x.className),
+                    datasets: [{
+                        label: 'Average score (%)',
+                        data: classPerformanceData.map(x => x.averageScore),
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Average score (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        } else if (classCanvas) {
+            classCanvas.parentElement.innerHTML =
+                '<p class="text-muted text-center py-5">No completed exam results available yet.</p>';
+        }
+
+        const aiCanvas = document.getElementById('aiUsageChart');
+
+        if (aiCanvas) {
+            new Chart(aiCanvas, {
+                type: 'line',
+                data: {
+                    labels: aiUsageData.map(x => x.date),
+                    datasets: [
+                        {
+                            label: 'Successful',
+                            data: aiUsageData.map(x => x.successful),
+                            borderColor: 'rgb(40, 167, 69)',
+                            backgroundColor: 'rgba(40, 167, 69, 0.12)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Failed',
+                            data: aiUsageData.map(x => x.failed),
+                            borderColor: 'rgb(220, 53, 69)',
+                            backgroundColor: 'rgba(220, 53, 69, 0.10)',
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Number of requests'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 }

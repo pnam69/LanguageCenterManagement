@@ -1,6 +1,8 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace LanguageCenterManagement.Services.Ai
 {
@@ -9,17 +11,23 @@ namespace LanguageCenterManagement.Services.Ai
         private readonly HttpClient _httpClient;
         private const string Model = "qwen2.5:3b";
         private const int MaxAttempts = 3;
-
+        private readonly ILogger<QuestionGenerationService> _logger;
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public QuestionGenerationService(HttpClient httpClient)
+        public QuestionGenerationService(
+            HttpClient httpClient,
+            ILogger<QuestionGenerationService> logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
+
             _httpClient.BaseAddress ??= new Uri("http://localhost:11434/");
+            _httpClient.Timeout = TimeSpan.FromMinutes(3);
         }
+
 
 
         public async Task<List<GeneratedQuestion>> GenerateAsync(
@@ -28,139 +36,108 @@ namespace LanguageCenterManagement.Services.Ai
         {
             ValidateRequest(request);
 
-            var questions = new List<GeneratedQuestion>();
-            try
-            {
-                for (int i = 0; i < request.Count; i++)
+            string prompt = BuildPrompt(
+                request,
+                null,
+                new List<GeneratedQuestion>());
+
+            using var response = await _httpClient.PostAsJsonAsync(
+                "api/generate",
+                new
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    string? lastError = null;
-                    bool generated = false;
-
-                    for (int attempt = 1; attempt <= MaxAttempts; attempt++)
+                    model = Model,
+                    prompt,
+                    stream = false,
+                    format = "json",
+                    options = new
                     {
-                        cancellationToken.ThrowIfCancellationRequested();
-
-                        try
-                        {
-                            // Request exactly one question at a time.
-                            var singleRequest = new QuestionGenerationRequest
-                            {
-                                Topic = request.Topic,
-                                Skill = request.Skill,
-                                Difficulty = request.Difficulty,
-                                QuestionType = request.QuestionType,
-                                Count = 1,
-                                ReadingContentId = request.ReadingContentId,
-                                PassageText = request.PassageText
-                            };
-
-                            string prompt = BuildPrompt(singleRequest, lastError, questions);
-
-                            using var response = await _httpClient.PostAsJsonAsync(
-                                "api/generate",
-                                new
-                                {
-                                    model = Model,
-                                    prompt,
-                                    stream = false,
-                                    format = "json",
-                                    options = new
-                                    {
-                                        temperature = 0.7
-                                    }
-                                },
-                                cancellationToken);
-
-                            response.EnsureSuccessStatusCode();
-
-                            using var responseJson = JsonDocument.Parse(
-                                await response.Content.ReadAsStringAsync(
-                                    cancellationToken));
-
-                            if (!responseJson.RootElement.TryGetProperty(
-                                "response", out var responseElement))
-                            {
-                                throw new JsonException(
-                                    "Ollama response is missing the response field.");
-                            }
-
-                            string? generatedText = responseElement.GetString();
-
-                            if (string.IsNullOrWhiteSpace(generatedText))
-                                throw new JsonException("Ollama returned empty output.");
-
-                            using var resultJson = JsonDocument.Parse(generatedText);
-
-                            if (!resultJson.RootElement.TryGetProperty(
-                                "questions", out var questionsElement))
-                            {
-                                throw new JsonException(
-                                    "The generated JSON has no questions array.");
-                            }
-
-                            var batch =
-                                JsonSerializer.Deserialize<List<GeneratedQuestion>>(
-                                    questionsElement.GetRawText(),
-                                    JsonOptions);
-
-                            if (batch == null || batch.Count != 1)
-                            {
-                                throw new InvalidOperationException(
-                                    "Expected exactly one question.");
-                            }
-
-                            ValidateQuestion(batch[0], request.QuestionType);
-
-                            if (IsDuplicateQuestion(batch[0], questions))
-                            {
-                                throw new InvalidOperationException(
-                                    "This question is too similar to a question already generated. " +
-                                    "Generate a question testing a different concept with a different structure.");
-                            }
-
-                            questions.Add(batch[0]);
-                            generated = true;
-                            break;
-                        }
-                        catch (JsonException ex)
-                        {
-                            lastError = ex.Message;
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            lastError = ex.Message;
-                        }
+                        temperature = 0.5
                     }
+                },
+                cancellationToken);
 
-                    if (!generated)
-                    {
-                        throw new InvalidOperationException(
-                            $"Could not generate question {i + 1} of {request.Count} " +
-                            $"after {MaxAttempts} attempts. Last error: {lastError}");
-                    }
-                }
+            response.EnsureSuccessStatusCode();
 
-                return questions;
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            using var responseJson = JsonDocument.Parse(
+                await response.Content.ReadAsStringAsync(cancellationToken));
+
+            if (!responseJson.RootElement.TryGetProperty(
+                "response", out var responseElement))
             {
-                // Cancellation is expected when the user stops or leaves the operation.
-                throw;
+                throw new JsonException("Ollama response is missing the response field.");
             }
+
+            string? generatedText = responseElement.GetString();
+
+            if (string.IsNullOrWhiteSpace(generatedText))
+                throw new JsonException("Ollama returned empty output.");
+
+            using var resultJson = JsonDocument.Parse(generatedText);
+
+            if (!resultJson.RootElement.TryGetProperty(
+                "questions", out var questionsElement) ||
+                questionsElement.ValueKind != JsonValueKind.Array)
+            {
+                throw new JsonException("Generated JSON has no valid questions array.");
+            }
+
+            var questions = new List<GeneratedQuestion>();
+
+            foreach (var element in questionsElement.EnumerateArray())
+            {
+                if (questions.Count >= request.Count)
+                    break;
+
+                try
+                {
+                    var candidate = JsonSerializer.Deserialize<GeneratedQuestion>(
+                        element.GetRawText(),
+                        JsonOptions);
+
+                    if (candidate == null)
+                        continue;
+
+                    ValidateQuestion(candidate, request.QuestionType);
+
+                    if (IsDuplicateQuestion(candidate, questions))
+                        continue;
+
+                    questions.Add(candidate);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogDebug(ex, "Skipping invalid generated question JSON.");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogDebug(ex, "Skipping invalid generated question.");
+                }
+            }
+
+            if (questions.Count == 0)
+                throw new InvalidOperationException(
+                    "Ollama did not generate any valid questions.");
+
+            return questions;
         }
 
 
-        private static void ValidateRequest(
-            QuestionGenerationRequest request)
+
+        private static void ValidateRequest(QuestionGenerationRequest request)
         {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
             if (request.Count < 1 || request.Count > 10)
                 throw new InvalidOperationException(
                     "Generate between 1 and 10 questions.");
 
-            if (!new[] { "MultipleChoice", "TrueFalse", "FillInTheBlank" }
-                .Contains(request.QuestionType))
+            if (!new[]
+                {
+            "MultipleChoice",
+            "TrueFalse",
+            "FillInTheBlank"
+        }.Contains(request.QuestionType))
             {
                 throw new InvalidOperationException(
                     "Unsupported question type.");
@@ -170,7 +147,27 @@ namespace LanguageCenterManagement.Services.Ai
                 throw new InvalidOperationException(
                     "A topic is required.");
 
-            if (request.Skill == "Reading" &&
+            if (!new[]
+                {
+            "Reading",
+            "Listening",
+            "Speaking",
+            "Writing",
+            "Grammar",
+            "Vocabulary"
+        }.Contains(request.Skill, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "Unsupported skill.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Difficulty))
+                throw new InvalidOperationException(
+                    "A difficulty level is required.");
+
+            if (request.Skill.Equals(
+                    "Reading",
+                    StringComparison.OrdinalIgnoreCase) &&
                 !string.IsNullOrWhiteSpace(request.PassageText) &&
                 request.PassageText.Length > 15000)
             {
@@ -215,6 +212,8 @@ namespace LanguageCenterManagement.Services.Ai
                     "Unsupported question type.")
             };
 
+
+
             string passageRules =
                 request.Skill == "Reading" &&
                 !string.IsNullOrWhiteSpace(request.PassageText)
@@ -230,7 +229,7 @@ namespace LanguageCenterManagement.Services.Ai
                 : "";
 
             string previousQuestionRules = previousQuestions.Count == 0
-                ? "Create a useful question for the requested topic."
+                ? "Create useful, distinct questions for the requested topic."
                 : $$"""
 
           PREVIOUSLY GENERATED QUESTIONS:
@@ -259,7 +258,8 @@ namespace LanguageCenterManagement.Services.Ai
             return $$"""
         You are an experienced English teacher creating a practice quiz.
 
-        Generate exactly ONE new question.
+        Generate exactly {{request.Count}} questions.
+        Return all questions inside one JSON "questions" array.
 
         Topic: {{request.Topic}}
         Skill: {{request.Skill}}
@@ -279,18 +279,26 @@ namespace LanguageCenterManagement.Services.Ai
 
         {{typeRules}}
 
+        For MultipleChoice grammar questions:
+        - "questionText" must contain ONLY the question or sentence with a blank.
+        - Never include answer options inside "questionText".
+        - Put every possible answer exclusively in the "answers" array.
+        - Do not append options such as A), B), C), D) to the question text.
+        - Do not include the correct answer or its explanation in "questionText".
+
         {{previousQuestionRules}}
 
         {{passageRules}}
 
         {{retryRules}}
-
+        
         OUTPUT REQUIREMENTS:
         Return valid JSON only. No Markdown, code fences, or explanations.
         The root object MUST contain a property named "questions".
-        "questions" MUST be an array containing exactly one question.
+        "questions" MUST be an array containing exactly {{request.Count}} questions.
         Each question MUST contain "questionText" and "answers".
         Each answer MUST contain "answerText" and "isCorrect".
+        Do not put answers into the question text. Do not include any other properties. In any forms.
         "isCorrect" MUST be a JSON boolean: true or false, not a string.
 
         Required structure:
@@ -348,6 +356,11 @@ namespace LanguageCenterManagement.Services.Ai
 
             question.QuestionText = question.QuestionText.Trim();
             question.Answers ??= new List<GeneratedAnswer>();
+            if (question.Answers.Any(a => a == null))
+            {
+                throw new InvalidOperationException(
+                    "The generated question contains a null answer.");
+            }
 
             if (question.QuestionText.Length > 2000)
                 throw new InvalidOperationException(

@@ -124,6 +124,78 @@ namespace LanguageCenterManagement.Controllers
                 .Take(5)
                 .ToList();
 
+            // Class performance chart: average percentage from completed exams.
+            var classResultsForChart = await _context.ExamResults
+                .AsNoTracking()
+                .Where(r =>
+                    r.Status == "Completed" &&
+                    r.Exam != null &&
+                    r.Exam.Class != null &&
+                    r.Exam.MaxScore > 0)
+                .Select(r => new
+                {
+                    ClassId = r.Exam!.Class!.LanguageClassId,
+                    ClassName = r.Exam.Class.ClassName,
+                    Score = r.Score,
+                    MaxScore = r.Exam.MaxScore
+                })
+                .ToListAsync();
+
+            ViewBag.ClassPerformanceChart = classResultsForChart
+                .GroupBy(r => new { r.ClassId, r.ClassName })
+                .Select(g => new
+                {
+                    ClassName = g.Key.ClassName,
+                    AverageScore = Math.Round(
+                        g.Average(r =>
+                            (double)r.Score / (double)r.MaxScore * 100.0),
+                        2)
+                })
+                .OrderByDescending(x => x.AverageScore)
+                .Take(10)
+                .ToList();
+
+            // AI usage chart: successful and failed requests over the last 7 days.
+            var chartToday = DateTime.UtcNow.Date;
+            var chartStartDate = chartToday.AddDays(-6);
+
+            var aiLogsForChart = await _context.AiUsageLogs
+                .AsNoTracking()
+                .Where(log =>
+                    log.StartedAt >= chartStartDate &&
+                    log.StartedAt < chartToday.AddDays(1) &&
+                    (log.Status == "Succeeded" || log.Status == "Failed"))
+                .Select(log => new
+                {
+                    Day = log.StartedAt.Date,
+                    log.Status
+                })
+                .ToListAsync();
+
+            var aiUsageByDay = aiLogsForChart
+                .GroupBy(log => log.Day)
+                .ToDictionary(
+                    g => g.Key,
+                    g => new
+                    {
+                        Successful = g.Count(log => log.Status == "Succeeded"),
+                        Failed = g.Count(log => log.Status == "Failed")
+                    });
+
+            ViewBag.AiUsageChart = Enumerable.Range(0, 7)
+                .Select(offset =>
+                {
+                    var day = chartStartDate.AddDays(offset);
+                    aiUsageByDay.TryGetValue(day, out var usage);
+
+                    return new
+                    {
+                        Date = day.ToString("MMM dd"),
+                        Successful = usage?.Successful ?? 0,
+                        Failed = usage?.Failed ?? 0
+                    };
+                })
+                .ToList();
 
             return View();
         }

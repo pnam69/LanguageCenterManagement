@@ -1,5 +1,4 @@
-﻿
-using LanguageCenterManagement.Data;
+﻿using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
 using LanguageCenterManagement.Services.Ai;
 using LanguageCenterManagement.ViewModels;

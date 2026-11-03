@@ -1,5 +1,4 @@
-﻿
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using LanguageCenterManagement.Data;
 using LanguageCenterManagement.Models;
@@ -20,12 +19,16 @@ namespace LanguageCenterManagement.Services.Ai
             _httpClient = httpClient;
         }
 
-        public async Task CheckAnswerAsync(int examAnswerId)
+
+        public async Task CheckAnswerAsync(
+            int examAnswerId,
+            CancellationToken cancellationToken = default)
         {
             var answer = await _context.ExamAnswers
                 .Include(a => a.Question)
-                .FirstOrDefaultAsync(a =>
-                    a.ExamAnswerId == examAnswerId);
+                .FirstOrDefaultAsync(
+                    a => a.ExamAnswerId == examAnswerId,
+                    cancellationToken);
 
             if (answer == null ||
                 answer.Question?.Skill != "Writing" ||
@@ -35,8 +38,9 @@ namespace LanguageCenterManagement.Services.Ai
             }
 
             var writingContent = await _context.WritingContents
-                .FirstOrDefaultAsync(w =>
-                    w.QuestionId == answer.QuestionId);
+                .FirstOrDefaultAsync(
+                    w => w.QuestionId == answer.QuestionId,
+                    cancellationToken);
 
             string prompt = writingContent?.Prompt
                 ?? answer.Question.QuestionText;
@@ -48,98 +52,137 @@ namespace LanguageCenterManagement.Services.Ai
                 format = "json",
                 options = new
                 {
-                    temperature = 0
+                    temperature = 0,
+                    num_predict = 256
                 },
                 prompt = $$$"""
-                You are assisting a teacher reviewing an English essay.
+        You are assisting a teacher reviewing an English essay.
 
-                This is NOT a reliable AI-authorship detection test.
-                Do not claim you can determine authorship with certainty.
-                Assess only whether the text contains features that warrant
-                a teacher's closer review.
+        This is NOT a reliable AI-authorship detection test.
+        Do not claim you can determine authorship with certainty.
+        Assess only whether the text contains features that warrant
+        a teacher's closer review.
 
-                Consider:
-                - Generic or formulaic wording
-                - Repetitive structure or ideas
-                - Unusually uniform sentence patterns
-                - Specific inconsistencies between the prompt and response
+        Consider:
+        - Generic or formulaic wording
+        - Repetitive structure or ideas
+        - Unusually uniform sentence patterns
+        - Specific inconsistencies between the prompt and response
 
-                Do not treat good grammar, formal vocabulary, or correct
-                spelling alone as evidence of AI use.
-                Do not assume a student used AI merely because the essay
-                is well written.
+        Do not treat good grammar, formal vocabulary, or correct
+        spelling alone as evidence of AI use.
+        Do not assume a student used AI merely because the essay
+        is well written.
 
-                Return valid JSON with exactly these properties:
-                {{
-                    "status": "Review" or "NoConcern",
-                    "indicators": "Brief list of observable features",
-                    "explanation": "Brief explanation and limitations"
-                }}
+        Return valid JSON with exactly these properties:
+        {{
+            "status": "Review" or "NoConcern",
+            "indicators": "Brief list of observable features",
+            "explanation": "Brief explanation and limitations"
+        }}
 
-                If there is insufficient evidence, choose NoConcern.
-                A Review result means only that a teacher should examine it.
-                Never describe the result as proof or a probability of AI use.
+        If there is insufficient evidence, choose NoConcern.
+        A Review result means only that a teacher should examine it.
+        Never describe the result as proof or a probability of AI use.
 
-                Writing prompt:
-                {prompt}
+        Writing prompt:
+        {prompt}
 
-                Student essay:
-                {answer.TextAnswer}
-                """
+        Student essay:
+        {answer.TextAnswer}
+        """
             };
 
-            using var response = await _httpClient.PostAsJsonAsync(
-                "api/generate", request);
+            try
+            {
+                using var response = await _httpClient.PostAsJsonAsync(
+                    "api/generate",
+                    request,
+                    cancellationToken);
 
-            response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
 
-            var result = await response.Content
-                .ReadFromJsonAsync<OllamaResponse>();
+                var result = await response.Content.ReadFromJsonAsync<OllamaResponse>(
+                    cancellationToken: cancellationToken);
 
-            if (string.IsNullOrWhiteSpace(result?.Response))
-                throw new InvalidOperationException(
-                    "Ollama returned an empty assessment.");
+                if (string.IsNullOrWhiteSpace(result?.Response))
+                {
+                    throw new InvalidOperationException(
+                        "Ollama returned an empty assessment.");
+                }
 
-            var assessment =
-                JsonSerializer.Deserialize<AssessmentResult>(
+                var assessment = JsonSerializer.Deserialize<AssessmentResult>(
                     result.Response,
                     new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
 
-            if (assessment == null)
-                throw new InvalidOperationException(
-                    "Could not read Ollama's assessment.");
-
-            var review = await _context.WritingAiReviews
-                .FirstOrDefaultAsync(r =>
-                    r.ExamAnswerId == examAnswerId);
-
-            if (review == null)
-            {
-                review = new WritingAiReview
+                if (assessment == null ||
+                    string.IsNullOrWhiteSpace(assessment.Status))
                 {
-                    ExamAnswerId = examAnswerId
-                };
+                    throw new InvalidOperationException(
+                        "Could not read Ollama's assessment.");
+                }
 
-                _context.WritingAiReviews.Add(review);
+                if (!assessment.Status.Equals(
+                        "Review",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !assessment.Status.Equals(
+                        "NoConcern",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException(
+                        "Ollama returned an unsupported assessment status.");
+                }
+
+                var review = await _context.WritingAiReviews
+                    .FirstOrDefaultAsync(
+                        r => r.ExamAnswerId == examAnswerId,
+                        cancellationToken);
+
+                if (review == null)
+                {
+                    review = new WritingAiReview
+                    {
+                        ExamAnswerId = examAnswerId
+                    };
+
+                    _context.WritingAiReviews.Add(review);
+                }
+
+                review.Status = assessment.Status.Equals(
+                    "Review",
+                    StringComparison.OrdinalIgnoreCase)
+                        ? "Review"
+                        : "NoConcern";
+
+                review.Indicators = Limit(assessment.Indicators, 2000);
+                review.Explanation = Limit(assessment.Explanation, 2000);
+                review.CheckedAt = DateTime.Now;
+
+                await _context.SaveChangesAsync(cancellationToken);
             }
-
-            review.Status =
-                assessment.Status == "Review"
-                    ? "Review"
-                    : "NoConcern";
-
-            review.Indicators = Limit(
-                assessment.Indicators, 2000);
-
-            review.Explanation = Limit(
-                assessment.Explanation, 2000);
-
-            review.CheckedAt = DateTime.Now;
-
-            await _context.SaveChangesAsync();
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new TimeoutException(
+                    "The writing assessment request timed out.", ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new InvalidOperationException(
+                    "Could not connect to Ollama. Check that Ollama is running and qwen2.5:3b is available.",
+                    ex);
+            }
+            catch (JsonException ex)
+            {
+                throw new InvalidOperationException(
+                    "Ollama returned invalid JSON for the writing assessment.", ex);
+            }
         }
 
         private static string? Limit(string? value, int maxLength)

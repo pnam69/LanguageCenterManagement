@@ -95,6 +95,11 @@ builder.Services.AddHttpClient<AiChatService>();
 
 QuestPDF.Settings.License = LicenseType.Community;
 
+builder.Services.AddSingleton<WritingAssessmentBackgroundService>();
+
+builder.Services.AddHostedService(provider =>
+    provider.GetRequiredService<WritingAssessmentBackgroundService>());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

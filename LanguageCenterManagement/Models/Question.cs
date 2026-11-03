@@ -32,6 +32,7 @@ namespace LanguageCenterManagement.Models
         public WritingContent? WritingContent { get; set; }
 
         public int? ReadingContentId { get; set; }
+        public int? ListeningContentId { get; set; }
 
     }
 }

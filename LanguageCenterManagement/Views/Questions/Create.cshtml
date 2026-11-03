@@ -63,6 +63,24 @@
 								<span asp-validation-for="ReadingContentId" class="text-danger"></span>
 							</div>
 
+							<div class="col-md-4 mb-3"
+								 id="listeningContentGroup"
+								 style="display: none;">
+
+								<label asp-for="ListeningContentId" class="form-label">
+									Listening Audio
+								</label>
+
+								<select asp-for="ListeningContentId"
+										asp-items="ViewBag.ListeningContents"
+										class="form-select">
+									<option value="">-- Select listening audio --</option>
+								</select>
+
+								<span asp-validation-for="ListeningContentId"
+									  class="text-danger"></span>
+							</div>
+
 							
 							<div id="writingContentGroup" style="display: none;">
 								<hr />
@@ -185,6 +203,13 @@
 							   class="btn btn-secondary">
 								Cancel
 							</a>
+
+
+							<a asp-controller ="AIQuestions"
+							asp-action="Index"
+							   class="btn btn-outline-primary">
+								Generate AI Questions
+							</a>
 						</div>
 					</form>
 				</div>
@@ -214,6 +239,17 @@
 			function toggleSkillSections() {
 				const isReading = skillSelect.value === "Reading";
 				const isWriting = skillSelect.value === "Writing";
+				const isSpeaking = skillSelect.value == "Speaking";
+				const isListening = skillSelect.value === "Listening";
+
+				const listeningGroup =
+					document.getElementById("listeningContentGroup");
+
+				const listeningSelect =
+					document.getElementById("ListeningContentId");
+
+				listeningGroup.style.display = isListening ? "" : "none";
+				listeningSelect.required = isListening;
 
 				passageGroup.style.display = isReading ? "" : "none";
 				passageSelect.required = isReading;
@@ -222,7 +258,13 @@
 				writingPrompt.required = isWriting;
 
 				answerSettingsGroup.style.display =
-					isWriting ? "none" : "";
+					(isWriting || isSpeaking) ? "none" : "";
+
+                const questionTypeSelect = document.getElementById("QuestionType");
+
+				if(isSpeaking){
+					questionTypeSelect.value = "ShortAnswer";
+				}
 			}
 
 			skillSelect.addEventListener("change", toggleSkillSections);

@@ -218,15 +218,40 @@ namespace LanguageCenterManagement.Controllers
                         usageLogId.Value,
                         "Failed",
                         0,
-                        "Question generation failed.",
+                        ex.Message,
                         CancellationToken.None);
                 }
-                _logger.LogWarning(ex, "AI generated invalid questions.");
 
-                ModelState.AddModelError(
-                    "",
-                    "The AI could not generate valid questions after several attempts. " +
-                    "Try again or reduce the number of questions.");
+                if (ex.InnerException is HttpRequestException)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Ollama is unavailable during question generation.");
+
+                    ModelState.AddModelError(
+                        "",
+                        "The AI service is currently unavailable. Your questions were not generated. Please try again later.");
+                }
+                else if (ex.InnerException is OperationCanceledException)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Ollama question generation timed out.");
+
+                    ModelState.AddModelError(
+                        "",
+                        "Question generation timed out. Please try again with fewer questions.");
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "AI generated invalid questions.");
+
+                    ModelState.AddModelError(
+                        "",
+                        "The AI could not generate valid questions after several attempts. Try again or reduce the number of questions.");
+                }
             }
             catch (System.Text.Json.JsonException ex)
             {
@@ -243,6 +268,35 @@ namespace LanguageCenterManagement.Controllers
                 ModelState.AddModelError(
                     "",
                     "The AI response could not be processed. Please try again.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Unexpected error during AI question generation.");
+
+                if (usageLogId.HasValue)
+                {
+                    try
+                    {
+                        await _quotaService.CompleteAsync(
+                            usageLogId.Value,
+                            "Failed",
+                            0,
+                            "Unexpected question generation error.",
+                            CancellationToken.None);
+                    }
+                    catch (Exception logException)
+                    {
+                        _logger.LogError(
+                            logException,
+                            "Could not update AI usage log after generation failure.");
+                    }
+                }
+
+                ModelState.AddModelError(
+                    "",
+                    "An unexpected error occurred during question generation. Other application features remain available.");
             }
 
             return View("Index", model);
@@ -297,31 +351,40 @@ namespace LanguageCenterManagement.Controllers
 
             foreach (var question in model.Questions)
             {
-                int expectedAnswers = model.QuestionType switch
+                int answerCount = question.Answers?.Count ?? 0;
+
+                bool validAnswerCount = model.QuestionType switch
                 {
-                    "MultipleChoice" => 4,
-                    "TrueFalse" => 2,
-                    "FillInTheBlank" => 1,
-                    _ => 0
+                    "MultipleChoice" => answerCount >= 2,
+                    "TrueFalse" => answerCount == 2,
+                    "FillInTheBlank" => answerCount == 1,
+                    _ => false
                 };
 
                 if (string.IsNullOrWhiteSpace(question.QuestionText) ||
                     question.QuestionText.Length > 2000 ||
                     question.Answers == null ||
-                    expectedAnswers == 0 ||
-                    question.Answers.Count != expectedAnswers ||
+                    !validAnswerCount ||
                     question.Answers.Any(a =>
                         string.IsNullOrWhiteSpace(a.AnswerText) ||
                         a.AnswerText.Length > 1000) ||
                     question.Answers
                         .Select(a => a.AnswerText.Trim())
                         .Distinct(StringComparer.OrdinalIgnoreCase)
-                        .Count() != expectedAnswers ||
+                        .Count() != answerCount ||
                     question.Answers.Count(a => a.IsCorrect) != 1)
                 {
+                    string answerRequirement = model.QuestionType switch
+                    {
+                        "MultipleChoice" => "at least 2 distinct answers",
+                        "TrueFalse" => "exactly True and False",
+                        "FillInTheBlank" => "exactly 1 answer",
+                        _ => "a valid question type"
+                    };
+
                     ModelState.AddModelError(
-                        "",
-                        $"Each {model.QuestionType} question must have {expectedAnswers} distinct answer(s) and exactly one correct answer.");
+                        string.Empty,
+                        $"Each {model.QuestionType} question must have {answerRequirement} and exactly one correct answer.");
 
                     return View("Preview", model);
                 }
@@ -333,7 +396,7 @@ namespace LanguageCenterManagement.Controllers
                         .SetEquals(new[] { "True", "False" }))
                 {
                     ModelState.AddModelError(
-                        "",
+                        string.Empty,
                         "True/False questions must have exactly True and False as their answers.");
 
                     return View("Preview", model);
@@ -406,7 +469,7 @@ namespace LanguageCenterManagement.Controllers
                     "Enter a topic of no more than 200 characters.");
             }
 
-            if (!new[] { "Reading", "Listening", "Speaking", "Writing" }
+            if (!new[] { "Reading", "Listening", "Speaking", "Writing", "Grammar", "Vocabulary" }
                 .Contains(model.Skill))
             {
                 ModelState.AddModelError(

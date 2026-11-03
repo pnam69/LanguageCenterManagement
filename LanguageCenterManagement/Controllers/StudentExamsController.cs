@@ -15,25 +15,22 @@ namespace LanguageCenterManagement.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AiAnswerReviewService _aiAnswerReviewService;
-        private readonly WritingIntegrityService _writingIntegrityService;
         private readonly ILogger<StudentExamsController> _logger;
-        private readonly WritingAiAssessmentService _writingAiAssessmentService;
+        private readonly WritingAssessmentBackgroundService _writingAssessmentBackgroundService;
         private readonly AiExamReviewService _aiExamReviewService;
 
         public StudentExamsController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             AiAnswerReviewService aiAnswerReviewService,
-            WritingIntegrityService writingIntegrityService,
-            WritingAiAssessmentService writingAiAssessmentService,
+            WritingAssessmentBackgroundService writingAssessmentBackgroundService,
             AiExamReviewService aiExamReviewService,
             ILogger<StudentExamsController> logger)
         {
             _context = context;
             _userManager = userManager;
             _aiAnswerReviewService = aiAnswerReviewService;
-            _writingIntegrityService = writingIntegrityService;
-            _writingAiAssessmentService = writingAiAssessmentService;
+            _writingAssessmentBackgroundService = writingAssessmentBackgroundService;
             _aiExamReviewService = aiExamReviewService;
             _logger = logger;
         }
@@ -87,87 +84,6 @@ namespace LanguageCenterManagement.Controllers
             return View(model);
         }
 
-        // GET: StudentExams/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _userManager.GetUserAsync(User);
-
-            if (user == null || !user.StudentId.HasValue)
-            {
-                return Forbid();
-            }
-
-            int studentId = user.StudentId.Value;
-
-            var exam = await _context.Exams
-                .Include(e => e.Class)
-                .Include(e => e.ExamQuestions)
-                    .ThenInclude(eq => eq.Question)
-                        .ThenInclude(q => q!.Answers)
-                .Include(e => e.ExamResults)
-                .FirstOrDefaultAsync(e => e.ExamId == id);
-
-            if (exam == null)
-            {
-                return NotFound();
-            }
-
-            bool enrolled = exam.Class != null &&
-                await _context.Enrollments.AnyAsync(e =>
-                    e.ClassId == exam.ClassId &&
-                    e.StudentId == studentId &&
-                    e.Status != "Cancelled");
-
-            if (!enrolled)
-            {
-                return Forbid();
-            }
-
-            bool submitted = exam.ExamResults
-                .Any(r => r.StudentId == studentId);
-
-            ViewBag.HasSubmitted = submitted;
-
-            var model = new StudentExamViewModel
-            {
-                ExamId = exam.ExamId,
-                ExamName = exam.ExamName,
-                ClassName = exam.Class?.ClassName ?? "",
-                ExamType = exam.ExamType,
-                ExamDate = exam.ExamDate,
-                Duration = exam.Duration,
-                MaxScore = exam.MaxScore,
-                Description = exam.Description,
-
-                Questions = exam.ExamQuestions
-                    .OrderBy(eq => eq.QuestionOrder)
-                    .Select(eq => new StudentExamQuestionViewModel
-                    {
-                        ExamQuestionId = eq.ExamQuestionId,
-                        QuestionId = eq.QuestionId,
-                        QuestionOrder = eq.QuestionOrder,
-                        QuestionText = eq.Question?.QuestionText ?? "",
-                        QuestionType = eq.Question?.QuestionType ?? "",
-                        Skill = eq.Question?.Skill ?? "",
-                        Score = eq.Question?.Score ?? 1,
-                        Answers = eq.Question?.Answers
-                            .Select(a => new StudentExamAnswerViewModel
-                            {
-                                AnswerId = a.AnswerId,
-                                AnswerText = a.AnswerText
-                            })
-                            .ToList() ?? new()
-                    })
-                    .ToList()
-            };
-
-            return View(model);
-        }
 
         // GET: StudentExams/Take/5
         public async Task<IActionResult> Take(int? id)
@@ -215,7 +131,7 @@ namespace LanguageCenterManagement.Controllers
                 TempData["ErrorMessage"] =
                     "This exam is not currently available.";
 
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Index));
             }
 
             if (exam.ExamDate > DateTime.Now)
@@ -223,7 +139,7 @@ namespace LanguageCenterManagement.Controllers
                 TempData["ErrorMessage"] =
                     "This exam has not started yet.";
 
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Index));
             }
 
             if (exam.ExamResults.Any(r => r.StudentId == studentId))
@@ -231,7 +147,7 @@ namespace LanguageCenterManagement.Controllers
                 TempData["ErrorMessage"] =
                     "You have already submitted this exam.";
 
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Index));
             }
 
             var questionIds = exam.ExamQuestions
@@ -337,7 +253,7 @@ namespace LanguageCenterManagement.Controllers
                 TempData["ErrorMessage"] =
                     "This exam does not have any questions.";
 
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Index));
             }
 
             return View(model);
@@ -574,27 +490,10 @@ namespace LanguageCenterManagement.Controllers
             // Neither failure should affect the saved exam submission.
             foreach (var answerId in writingAnswerIds)
             {
-                try
-                {
-                    await _writingIntegrityService.CheckAnswerAsync(answerId);
-                }
-                catch (Exception ex)
+                if (!_writingAssessmentBackgroundService.Enqueue(answerId))
                 {
                     _logger.LogWarning(
-                        ex,
-                        "Writing similarity check failed for answer {AnswerId}",
-                        answerId);
-                }
-
-                try
-                {
-                    await _writingAiAssessmentService.CheckAnswerAsync(answerId);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(
-                        ex,
-                        "Ollama writing assessment failed for answer {AnswerId}",
+                        "Could not queue writing assessment for answer {AnswerId}",
                         answerId);
                 }
             }
@@ -641,6 +540,11 @@ namespace LanguageCenterManagement.Controllers
                 .OrderBy(eq => eq.QuestionOrder)
                 .ToListAsync();
 
+            // Group answers by QuestionId to safely handle duplicates.
+            var studentAnswers = result.ExamAnswers
+                .GroupBy(a => a.QuestionId)
+                .ToDictionary(g => g.Key, g => g.First());
+
             var model = new StudentExamResultViewModel
             {
                 ExamResultId = result.ExamResultId,
@@ -655,15 +559,17 @@ namespace LanguageCenterManagement.Controllers
 
             foreach (var examQuestion in examQuestions)
             {
-                var question = await _context.Questions
-                    .Include(q => q.Answers)
-                    .FirstOrDefaultAsync(q => q.QuestionId == examQuestion.QuestionId);
+                // Use the Question navigation property already loaded above.
+                var question = result.ExamAnswers
+                    .FirstOrDefault(a => a.QuestionId == examQuestion.QuestionId)
+                    ?.Question;
 
                 if (question == null)
                     continue;
 
-                var studentAnswer = result.ExamAnswers
-                    .FirstOrDefault(a => a.QuestionId == question.QuestionId);
+                studentAnswers.TryGetValue(
+                    question.QuestionId,
+                    out var studentAnswer);
 
                 var item = new StudentExamResultAnswerViewModel
                 {

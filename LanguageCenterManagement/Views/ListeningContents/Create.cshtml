@@ -1,89 +1,61 @@
-﻿@model LanguageCenterManagement.ViewModels.ListeningContentViewModel
+﻿@model LanguageCenterManagement.ViewModels.ListeningAudioCreateViewModel
 
 @{
     ViewData["Title"] = "Create Listening Content";
 }
 
 <div class="container mt-4">
-
-    <div class="mb-4">
-        <h2>Create Listening Content</h2>
-        <p class="text-muted">
-            Add an audio exercise for students.
-        </p>
-    </div>
-
     <div class="card shadow-sm">
-        <div class="card-body">
+        <div class="card-header">
+            <h4 class="mb-0">Create Listening Content</h4>
+        </div>
 
-            <form asp-action="Create" method="post">
+        <div class="card-body">
+            <form asp-action="Create" method="post"
+                  enctype="multipart/form-data">
 
                 <div asp-validation-summary="ModelOnly"
-                     class="text-danger mb-3">
-                </div>
+                     class="text-danger mb-3"></div>
 
                 <div class="mb-3">
                     <label asp-for="Title" class="form-label"></label>
-
-                    <input asp-for="Title"
-                           class="form-control"
-                           placeholder="e.g. Daily Conversation" />
-
+                    <input asp-for="Title" class="form-control" />
                     <span asp-validation-for="Title"
-                          class="text-danger">
-                    </span>
+                          class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="AudioUrl" class="form-label"></label>
-
-                    <input asp-for="AudioUrl"
+                    <label asp-for="AudioFile" class="form-label"></label>
+                    <input asp-for="AudioFile"
+                           type="file"
                            class="form-control"
-                           placeholder="/materials/listening/daily-conversation.mp3" />
-
-                    <span asp-validation-for="AudioUrl"
-                          class="text-danger">
-                    </span>
-
-                    <div class="form-text">
-                        Enter the URL or path to the audio file.
-                    </div>
+                           accept=".mp3" />
+                    <span asp-validation-for="AudioFile"
+                          class="text-danger"></span>
+                    <small class="text-muted">Maximum file size: 20 MB.</small>
                 </div>
 
                 <div class="mb-3">
                     <label asp-for="Transcript" class="form-label"></label>
-
                     <textarea asp-for="Transcript"
                               class="form-control"
-                              rows="8"
-                              placeholder="Enter the listening transcript..."></textarea>
-
+                              rows="6"></textarea>
                     <span asp-validation-for="Transcript"
-                          class="text-danger">
-                    </span>
+                          class="text-danger"></span>
                 </div>
 
-                <div class="d-flex gap-2">
-                    <button type="submit"
-                            class="btn btn-primary">
-                        Create
-                    </button>
+                <button type="submit" class="btn btn-primary">
+                    Upload Listening Content
+                </button>
 
-                    <a asp-action="Index"
-                       class="btn btn-secondary">
-                        Cancel
-                    </a>
-                </div>
-
+                <a asp-action="Index" class="btn btn-secondary">
+                    Cancel
+                </a>
             </form>
-
         </div>
     </div>
-
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

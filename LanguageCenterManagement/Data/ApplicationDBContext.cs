@@ -52,6 +52,8 @@ namespace LanguageCenterManagement.Data
         public DbSet<WritingAiReview> WritingAiReviews { get; set; }
         public DbSet<AiUsageLog> AiUsageLogs { get; set; }
         public DbSet<AiQuotaSettings> AiQuotaSettings { get; set; }
+        public DbSet<Conversation> Conversations { get; set; }
+        public DbSet<ConversationMessage> ConversationMessages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -395,6 +397,39 @@ namespace LanguageCenterManagement.Data
 
             modelBuilder.Entity<AiUsageLog>()
                 .HasIndex(log => new { log.UserId, log.StartedAt });
+
+            modelBuilder.Entity<Conversation>()
+                .HasOne(c => c.Student)
+                .WithMany()
+                .HasForeignKey(c => c.StudentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Conversation>()
+                .HasIndex(c => new
+                {
+                    c.StudentId,
+                    c.UpdatedAt
+                });
+
+            modelBuilder.Entity<Conversation>()
+                .HasIndex(c => new
+                {
+                    c.RecipientUserId,
+                    c.UpdatedAt
+                });
+
+            modelBuilder.Entity<ConversationMessage>()
+                .HasOne(m => m.Conversation)
+                .WithMany(c => c.Messages)
+                .HasForeignKey(m => m.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConversationMessage>()
+                .HasIndex(m => new
+                {
+                    m.ConversationId,
+                    m.SentAt
+                });
         }
     }
 }

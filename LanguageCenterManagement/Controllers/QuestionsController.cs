@@ -75,7 +75,7 @@ namespace LanguageCenterManagement.Controllers
                 model.Answers.Add(new AnswerManagementViewModel());
             }
 
-            await LoadReadingContents();
+            await LoadQuestionContentLists(model);
             return View(model);
         }
 
@@ -85,8 +85,15 @@ namespace LanguageCenterManagement.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(QuestionManagementViewModel model)
         {
+            Console.WriteLine("QUESTION CREATE POST REACHED");
+            if (model.Skill != "Writing" || model.Skill == "Speaking")
+            {
+                ModelState.Remove(nameof(model.WritingPrompt));
+                ModelState.Remove(nameof(model.MinimumWords));
+                ModelState.Remove(nameof(model.MaximumWords));
+            }
             // Writing questions do not need answer choices.
-            if (model.Skill == "Writing")
+            if (model.Skill == "Writing" || model.Skill == "Speaking")
             {
                 ModelState.Remove(nameof(model.QuestionType));
 
@@ -103,9 +110,20 @@ namespace LanguageCenterManagement.Controllers
                 model.QuestionType = "ShortAnswer";
             }
 
+            foreach (var error in ModelState)
+            {
+                foreach (var entry in error.Value.Errors)
+                {
+                    Console.WriteLine(
+                        $"Validation error - {error.Key}: {entry.ErrorMessage}");
+                }
+            }
+
+            Console.WriteLine($"ModelState valid: {ModelState.IsValid}");
+
             if (!ModelState.IsValid)
             {
-                await LoadReadingContents(model.ReadingContentId);
+                await LoadQuestionContentLists(model);
                 return View(model);
             }
 
@@ -115,8 +133,23 @@ namespace LanguageCenterManagement.Controllers
                     nameof(model.ReadingContentId),
                     "Please select a reading passage.");
 
-                await LoadReadingContents(model.ReadingContentId);
+                await LoadQuestionContentLists(model);
                 return View(model);
+            }
+
+            if (model.Skill == "Listening")
+            {
+                if (model.ListeningContentId == null ||
+                    !await _context.ListeningContents.AnyAsync(
+                        l => l.ListeningContentId == model.ListeningContentId))
+                {
+                    ModelState.AddModelError(
+                        nameof(model.ListeningContentId),
+                        "Please select a listening audio.");
+
+                    await LoadQuestionContentLists(model);
+                    return View(model);
+                }
             }
 
             if (model.Skill == "Writing")
@@ -138,7 +171,7 @@ namespace LanguageCenterManagement.Controllers
 
                 if (!ModelState.IsValid)
                 {
-                    await LoadReadingContents(model.ReadingContentId);
+                    await LoadQuestionContentLists(model);
                     return View(model);
                 }
             }
@@ -154,7 +187,7 @@ namespace LanguageCenterManagement.Controllers
                         "Answers",
                         "Multiple choice questions must have at least 2 answers.");
 
-                    await LoadReadingContents(model.ReadingContentId);
+                    await LoadQuestionContentLists(model);
                     return View(model);
                 }
 
@@ -164,7 +197,7 @@ namespace LanguageCenterManagement.Controllers
                         "Answers",
                         "Multiple choice questions must have exactly one correct answer.");
 
-                    await LoadReadingContents(model.ReadingContentId);
+                    await LoadQuestionContentLists(model);
                     return View(model);
                 }
             }
@@ -173,13 +206,16 @@ namespace LanguageCenterManagement.Controllers
             {
                 QuestionText = model.QuestionText,
                 QuestionType = model.Skill == "Writing"
-                    ? "ShortAnswer"
-                    : model.QuestionType,
+                ? "ShortAnswer"
+                : model.QuestionType,
                 Skill = model.Skill,
                 Score = model.Score,
                 ReadingContentId = model.Skill == "Reading"
-                    ? model.ReadingContentId
-                    : null
+                ? model.ReadingContentId
+                : null,
+                ListeningContentId = model.Skill == "Listening"
+                ? model.ListeningContentId
+                : null
             };
 
             if (model.Skill != "Writing" && model.Answers != null)
@@ -198,8 +234,9 @@ namespace LanguageCenterManagement.Controllers
             }
 
             _context.Questions.Add(question);
+            Console.WriteLine("Attempting to save question...");
             await _context.SaveChangesAsync();
-
+            Console.WriteLine("Question saved successfully.");
             if (model.Skill == "Writing")
             {
                 var writingContent = new WritingContent
@@ -238,6 +275,7 @@ namespace LanguageCenterManagement.Controllers
             {
                 ReadingContentId = question.ReadingContentId,
                 QuestionId = question.QuestionId,
+                ListeningContentId = question.ListeningContentId,
                 QuestionText = question.QuestionText,
                 QuestionType = question.QuestionType,
                 WritingPrompt = writingContent?.Prompt ?? string.Empty,
@@ -253,7 +291,7 @@ namespace LanguageCenterManagement.Controllers
                         IsCorrect = a.IsCorrect
                     }).ToList()
             };
-            await LoadReadingContents(model.ReadingContentId);
+            await LoadQuestionContentLists(model);
             return View(model);
         }
 
@@ -266,9 +304,14 @@ namespace LanguageCenterManagement.Controllers
         {
             if (id != model.QuestionId)
                 return NotFound();
+            if (model.Skill != "Writing" || model.Skill == "Speaking")
+            {
+                ModelState.Remove(nameof(model.WritingPrompt));
+                ModelState.Remove(nameof(model.MinimumWords));
+                ModelState.Remove(nameof(model.MaximumWords));
+            }
 
-
-            if (model.Skill == "Writing")
+            if (model.Skill == "Writing" || model.Skill == "Speaking")
             {
                 ModelState.Remove(nameof(model.QuestionType));
 
@@ -300,11 +343,28 @@ namespace LanguageCenterManagement.Controllers
                         "Maximum words must be greater than or equal to minimum words.");
                 }
             }
-
+            if (model.Skill == "Listening" &&
+                (model.ListeningContentId == null ||
+                 !await _context.ListeningContents.AnyAsync(
+                     l => l.ListeningContentId == model.ListeningContentId)))
+            {
+                ModelState.AddModelError(
+                    nameof(model.ListeningContentId),
+                    "Please select a valid listening audio.");
+            }
             if (!ModelState.IsValid)
             {
-                await LoadReadingContents(model.ReadingContentId);
+                await LoadQuestionContentLists(model);
                 return View(model);
+            }
+
+            foreach (var error in ModelState)
+            {
+                foreach (var entry in error.Value.Errors)
+                {
+                    Console.WriteLine(
+                        $"Validation error - {error.Key}: {entry.ErrorMessage}");
+                }
             }
 
             if (model.Skill == "Reading" && model.ReadingContentId == null)
@@ -354,6 +414,9 @@ namespace LanguageCenterManagement.Controllers
             question.QuestionType = model.Skill == "Writing" ? "ShortAnswer" : model.QuestionType;
             question.Skill = model.Skill;
             question.ReadingContentId = model.Skill == "Reading" ? model.ReadingContentId : null;
+            question.ListeningContentId = model.Skill == "Listening"
+            ? model.ListeningContentId
+            : null;
             question.Score = model.Score;
 
             var writingContent = await _context.WritingContents.FirstOrDefaultAsync(w => w.QuestionId == question.QuestionId);
@@ -417,7 +480,6 @@ namespace LanguageCenterManagement.Controllers
                     }
                 }
             }
-
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -493,6 +555,32 @@ namespace LanguageCenterManagement.Controllers
                             : r.Passage),
                     Selected = r.ReadingContentId == selectedId
                 }).ToList();
+        }
+
+        private async Task LoadListeningContents(int? selectedId = null)
+        {
+            var contents = await _context.ListeningContents
+                .OrderBy(l => l.Title)
+                .Select(l => new
+                {
+                    l.ListeningContentId,
+                    l.Title
+                })
+                .ToListAsync();
+
+            ViewBag.ListeningContents = contents.Select(l =>
+                new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+                {
+                    Value = l.ListeningContentId.ToString(),
+                    Text = l.Title,
+                    Selected = l.ListeningContentId == selectedId
+                }).ToList();
+        }
+
+        private async Task LoadQuestionContentLists(QuestionManagementViewModel model)
+        {
+            await LoadReadingContents(model.ReadingContentId);
+            await LoadListeningContents(model.ListeningContentId);
         }
     }
 

@@ -32,6 +32,8 @@
 								  class="text-danger"></span>
 						</div>
 
+						<div id="answerSettingsGroup">
+						<!-- Move the QuestionType dropdown here -->
 						<div class="row">
 							<div class="col-md-4 mb-3">
 								<label asp-for="Skill"
@@ -62,6 +64,24 @@
 								</select>
 
 								<span asp-validation-for="ReadingContentId" class="text-danger"></span>
+							</div>
+
+							<div class="col-md-4 mb-3"
+								 id="listeningContentGroup"
+								 style="display: none;">
+
+								<label asp-for="ListeningContentId" class="form-label">
+									Listening Audio
+								</label>
+
+								<select asp-for="ListeningContentId"
+										asp-items="ViewBag.ListeningContents"
+										class="form-select">
+									<option value="">-- Select listening audio --</option>
+								</select>
+
+								<span asp-validation-for="ListeningContentId"
+									  class="text-danger"></span>
 							</div>
 
 							<div class="col-md-4 mb-3">
@@ -108,6 +128,7 @@
 							and mark exactly one as correct.
 						</div>
 
+						<!-- Move your existing Answers loop here -->
 						@for (int i = 0; i < Model.Answers.Count; i++)
 						{
 							<input type="hidden"
@@ -132,6 +153,12 @@
 								</div>
 							</div>
 						}
+					</div>
+
+						
+						<hr />
+
+						
 
 						<div class="d-flex gap-2 mt-4">
 							<button type="submit"
@@ -157,20 +184,53 @@
 	<script>
 		document.addEventListener("DOMContentLoaded", function () {
 			const skillSelect = document.getElementById("Skill");
-			const passageGroup = document.getElementById("readingContentGroup");
-			const passageSelect = document.getElementById("ReadingContentId");
 
-			function toggleReadingPassage() {
+			const passageGroup =
+				document.getElementById("readingContentGroup");
+			const passageSelect =
+				document.getElementById("ReadingContentId");
+
+			const listeningGroup =
+				document.getElementById("listeningContentGroup");
+			const listeningSelect =
+				document.getElementById("ListeningContentId");
+
+			const questionTypeSelect = document.getElementById("QuestionType");
+			const answerSettingsGroup = document.getElementById("answerSettingsGroup");
+
+			function toggleSkillSections() {
 				const isReading = skillSelect.value === "Reading";
+				const isListening = skillSelect.value === "Listening";
+				const isSpeaking = skillSelect.value === "Speaking";
 
 				passageGroup.style.display = isReading ? "" : "none";
 				passageSelect.required = isReading;
-			}
 
-			skillSelect.addEventListener("change", toggleReadingPassage);
-			toggleReadingPassage();
+				listeningGroup.style.display = isListening ? "" : "none";
+				listeningSelect.required = isListening;
+
+				answerSettingsGroup.style.display = isSpeaking ? "none" : "";
+
+				if (isSpeaking) {
+					questionTypeSelect.value = "ShortAnswer";
+				}
+			}
+			// function toggleSkillSections() {
+			// 	const isReading = skillSelect.value === "Reading";
+			// 	const isListening = skillSelect.value === "Listening";
+
+			// 	passageGroup.style.display = isReading ? "" : "none";
+			// 	passageSelect.required = isReading;
+
+			// 	listeningGroup.style.display = isListening ? "" : "none";
+			// 	listeningSelect.required = isListening;
+			// }
+
+			skillSelect.addEventListener("change", toggleSkillSections);
+			toggleSkillSections();
 		});
 	</script>
+
 	@{
 		await Html.RenderPartialAsync("_ValidationScriptsPartial");
 	}
