@@ -8,9 +8,19 @@
 <div class="container-fluid px-lg-4 py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Writing Integrity</h2>
+            <h2 class="fw-bold mb-1">Writing Integrity
+                <i class="bi bi-question-circle ms-2 text-primary"
+                   role="button"
+                   tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="Kiểm tra tính toàn vẹn bài viết"
+                   data-bs-content="Xem kết quả đánh giá bài viết do AI thực hiện và kiểm tra nội dung học viên đã nộp. Hệ thống chỉ đưa ra các dấu hiệu cần chú ý để giáo viên xem xét, không tự động kết luận học viên gian lận.">
+                </i>
+            </h2>
             <p class="text-muted mb-0">
                 Review AI assessment results and inspect student submissions.
+                
             </p>
         </div>
 
@@ -26,7 +36,16 @@
         <div class="col-sm-6 col-xl-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-2">Total assessments</div>
+                    <div class="text-muted small mb-2">Total assessments
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Tổng số bài đánh giá"
+                           data-bs-content="Tổng số lượt đánh giá bài viết đã được AI thực hiện và ghi nhận trong hệ thống.">
+                        </i>
+                    </div>
                     <div class="fs-3 fw-bold">@reviews.Count</div>
                 </div>
             </div>
@@ -35,7 +54,16 @@
         <div class="col-sm-6 col-xl-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-2">Flagged for review</div>
+                    <div class="text-muted small mb-2">Flagged for review
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Được đề xuất xem xét"
+                           data-bs-content="Số bài viết có những đặc điểm bất thường như cách diễn đạt khuôn mẫu, lặp lại ý tưởng hoặc cấu trúc câu quá đồng nhất. Giáo viên cần kiểm tra thêm trước khi đưa ra kết luận.">
+                        </i>
+                    </div>
                     <div class="fs-3 fw-bold text-warning">
                         @reviews.Count(r => r.Status == "Review")
                     </div>
@@ -91,8 +119,26 @@
                     <thead class="table-light">
                         <tr>
                             <th class="ps-3">Student / Exam</th>
-                            <th>Assessment</th>
-                            <th>Indicators</th>
+                            <th>Assessment
+                                <i class="bi bi-question-circle ms-1 text-primary"
+                                   role="button"
+                                   tabindex="0"
+                                   data-demo-popover
+                                   data-bs-toggle="popover"
+                                   data-bs-title="Lọc trạng thái đánh giá"
+                                   data-bs-content="Lọc danh sách bài đánh giá theo trạng thái: tất cả, cần xem xét hoặc không phát hiện dấu hiệu đáng chú ý.">
+                                </i>
+                            </th>
+                            <th>Indicators
+                                <i class="bi bi-question-circle ms-1 text-primary"
+                                   role="button"
+                                   tabindex="0"
+                                   data-demo-popover
+                                   data-bs-toggle="popover"
+                                   data-bs-title="Các dấu hiệu được AI nhận diện"
+                                   data-bs-content="Hiển thị những đặc điểm trong bài viết mà AI cho là cần chú ý, chẳng hạn như cách diễn đạt khuôn mẫu, nội dung lặp lại hoặc cấu trúc câu đồng nhất.">
+                                </i>
+                            </th>
                             <th>Checked</th>
                             <th class="text-end pe-3">Actions</th>
                         </tr>
@@ -143,6 +189,14 @@
                                         <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2">
                                             <i class="bi bi-check-circle me-1"></i>
                                             No concerns identified
+                                            <i class="bi bi-question-circle ms-1 text-primary"
+                                               role="button"
+                                               tabindex="0"
+                                               data-demo-popover
+                                               data-bs-toggle="popover"
+                                               data-bs-title="Không phát hiện dấu hiệu đáng chú ý"
+                                               data-bs-content="Số bài viết mà AI không phát hiện các đặc điểm bất thường đáng chú ý trong quá trình đánh giá. Điều này không đảm bảo bài viết chắc chắn là nguyên bản.">
+                                            </i>
                                         </span>
                                     }
                                     else
@@ -165,6 +219,14 @@
                                         <summary class="small text-primary"
                                                  style="cursor:pointer;">
                                             View explanation and essay
+                                            <i class="bi bi-question-circle ms-1 text-primary"
+                                               role="button"
+                                               tabindex="0"
+                                               data-demo-popover
+                                               data-bs-toggle="popover"
+                                               data-bs-title="Xem giải thích và bài viết"
+                                               data-bs-content="Mở phần giải thích chi tiết của AI cùng nội dung bài viết gốc do học viên gửi, giúp giáo viên tự kiểm tra các dấu hiệu được nhận diện.">
+                                            </i>
                                         </summary>
 
                                         <div class="small text-muted mt-2 mb-2">

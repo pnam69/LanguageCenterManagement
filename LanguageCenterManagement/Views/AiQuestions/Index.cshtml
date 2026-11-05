@@ -5,7 +5,16 @@
 }
 
 <div class="container py-4">
-    <h2>AI Question Generator</h2>
+    <h2>AI Question Generator
+        <i class="bi bi-question-circle ms-2 text-primary"
+           role="button" tabindex="0"
+           data-demo-popover
+           data-bs-toggle="popover"
+           data-bs-title="Tạo câu hỏi bằng AI"
+           data-bs-content="Giáo viên nhập chủ đề, chọn kỹ năng, dạng câu hỏi, độ khó và số lượng. AI tạo câu hỏi theo yêu cầu, sau đó hệ thống kiểm tra cấu trúc và số lượng đáp án rồi hiện lên UI 
+để giáo viên hoặc admin kiểm tra.">
+        </i>
+    </h2>
     <p class="text-muted">
         Generate English multiple-choice questions for teacher review.
     </p>
@@ -72,13 +81,20 @@
 
         <button type="submit" class="btn btn-primary">
             Generate with AI
+            <i class="bi bi-question-circle text-primary"
+               role="button" tabindex="0"
+               data-demo-popover
+               data-bs-toggle="popover"
+               data-bs-title="Tạo câu hỏi bằng AI"
+               data-bs-content="Gửi yêu cầu đến mô hình AI cục bộ để tạo câu hỏi dựa trên các thiết lập đã chọn.">
+            </i>
         </button>
-        <button type="button"
+        @* <button type="button"
                 id="cancelGeneration"
                 class="btn btn-outline-secondary"
                 disabled>
             Cancel
-        </button>
+        </button> *@
 
         <a asp-controller="Questions" asp-action="Index"
            class="btn btn-outline-secondary">Cancel</a>

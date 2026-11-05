@@ -469,590 +469,806 @@
 
 
 @section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const examForm = document.getElementById("examForm");
 
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-
-			/*
-			 * EXAM TIMER
-			 */
-
-			const examDuration = @Model.Duration;
-			const timerElement = document.getElementById("examTimer");
-			const examForm = document.getElementById("examForm");
-			const submitButton = document.getElementById("submitExamButton");
-
-			let remainingSeconds = Math.max(0, Number(examDuration) * 60);
-
-			// Restrict copy, cut, paste, and the context menu inside the exam form.
-			["copy", "cut", "paste", "contextmenu"].forEach(eventType => {
-				examForm.addEventListener(eventType, event => {
-					event.preventDefault();
-				});
-			});
-
-			// Block common keyboard shortcuts inside the exam form.
-			examForm.addEventListener("keydown", event => {
-				if (
-					(event.ctrlKey || event.metaKey) &&
-					["c", "x", "v", "a"].includes(event.key.toLowerCase())
-				) {
-					event.preventDefault();
-				}
-			});
-
-			// EXAM MONITORING
-			const examId = examForm.querySelector(
-				'input[name="ExamId"]'
-			).value;
-
-			const antiforgeryToken = examForm.querySelector(
-				'input[name="__RequestVerificationToken"]'
-			).value;
-
-			const monitorUrl = examForm.dataset.monitorUrl;
-
-			let interruptionStartedAt = null;
-			let lastEventAt = 0;
-			let examSubmitted = false;
-
-			function reportMonitoringEvent(eventType, durationSeconds = null) {
-				const now = Date.now();
-
-				// Suppress duplicate focus-loss events.
-				if (
-					(eventType === "TabHidden" ||
-						eventType === "WindowBlurred") &&
-					now - lastEventAt < 1500
-				) {
-					return;
-				}
-
-				lastEventAt = now;
-
-				const body = new URLSearchParams({
-					examId: examId,
-					eventType: eventType
-				});
-
-				if (durationSeconds !== null) {
-					body.set("durationSeconds", String(durationSeconds));
-				}
-
-				return fetch(monitorUrl, {
-					method: "POST",
-					credentials: "same-origin",
-					keepalive: true,
-					headers: {
-						"Content-Type": "application/x-www-form-urlencoded",
-						"RequestVerificationToken": antiforgeryToken
-					},
-					body: body.toString()
-				}).catch(function (error) {
-					console.error("Could not report monitoring event.", error);
-				});
-			}
-
-			function handleFocusLost(eventType) {
-				if (examSubmitted || document.hidden && eventType === "WindowBlurred") {
-					return;
-				}
-
-				// One interruption can trigger both browser events.
-				if (interruptionStartedAt !== null) {
-					return;
-				}
-
-				interruptionStartedAt = Date.now();
-				reportMonitoringEvent(eventType);
-			}
-
-			function handleFocusRegained() {
-				if (interruptionStartedAt === null) {
-					return;
-				}
+            if (!examForm) return;
+
+            const timerElement = document.getElementById("examTimer");
+            const submitButton = document.getElementById("submitExamButton");
 
-				const durationSeconds = Math.min(
-					86400,
-					Math.max(
-						0,
-						Math.round((Date.now() - interruptionStartedAt) / 1000)
-					)
-				);
+            let examSubmitted = false;
+            let submissionInProgress = false;
+            let examTimerInterval = null;
 
-				interruptionStartedAt = null;
+            const speakingRecorders = new Map();
 
-				reportMonitoringEvent("FocusRegained", durationSeconds);
-			}
+            // ============================================================
+            // 1. COMMON UTILITIES
+            // ============================================================
+
+            function stopMediaStream(stream) {
+                if (!stream) return;
+
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remaining = seconds % 60;
 
-			document.addEventListener("visibilitychange", function () {
-				if (document.hidden) {
-					handleFocusLost("TabHidden");
-				} else {
-					handleFocusRegained();
-				}
-			});
+                return `${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`;
+            }
 
-			window.addEventListener("blur", function () {
-				if (!document.hidden) {
-					handleFocusLost("WindowBlurred");
-				}
-			});
+            // ============================================================
+            // 2. COPY / PASTE RESTRICTIONS
+            // ============================================================
 
-			window.addEventListener("focus", function () {
-				if (!document.hidden) {
-					handleFocusRegained();
-				}
-			});
+            ["copy", "cut", "paste", "contextmenu"].forEach(eventType => {
+                examForm.addEventListener(eventType, event => {
+                    event.preventDefault();
+                });
+            });
 
-			function updateExamTimer() {
+            examForm.addEventListener("keydown", event => {
+                if (
+                    (event.ctrlKey || event.metaKey) &&
+                    ["c", "x", "v", "a"].includes(event.key.toLowerCase())
+                ) {
+                    event.preventDefault();
+                }
+            });
 
-				const minutes = Math.floor(remainingSeconds / 60);
-				const seconds = remainingSeconds % 60;
+            // ============================================================
+            // 3. EXAM MONITORING
+            // ============================================================
 
-				timerElement.textContent =
-					String(minutes).padStart(2, "0") +
-					":" +
-					String(seconds).padStart(2, "0");
+            const examIdInput = examForm.querySelector('input[name="ExamId"]');
+            const tokenInput = examForm.querySelector('input[name="__RequestVerificationToken"]');
 
-				if (remainingSeconds <= 0) {
-					clearInterval(examTimerInterval);
+            const examId = examIdInput?.value;
+            const antiforgeryToken = tokenInput?.value;
+            const monitorUrl = examForm.dataset.monitorUrl;
 
-					submitButton.disabled = true;
+            let interruptionStartedAt = null;
+            let interruptionEventType = null;
 
-					alert("Time is up. The exam will be submitted.");
+            function reportMonitoringEvent(eventType, durationSeconds = null) {
 
-					examForm.submit();
+                if (examSubmitted || !monitorUrl || !examId || !antiforgeryToken) {
+                    return Promise.resolve();
+                }
 
-					return;
-				}
+                const body = new URLSearchParams({
+                    examId: examId,
+                    eventType: eventType
+                });
 
-				remainingSeconds--;
-			}
+                if (durationSeconds !== null) {
+                    body.set("durationSeconds", String(durationSeconds));
+                }
 
-			updateExamTimer();
+                return fetch(monitorUrl, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    keepalive: true,
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken": antiforgeryToken
+                    },
+                    body: body.toString()
+                }).catch(error => {
+                    console.error("Monitoring event could not be reported:", error);
+                });
+            }
 
-			const examTimerInterval =
-				setInterval(updateExamTimer, 1000);
+            function handleFocusLost(eventType) {
 
+                if (examSubmitted || interruptionStartedAt !== null) {
+                    return;
+                }
 
-			/*
-			 * PROGRESS
-			 */
+                interruptionStartedAt = Date.now();
+                interruptionEventType = eventType;
 
-			const questionCards =
-				document.querySelectorAll(".question-card");
+                reportMonitoringEvent(eventType);
+            }
 
-			const progressText =
-				document.getElementById("progressText");
+            function handleFocusRegained() {
 
-			const progressBar =
-				document.getElementById("progressBar");
+                if (interruptionStartedAt === null) {
+                    return;
+                }
 
-			function updateProgress() {
-				let answered = 0;
+                const durationSeconds = Math.min(
+                    86400,
+                    Math.max(
+                        0,
+                        Math.round((Date.now() - interruptionStartedAt) / 1000)
+                    )
+                );
 
-				questionCards.forEach(function (card) {
-					const radio = card.querySelector(
-						'input[type="radio"]:checked'
-					);
+                interruptionStartedAt = null;
+                interruptionEventType = null;
 
-					const textAnswer = card.querySelector(
-						'textarea.writing-answer, input.fill-blank-answer'
-					);
+                reportMonitoringEvent("FocusRegained", durationSeconds);
+            }
 
-					const audioFile = card.querySelector(
-						'input[type="file"][name$=".AudioFile"]'
-					);
+            document.addEventListener("visibilitychange", function () {
 
-					const hasText = textAnswer &&
-						textAnswer.value.trim().length > 0;
+                if (document.hidden) {
+                    handleFocusLost("TabHidden");
+                } else {
+                    handleFocusRegained();
+                }
 
-					const hasAudio = audioFile &&
-						audioFile.files &&
-						audioFile.files.length > 0;
+            });
 
-					if (radio || hasText || hasAudio) {
-						answered++;
-					}
-				});
+            window.addEventListener("blur", function () {
 
-				const total = questionCards.length;
-				const percentage = total === 0 ? 0 : (answered / total) * 100;
+                if (!document.hidden) {
+                    handleFocusLost("WindowBlurred");
+                }
 
-				progressText.textContent = `${answered} / ${total} answered`;
-				progressBar.style.width = `${percentage}%`;
-				progressBar.setAttribute("aria-valuenow", percentage);
-			}
+            });
 
+            window.addEventListener("focus", function () {
 
-			document
-				.querySelectorAll(".answer-input")
-				.forEach(function (input) {
+                if (!document.hidden) {
+                    handleFocusRegained();
+                }
 
-					input.addEventListener(
-						"change",
-						updateProgress
-					);
+            });
 
-				});
+            // ============================================================
+            // 4. EXAM TIMER
+            // ============================================================
 
+            const examDurationMinutes = Number(@Model.Duration);
 
-			document
-				.querySelectorAll(".writing-answer")
-				.forEach(function (textarea) {
+            const examDurationSeconds = Math.max(
+                0,
+                Math.floor(examDurationMinutes * 60)
+            );
 
-					textarea.addEventListener(
-						"input",
-						function () {
+            const examDeadline = Date.now() + examDurationSeconds * 1000;
 
-							const countElement =
-								textarea
-									.closest(".writing-section")
-									.querySelector(".word-count");
+            function updateExamTimer() {
 
-							const words =
-								textarea.value
-									.trim()
-									.split(/\s+/)
-									.filter(Boolean);
+                if (examSubmitted) return;
 
-							countElement.textContent =
-								textarea.value.trim() === ""
-									? "0"
-									: words.length;
+                const remainingSeconds = Math.max(
+                    0,
+                    Math.ceil((examDeadline - Date.now()) / 1000)
+                );
 
-							updateProgress();
-						}
-					);
+                if (timerElement) {
+                    timerElement.textContent = formatTime(remainingSeconds);
+                }
 
-				});
+                if (remainingSeconds <= 0) {
 
+                    clearInterval(examTimerInterval);
 
-			updateProgress();
+                    alert("Time is up. Your exam is being submitted.");
 
-					/*
-		 * SPEAKING RECORDING
-		 */
+                    submitExam(false);
+                }
+            }
 
-		const speakingRecorders = {};
+            updateExamTimer();
 
-		document
-			.querySelectorAll(".speaking-start")
-			.forEach(function (button) {
+            if (examDurationSeconds > 0) {
+                examTimerInterval = setInterval(updateExamTimer, 250);
+            } else {
+                submitExam(false);
+            }
 
-				button.addEventListener("click", async function () {
+            // ============================================================
+            // 5. PROGRESS TRACKING
+            // ============================================================
 
-					const questionId = button.dataset.question;
-					const index = button.dataset.index;
+            const questionCards = document.querySelectorAll(".question-card");
 
-					const preparation =
-						parseInt(button.dataset.preparation) || 0;
+            const progressText = document.getElementById("progressText");
+            const progressBar = document.getElementById("progressBar");
 
-					const response =
-						parseInt(button.dataset.response) || 0;
+            function isQuestionAnswered(card) {
 
-					const stopButton =
-						document.querySelector(
-							'.speaking-stop[data-question="' +
-							questionId +
-							'"]'
-						);
+                // Multiple choice / True-False / checkbox questions.
+                const selectedAnswer = card.querySelector(
+                    'input[type="radio"]:checked, input[type="checkbox"]:checked'
+                );
 
-					const timer =
-						document.getElementById(
-							"speakingTimer_" + questionId
-						);
+                if (selectedAnswer) return true;
 
-					const status =
-						document.getElementById(
-							"speakingStatus_" + questionId
-						);
+                // Written answers / Fill in the blank.
+                const textAnswers = card.querySelectorAll(
+                    "textarea.writing-answer, input.fill-blank-answer"
+                );
 
-					const preview =
-						document.getElementById(
-							"speakingPreview_" + questionId
-						);
+                for (const input of textAnswers) {
+                    if (input.value.trim().length > 0) {
+                        return true;
+                    }
+                }
 
-					const fileInput =
-						document.getElementById(
-							"audioFile_" + questionId
-						);
+                // Speaking recordings.
+                const audioFile = card.querySelector(
+                    'input[type="file"][name$=".AudioFile"]'
+                );
 
+                return !!(
+                    audioFile &&
+                    audioFile.files &&
+                    audioFile.files.length > 0
+                );
+            }
 
-					if (!navigator.mediaDevices ||
-						!navigator.mediaDevices.getUserMedia ||
-						!window.MediaRecorder) {
+            function updateProgress() {
 
-						alert(
-							"Audio recording is not supported by this browser."
-						);
+                let answered = 0;
 
-						return;
-					}
+                questionCards.forEach(card => {
+                    if (isQuestionAnswered(card)) {
+                        answered++;
+                    }
+                });
 
+                const total = questionCards.length;
 
-					try {
+                const percentage = total === 0
+                    ? 0
+                    : Math.round((answered / total) * 100);
 
-						const stream =
-							await navigator.mediaDevices.getUserMedia({
-								audio: true
-							});
+                if (progressText) {
+                    progressText.textContent = `${answered} / ${total} answered`;
+                }
 
-						const chunks = [];
+                if (progressBar) {
+                    progressBar.style.width = `${percentage}%`;
+                    progressBar.setAttribute("aria-valuenow", percentage);
+                }
+            }
 
-						const recorder =
-							new MediaRecorder(stream);
+            examForm.addEventListener("change", event => {
 
-						speakingRecorders[questionId] = {
-							recorder: recorder,
-							stream: stream,
-							chunks: chunks,
-							timerInterval: null
-						};
+                if (event.target.matches(".answer-input, .fill-blank-answer, input[type='file']")) {
+                    updateProgress();
+                }
 
+            });
 
-						recorder.ondataavailable = function (event) {
+            examForm.addEventListener("input", event => {
 
-							if (event.data.size > 0) {
-								chunks.push(event.data);
-							}
+                if (event.target.matches(".writing-answer, .fill-blank-answer")) {
+                    updateProgress();
+                }
 
-						};
+            });
 
+            // Word counter.
+            document.querySelectorAll(".writing-answer").forEach(textarea => {
 
-						recorder.onstop = function () {
+                textarea.addEventListener("input", function () {
 
-							stream
-								.getTracks()
-								.forEach(track => track.stop());
+                    const writingSection = textarea.closest(".writing-section");
 
+                    const countElement = writingSection?.querySelector(".word-count");
 
-							const blob =
-								new Blob(
-									chunks,
-									{ type: recorder.mimeType }
-								);
+                    if (!countElement) return;
 
+                    const words = textarea.value.trim()
+                        .split(/\s+/)
+                        .filter(Boolean);
 
-							const audioUrl =
-								URL.createObjectURL(blob);
+                    countElement.textContent = words.length;
 
-							preview.src = audioUrl;
-							preview.classList.remove("d-none");
+                });
 
+            });
 
-							const file =
-								new File(
-									[blob],
-									"speaking_" +
-									questionId +
-									".webm",
-									{
-										type: blob.type
-									}
-								);
+            updateProgress();
 
+            // ============================================================
+            // 6. SPEAKING RECORDING
+            // ============================================================
 
-							const dataTransfer =
-								new DataTransfer();
+            function getSpeakingElements(questionId) {
 
-							dataTransfer.items.add(file);
+                return {
+                    startButton: document.querySelector(
+                        `.speaking-start[data-question="${questionId}"]`
+                    ),
 
-							fileInput.files =
-								dataTransfer.files;
+                    stopButton: document.querySelector(
+                        `.speaking-stop[data-question="${questionId}"]`
+                    ),
 
+                    timer: document.getElementById(
+                        `speakingTimer_${questionId}`
+                    ),
 
-							status.textContent =
-								"Recording completed. You can listen to your response before submitting.";
+                    status: document.getElementById(
+                        `speakingStatus_${questionId}`
+                    ),
 
-							timer.textContent =
-								"Recorded";
+                    preview: document.getElementById(
+                        `speakingPreview_${questionId}`
+                    ),
 
-							updateProgress();
-						};
+                    fileInput: document.getElementById(
+                        `audioFile_${questionId}`
+                    )
+                };
+            }
 
+            function finishSpeakingRecording(questionId, message = null) {
 
-						recorder.start();
+                const data = speakingRecorders.get(questionId);
 
-						button.disabled = true;
-						stopButton.disabled = false;
+                if (!data || data.finished) return Promise.resolve();
 
+                data.finished = true;
 
-						let phase = "preparation";
-						let remaining = preparation;
+                clearInterval(data.timerInterval);
 
+                if (data.recorder && data.recorder.state !== "inactive") {
 
-						function updateTimer() {
+                    return new Promise(resolve => {
 
-							if (phase === "preparation") {
+                        data.stopResolve = resolve;
 
-								timer.textContent =
-									"Prepare: " +
-									remaining +
-									"s";
+                        try {
+                            data.recorder.stop();
+                        } catch (error) {
+                            console.error("Recording stop failed:", error);
+                            stopMediaStream(data.stream);
+                            resolve();
+                        }
 
-								status.textContent =
-									"Preparation time. Get ready to speak.";
+                    });
 
-							}
-							else {
+                }
 
-								timer.textContent =
-									"Recording: " +
-									remaining +
-									"s";
+                stopMediaStream(data.stream);
 
-								status.textContent =
-									"Recording your response...";
+                if (message) {
+                    data.elements.status.textContent = message;
+                }
 
-							}
+                return Promise.resolve();
+            }
 
+            function startActualRecording(questionId) {
 
-							if (remaining <= 0) {
+                const data = speakingRecorders.get(questionId);
 
-								if (phase === "preparation") {
+                if (!data || examSubmitted || data.finished) return;
 
-									phase = "response";
-									remaining = response;
+                const { recorder, elements } = data;
 
-									return;
-								}
+                try {
 
+                    recorder.start();
 
-								clearInterval(
-									speakingRecorders[
-										questionId
-									].timerInterval
-								);
+                    data.phase = "response";
 
+                    data.deadline = Date.now() + data.responseSeconds * 1000;
 
-								if (recorder.state !== "inactive") {
-									recorder.stop();
-								}
+                    elements.status.textContent = "Recording your response...";
 
+                    updateSpeakingTimer(questionId);
 
-								button.disabled = true;
-								stopButton.disabled = true;
+                } catch (error) {
 
-								return;
-							}
+                    console.error("Could not start recording:", error);
 
-							remaining--;
-						}
+                    finishSpeakingRecording(
+                        questionId,
+                        "Unable to start recording."
+                    );
 
+                }
+            }
 
-						updateTimer();
+            function updateSpeakingTimer(questionId) {
 
+                const data = speakingRecorders.get(questionId);
 
-						speakingRecorders[
-							questionId
-						].timerInterval =
-							setInterval(
-								updateTimer,
-								1000
-							);
+                if (!data || data.finished) return;
 
-					}
-					catch (error) {
+                const elements = data.elements;
 
-						console.error(error);
+                const remaining = Math.max(
+                    0,
+                    Math.ceil((data.deadline - Date.now()) / 1000)
+                );
 
-						alert(
-							"Unable to access your microphone. Please allow microphone access and try again."
-						);
+                if (data.phase === "preparation") {
 
-					}
+                    elements.timer.textContent = `Prepare: ${remaining}s`;
 
-				});
+                    elements.status.textContent =
+                        "Preparation time. Get ready to speak.";
 
-			});
+                    if (remaining <= 0) {
 
+                        startActualRecording(questionId);
 
-		document
-			.querySelectorAll(".speaking-stop")
-			.forEach(function (button) {
+                        return;
+                    }
 
-				button.addEventListener("click", function () {
+                } else {
 
-					const questionId =
-						button.dataset.question;
+                    elements.timer.textContent = `Recording: ${remaining}s`;
 
-					const data =
-						speakingRecorders[questionId];
+                    elements.status.textContent = "Recording your response...";
 
-					if (!data) {
-						return;
-					}
+                    if (remaining <= 0) {
 
+                        finishSpeakingRecording(questionId);
 
-					if (data.timerInterval) {
+                        return;
+                    }
 
-						clearInterval(
-							data.timerInterval
-						);
+                }
 
-					}
+            }
 
+            document.querySelectorAll(".speaking-start").forEach(button => {
 
-					if (data.recorder.state !== "inactive") {
+                button.addEventListener("click", async function () {
 
-						data.recorder.stop();
+                    if (examSubmitted || button.disabled) return;
 
-					}
+                    const questionId = button.dataset.question;
 
+                    const preparation = Math.max(
+                        0,
+                        parseInt(button.dataset.preparation) || 0
+                    );
 
-					const startButton =
-						document.querySelector(
-							'.speaking-start[data-question="' +
-							questionId +
-							'"]'
-						);
+                    const response = Math.max(
+                        0,
+                        parseInt(button.dataset.response) || 0
+                    );
 
-					startButton.disabled = true;
-					button.disabled = true;
+                    const elements = getSpeakingElements(questionId);
 
-				});
+                    if (
+                        !elements.stopButton ||
+                        !elements.timer ||
+                        !elements.status ||
+                        !elements.fileInput
+                    ) {
+                        console.error("Speaking question elements are missing:", questionId);
+                        return;
+                    }
 
-			});
+                    if (!navigator.mediaDevices?.getUserMedia ||
+                        !window.MediaRecorder) {
 
+                        alert("Audio recording is not supported by this browser.");
 
-			/*
-			 * SUBMIT CONFIRMATION
-			 */
+                        return;
+                    }
 
-			examForm.addEventListener(
-				"submit",
-				function (event) {
+                    button.disabled = true;
+                    elements.stopButton.disabled = true;
 
-					const confirmed =
-						confirm(
-							"Are you sure you want to submit this exam? You will not be able to submit it again."
-						);
+                    elements.status.textContent = "Requesting microphone access...";
 
-					if (!confirmed) {
-						event.preventDefault();
-					}
+                    try {
 
-				}
-			);
+                        const stream = await navigator.mediaDevices.getUserMedia({
+                            audio: true
+                        });
 
-		});
+                        // Exam may have been submitted while microphone permission was pending.
+                        if (examSubmitted) {
+                            stopMediaStream(stream);
+                            return;
+                        }
 
-		// Clicking anywhere in an answer row selects its radio button.
-		document.querySelectorAll(".form-check.border.rounded").forEach(row => {
-			row.addEventListener("click", event => {
-				const radio = row.querySelector(".answer-input");
+                        const mimeType = [
+                            "audio/webm;codecs=opus",
+                            "audio/webm",
+                            "audio/mp4"
+                        ].find(type => MediaRecorder.isTypeSupported(type));
 
-				if (!radio || event.target.closest("input, label, button")) {
-					return;
-				}
+                        const recorder = mimeType
+                            ? new MediaRecorder(stream, { mimeType })
+                            : new MediaRecorder(stream);
 
-				if (!radio.checked) {
-					radio.checked = true;
-					radio.dispatchEvent(new Event("change", { bubbles: true }));
-				}
-			});
-		});
-	</script>
+                        const data = {
+                            recorder: recorder,
+                            stream: stream,
+                            chunks: [],
+                            timerInterval: null,
+                            deadline: 0,
+                            phase: "preparation",
+                            preparationSeconds: preparation,
+                            responseSeconds: response,
+                            finished: false,
+                            stopResolve: null,
+                            objectUrl: null,
+                            elements: elements
+                        };
+
+                        speakingRecorders.set(questionId, data);
+
+                        recorder.ondataavailable = event => {
+
+                            if (event.data.size > 0) {
+                                data.chunks.push(event.data);
+                            }
+
+                        };
+
+                        recorder.onerror = event => {
+
+                            console.error("Recording error:", event.error);
+
+                            elements.status.textContent =
+                                "An error occurred during recording.";
+
+                        };
+
+                        recorder.onstop = function () {
+
+                            stopMediaStream(stream);
+
+                            const blob = new Blob(data.chunks, {
+                                type: recorder.mimeType || "audio/webm"
+                            });
+
+                            if (blob.size > 0) {
+
+                                const extension = blob.type.includes("mp4")
+                                    ? "mp4"
+                                    : "webm";
+
+                                const file = new File(
+                                    [blob],
+                                    `speaking_${questionId}.${extension}`,
+                                    { type: blob.type }
+                                );
+
+                                const transfer = new DataTransfer();
+
+                                transfer.items.add(file);
+
+                                elements.fileInput.files = transfer.files;
+
+                                if (data.objectUrl) {
+                                    URL.revokeObjectURL(data.objectUrl);
+                                }
+
+                                data.objectUrl = URL.createObjectURL(blob);
+
+                                if (elements.preview) {
+                                    elements.preview.src = data.objectUrl;
+                                    elements.preview.classList.remove("d-none");
+                                }
+
+                                elements.status.textContent =
+                                    "Recording completed. Listen to your response before submitting.";
+
+                                elements.timer.textContent = "Recorded";
+
+                            } else {
+
+                                elements.status.textContent =
+                                    "No audio was recorded. Please try again.";
+
+                            }
+
+                            elements.stopButton.disabled = true;
+
+                            if (blob.size === 0 && !examSubmitted) {
+                                elements.startButton.disabled = false;
+                            }
+
+                            updateProgress();
+
+                            if (data.stopResolve) {
+                                data.stopResolve();
+                                data.stopResolve = null;
+                            }
+
+                        };
+
+                        elements.stopButton.disabled = false;
+
+                        // Do NOT start MediaRecorder here.
+                        // Preparation time must not be included in the audio.
+
+                        if (preparation > 0) {
+
+                            data.deadline = Date.now() + preparation * 1000;
+
+                        } else {
+
+                            startActualRecording(questionId);
+
+                        }
+
+                        if (!data.finished) {
+
+                            updateSpeakingTimer(questionId);
+
+                            data.timerInterval = setInterval(() => {
+                                updateSpeakingTimer(questionId);
+                            }, 250);
+
+                        }
+
+                    } catch (error) {
+
+                        console.error("Microphone access failed:", error);
+
+                        button.disabled = false;
+                        elements.stopButton.disabled = true;
+
+                        elements.status.textContent =
+                            "Unable to access your microphone. Check microphone permissions.";
+
+                        alert(
+                            "Unable to access your microphone. Please allow microphone access and try again."
+                        );
+
+                    }
+
+                });
+
+            });
+
+            // Manual stop button.
+            document.querySelectorAll(".speaking-stop").forEach(button => {
+
+                button.addEventListener("click", async function () {
+
+                    const questionId = button.dataset.question;
+
+                    const data = speakingRecorders.get(questionId);
+
+                    if (!data || data.finished) return;
+
+                    const elements = data.elements;
+
+                    if (data.phase === "preparation") {
+
+                        // Cancelled before recording actually started.
+                        clearInterval(data.timerInterval);
+
+                        data.finished = true;
+
+                        stopMediaStream(data.stream);
+
+                        elements.status.textContent =
+                            "Preparation cancelled. You can try recording again.";
+
+                        elements.timer.textContent = "Cancelled";
+
+                        elements.startButton.disabled = false;
+                        elements.stopButton.disabled = true;
+
+                        speakingRecorders.delete(questionId);
+
+                        return;
+                    }
+
+                    elements.status.textContent = "Stopping recording...";
+
+                    button.disabled = true;
+
+                    await finishSpeakingRecording(questionId);
+
+                });
+
+            });
+
+            // ============================================================
+            // 7. SUBMISSION AND CLEANUP
+            // ============================================================
+
+            async function stopAllSpeakingRecorders() {
+
+                const promises = [];
+
+                speakingRecorders.forEach((data, questionId) => {
+
+                    if (!data.finished) {
+                        promises.push(finishSpeakingRecording(questionId));
+                    }
+
+                });
+
+                await Promise.all(promises);
+            }
+
+            async function submitExam(requireConfirmation) {
+
+                if (examSubmitted || submissionInProgress) return;
+
+                if (requireConfirmation) {
+
+                    const confirmed = confirm(
+                        "Are you sure you want to submit this exam? You will not be able to submit it again."
+                    );
+
+                    if (!confirmed) return;
+
+                }
+
+                submissionInProgress = true;
+                examSubmitted = true;
+
+                clearInterval(examTimerInterval);
+
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = "Submitting...";
+                }
+
+                // Prevent further monitoring requests.
+                // Close any active interruption without reporting a false regain event.
+                interruptionStartedAt = null;
+                interruptionEventType = null;
+
+                // Finish active recordings before submitting the form.
+                // This ensures their generated files are attached to the request.
+                await stopAllSpeakingRecorders();
+
+                // Use native submission to avoid triggering confirmation again.
+                HTMLFormElement.prototype.submit.call(examForm);
+            }
+
+            examForm.addEventListener("submit", function (event) {
+
+                event.preventDefault();
+
+                submitExam(true);
+
+            });
+
+            // ============================================================
+            // 8. ANSWER ROW CLICK SUPPORT
+            // ============================================================
+
+            examForm.querySelectorAll(".form-check.border.rounded").forEach(row => {
+
+                row.addEventListener("click", event => {
+
+                    const radio = row.querySelector(".answer-input");
+
+                    if (!radio || event.target.closest("input, label, button")) {
+                        return;
+                    }
+
+                    if (!radio.checked && !radio.disabled) {
+
+                        radio.checked = true;
+
+                        radio.dispatchEvent(
+                            new Event("change", { bubbles: true })
+                        );
+
+                    }
+
+                });
+
+            });
+
+            // ============================================================
+            // 9. INITIALIZATION
+            // ============================================================
+
+            updateProgress();
+
+        });
+    </script>
 }

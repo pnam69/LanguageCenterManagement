@@ -10,7 +10,7 @@ namespace LanguageCenterManagement.Services.Ai
     {
         private readonly HttpClient _httpClient;
         private const string Model = "qwen2.5:3b";
-        private const int MaxAttempts = 3;
+        //private const int MaxAttempts = 3;
         private readonly ILogger<QuestionGenerationService> _logger;
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -72,6 +72,11 @@ namespace LanguageCenterManagement.Services.Ai
             if (string.IsNullOrWhiteSpace(generatedText))
                 throw new JsonException("Ollama returned empty output.");
 
+            _logger.LogDebug(
+                "Ollama raw question output for {QuestionType}: {GeneratedText}",
+                request.QuestionType,
+                generatedText);
+
             using var resultJson = JsonDocument.Parse(generatedText);
 
             if (!resultJson.RootElement.TryGetProperty(
@@ -106,11 +111,18 @@ namespace LanguageCenterManagement.Services.Ai
                 }
                 catch (JsonException ex)
                 {
-                    _logger.LogDebug(ex, "Skipping invalid generated question JSON.");
+                    _logger.LogWarning(
+                        ex,
+                        "Rejected malformed question JSON for type {QuestionType}.",
+                        request.QuestionType);
                 }
                 catch (InvalidOperationException ex)
                 {
-                    _logger.LogDebug(ex, "Skipping invalid generated question.");
+                    _logger.LogWarning(
+                        ex,
+                        "Rejected generated question for type {QuestionType}: {Reason}",
+                        request.QuestionType,
+                        ex.Message);
                 }
             }
 
@@ -185,143 +197,175 @@ namespace LanguageCenterManagement.Services.Ai
             string typeRules = request.QuestionType switch
             {
                 "MultipleChoice" => """
-                    QUESTION TYPE: MultipleChoice
-                    - Provide between 2 and 4 distinct answer options.
-                    - Exactly one option must be correct.
-                    - The question must have ONE unambiguously correct answer.
-                    - Incorrect options must contain a clear grammatical or factual error.
-                    - Never include multiple sentences that are all correct.
-                    - For grammar questions, make distractors test common grammar mistakes.
-                    - Check every option independently before returning the question.
-                    """,
+            QUESTION TYPE: MultipleChoice
+
+            - questionText contains only the question.
+            - Provide exactly 4 answer objects.
+            - Each answerText contains one possible answer.
+            - Exactly one answer has "isCorrect": true.
+            - The other three answers have "isCorrect": false.
+            - Do not put A), B), C), D) or answer options in questionText.
+            - Use plausible but clearly incorrect distractors.
+            - Do not use ____ in questionText.
+
+            Example:
+            {
+              "questionText": "She _____ to school every day.",
+              "answers": [
+                { "answerText": "go", "isCorrect": false },
+                { "answerText": "goes", "isCorrect": true },
+                { "answerText": "going", "isCorrect": false },
+                { "answerText": "gone", "isCorrect": false }
+              ]
+            }
+            """,
 
                 "TrueFalse" => """
             QUESTION TYPE: TrueFalse
-            - Write a factual statement.
-            - Provide exactly two answers: "True" and "False".
-            - Exactly one answer must be correct.
+
+            - questionText must be one clear factual statement.
+            - Do not phrase it as a question.
+            - Provide exactly TWO answer objects.
+            - The first answerText must be exactly "True".
+            - The second answerText must be exactly "False".
+            - Exactly one answer must have "isCorrect": true.
+            - The other answer must have "isCorrect": false.
+            - Do not use Yes, No, T, F, or explanations as answerText.
+
+            Example:
+            {
+              "questionText": "The past tense of 'go' is 'went'.",
+              "answers": [
+                { "answerText": "True", "isCorrect": true },
+                { "answerText": "False", "isCorrect": false }
+              ]
+            }
             """,
 
                 "FillInTheBlank" => """
             QUESTION TYPE: FillInTheBlank
-            - Include exactly one missing word or phrase marked ____.
-            - Provide exactly one answer, with "isCorrect": true.
+
+            - questionText must contain exactly ONE blank.
+            - Represent the blank using exactly four underscores: ____.
+            - Provide exactly ONE answer object.
+            - answerText must contain only the missing word or phrase.
+            - The single answer must have "isCorrect": true.
+            - Do not provide alternative answers.
+            - Do not put the answer inside questionText.
+
+            Example:
+            {
+              "questionText": "She _____ to school every day.",
+              "answers": [
+                { "answerText": "goes", "isCorrect": true }
+              ]
+            }
             """,
 
                 _ => throw new InvalidOperationException(
                     "Unsupported question type.")
             };
 
-
-
             string passageRules =
-                request.Skill == "Reading" &&
+                string.Equals(
+                    request.Skill,
+                    "Reading",
+                    StringComparison.OrdinalIgnoreCase) &&
                 !string.IsNullOrWhiteSpace(request.PassageText)
                 ? $$"""
 
-          READING PASSAGE:
-          {{request.PassageText}}
+        READING PASSAGE:
+        {{request.PassageText}}
 
-          Base the question on this passage.
-          Do not copy existing exam questions.
-          Ensure the correct answer is supported by the passage.
-          """
+        Base every reading question on this passage.
+        The correct answer must be supported by the passage.
+        Do not introduce facts that are not in the passage.
+        """
                 : "";
 
             string previousQuestionRules = previousQuestions.Count == 0
-                ? "Create useful, distinct questions for the requested topic."
+                ? "Create distinct questions relevant to the requested topic."
                 : $$"""
 
-          PREVIOUSLY GENERATED QUESTIONS:
-          {{JsonSerializer.Serialize(previousQuestions.Select(q => new
+        PREVIOUSLY GENERATED QUESTIONS:
+        {{JsonSerializer.Serialize(previousQuestions.Select(q => new
                 {
                     Question = q.QuestionText,
                     Answers = q.Answers.Select(a => a.AnswerText).ToList()
                 }))}}
 
-          Do not repeat these questions or make minor wording changes.
-          You may test the same grammar concept using a new sentence.
-          Prioritize useful questions over forced variety.
-          """;
+        Do not repeat these questions or make minor wording changes.
+        You may test the same concept using a different sentence.
+        """
+                ;
 
             string retryRules = string.IsNullOrWhiteSpace(previousError)
                 ? ""
                 : $$"""
 
-          YOUR PREVIOUS ATTEMPT WAS REJECTED:
-          {{previousError}}
+        PREVIOUS VALIDATION ERROR:
+        {{previousError}}
 
-          Correct this specific problem. Generate a valid, new question.
-          Check the answer count and correct-answer flags before responding.
-          """;
+        Correct this specific problem. Follow the required structure exactly.
+        """
+                ;
 
             return $$"""
-        You are an experienced English teacher creating a practice quiz.
+    You are an experienced English teacher creating an English practice quiz.
 
-        Generate exactly {{request.Count}} questions.
-        Return all questions inside one JSON "questions" array.
+    Generate exactly {{request.Count}} questions.
 
-        Topic: {{request.Topic}}
-        Skill: {{request.Skill}}
-        Difficulty: {{request.Difficulty}}
+    Topic: {{request.Topic}}
+    Skill: {{request.Skill}}
+    Difficulty: {{request.Difficulty}}
+    Question type: {{request.QuestionType}}
 
-        PURPOSE:
-        Test the student's underlying English knowledge, not reproduce
-        an existing examination.
+    CONTENT REQUIREMENTS:
+    - Use natural, grammatically correct English.
+    - Match the requested difficulty.
+    - Test actual English knowledge.
+    - For grammar, test rules using new sentences.
+    - For vocabulary, test word meaning and appropriate usage.
+    - For reading, test comprehension and inference.
+    - Ensure every question has one unambiguous correct answer.
+    - Do not copy existing examination questions.
+    - Do not repeat questions.
 
-        - For grammar, test rules using new sentences and examples.
-        - For vocabulary, test meaning and appropriate word usage.
-        - For reading, test comprehension, inference, or vocabulary in context.
-        - Do not copy existing exam questions or their answer options.
-        - Use natural English appropriate to the requested difficulty.
-        - Questions may test the same general topic, but must not repeat
-          an earlier question with trivial changes.
+    {{typeRules}}
 
-        {{typeRules}}
+    {{previousQuestionRules}}
 
-        For MultipleChoice grammar questions:
-        - "questionText" must contain ONLY the question or sentence with a blank.
-        - Never include answer options inside "questionText".
-        - Put every possible answer exclusively in the "answers" array.
-        - Do not append options such as A), B), C), D) to the question text.
-        - Do not include the correct answer or its explanation in "questionText".
+    {{passageRules}}
 
-        {{previousQuestionRules}}
+    {{retryRules}}
 
-        {{passageRules}}
+    OUTPUT REQUIREMENTS:
+    - Return valid JSON only.
+    - Do not use Markdown or code fences.
+    - The root must contain exactly one property named "questions".
+    - "questions" must be an array containing exactly {{request.Count}} objects.
+    - Every question must contain "questionText" and "answers".
+    - Every answer must contain "answerText" and "isCorrect".
+    - "isCorrect" must be a JSON boolean, not a string.
+    - Do not add explanations or other properties.
+    - Follow the question-type example and rules exactly.
 
-        {{retryRules}}
-        
-        OUTPUT REQUIREMENTS:
-        Return valid JSON only. No Markdown, code fences, or explanations.
-        The root object MUST contain a property named "questions".
-        "questions" MUST be an array containing exactly {{request.Count}} questions.
-        Each question MUST contain "questionText" and "answers".
-        Each answer MUST contain "answerText" and "isCorrect".
-        Do not put answers into the question text. Do not include any other properties. In any forms.
-        "isCorrect" MUST be a JSON boolean: true or false, not a string.
-
-        Required structure:
+    Required root structure:
+    {
+      "questions": [
         {
-          "questions": [
+          "questionText": "Example question",
+          "answers": [
             {
-              "questionText": "A new question",
-              "answers": [
-                {
-                  "answerText": "An answer",
-                  "isCorrect": true
-                },
-                {
-                  "answerText": "Another answer",
-                  "isCorrect": false
-                }
-              ]
+              "answerText": "Example answer",
+              "isCorrect": true
             }
           ]
         }
-        """;
+      ]
+    }
+    """;
         }
-
 
         private static bool IsDuplicateQuestion(
     GeneratedQuestion candidate,
@@ -356,142 +400,157 @@ namespace LanguageCenterManagement.Services.Ai
 
             question.QuestionText = question.QuestionText.Trim();
             question.Answers ??= new List<GeneratedAnswer>();
-            if (question.Answers.Any(a => a == null))
-            {
-                throw new InvalidOperationException(
-                    "The generated question contains a null answer.");
-            }
 
             if (question.QuestionText.Length > 2000)
+            {
                 throw new InvalidOperationException(
                     "A question exceeds 2000 characters.");
+            }
 
             if (question.Answers.Any(a =>
-                    a == null ||
-                    string.IsNullOrWhiteSpace(a.AnswerText) ||
-                    a.AnswerText.Length > 1000))
+                a == null ||
+                string.IsNullOrWhiteSpace(a.AnswerText) ||
+                a.AnswerText.Length > 1000))
             {
                 throw new InvalidOperationException(
                     "An answer is empty or too long.");
             }
 
             foreach (var answer in question.Answers)
+            {
                 answer.AnswerText = answer.AnswerText.Trim();
-
-            // Merge duplicate answer options, preserving a correct answer if present.
-            question.Answers = question.Answers
-                .GroupBy(
-                    a => a.AnswerText.Trim(),
-                    StringComparer.OrdinalIgnoreCase)
-                .Select(g =>
-                {
-                    var first = g.First();
-                    first.AnswerText = first.AnswerText.Trim();
-                    first.IsCorrect = g.Any(a => a.IsCorrect);
-                    return first;
-                })
-                .ToList();
+            }
 
             switch (questionType)
             {
                 case "MultipleChoice":
-                    if (question.Answers.Count < 2 ||
-                        question.Answers.Count > 4)
                     {
-                        throw new InvalidOperationException(
-                            "MultipleChoice requires between 2 and 4 answers.");
+                        if (question.Answers.Count < 2 ||
+                            question.Answers.Count > 4)
+                        {
+                            throw new InvalidOperationException(
+                                "MultipleChoice requires between 2 and 4 answers.");
+                        }
+
+                        if (question.QuestionText.Contains("____") ||
+                            question.QuestionText.Contains(
+                                "true or false",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new InvalidOperationException(
+                                "MultipleChoice uses another question format.");
+                        }
+
+                        if (question.Answers.Any(a =>
+                            Regex.IsMatch(
+                                a.AnswerText,
+                                @"^Option\s+[1-4]$",
+                                RegexOptions.IgnoreCase)))
+                        {
+                            throw new InvalidOperationException(
+                                "MultipleChoice contains placeholder answers.");
+                        }
+
+                        break;
                     }
-                    break;
 
                 case "TrueFalse":
-                    if (question.Answers.Count != 2)
                     {
-                        throw new InvalidOperationException(
-                            "TrueFalse requires exactly 2 answers.");
+                        if (question.Answers.Count != 2)
+                        {
+                            throw new InvalidOperationException(
+                                "TrueFalse requires exactly 2 answers.");
+                        }
+
+                        foreach (var answer in question.Answers)
+                        {
+                            string normalized = answer.AnswerText
+                                .Trim()
+                                .TrimEnd('.', '!', '?', ':', ';')
+                                .Trim();
+
+                            if (normalized.Equals(
+                                "True",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                answer.AnswerText = "True";
+                            }
+                            else if (normalized.Equals(
+                                "False",
+                                StringComparison.OrdinalIgnoreCase))
+                            {
+                                answer.AnswerText = "False";
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException(
+                                    "TrueFalse answers must be True and False.");
+                            }
+                        }
+
+                        var answerSet = question.Answers
+                            .Select(a => a.AnswerText)
+                            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                        if (!answerSet.SetEquals(new[] { "True", "False" }))
+                        {
+                            throw new InvalidOperationException(
+                                "TrueFalse must contain one True and one False answer.");
+                        }
+
+                        break;
                     }
-                    break;
 
                 case "FillInTheBlank":
-                    if (question.Answers.Count != 1)
                     {
-                        throw new InvalidOperationException(
-                            "FillInTheBlank requires exactly 1 answer.");
+                        if (question.Answers.Count != 1)
+                        {
+                            throw new InvalidOperationException(
+                                "FillInTheBlank requires exactly 1 answer.");
+                        }
+
+                        // Accept common model variations for a single blank.
+                        question.QuestionText = Regex.Replace(
+                            question.QuestionText,
+                            @"_{3,}|\[blank\]|\[____\]",
+                            "____",
+                            RegexOptions.IgnoreCase);
+
+                        int blankCount = Regex.Matches(
+                            question.QuestionText,
+                            @"____").Count;
+
+                        if (blankCount != 1)
+                        {
+                            throw new InvalidOperationException(
+                                "FillInTheBlank must contain exactly one blank.");
+                        }
+
+                        // There is exactly one permitted answer in this question type.
+                        question.Answers[0].IsCorrect = true;
+
+                        break;
                     }
-                    break;
 
                 default:
                     throw new InvalidOperationException(
                         "Unsupported question type.");
             }
 
+            // Reject duplicate answer labels/options rather than silently merging them.
+            if (question.Answers
+                .Select(a => a.AnswerText)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Count() != question.Answers.Count)
+            {
+                throw new InvalidOperationException(
+                    "The question contains duplicate answers.");
+            }
+
             if (question.Answers.Count(a => a.IsCorrect) != 1)
             {
                 throw new InvalidOperationException(
                     "A question must have exactly one correct answer.");
-            }
-
-            switch (questionType)
-            {
-                case "MultipleChoice":
-                    if (question.QuestionText.Contains("____") ||
-                        question.QuestionText.Contains(
-                            "true or false",
-                            StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException(
-                            "A MultipleChoice question uses another question format.");
-                    }
-
-                    if (question.Answers.Any(a =>
-                        a.AnswerText.Equals(
-                            "Option 1", StringComparison.OrdinalIgnoreCase) ||
-                        a.AnswerText.Equals(
-                            "Option 2", StringComparison.OrdinalIgnoreCase) ||
-                        a.AnswerText.Equals(
-                            "Option 3", StringComparison.OrdinalIgnoreCase) ||
-                        a.AnswerText.Equals(
-                            "Option 4", StringComparison.OrdinalIgnoreCase)))
-                    {
-                        throw new InvalidOperationException(
-                            "MultipleChoice contains placeholder answers.");
-                    }
-                    break;
-
-                case "TrueFalse":
-                    var answerSet = question.Answers
-                        .Select(a => a.AnswerText)
-                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-                    if (!answerSet.SetEquals(new[] { "True", "False" }))
-                    {
-                        throw new InvalidOperationException(
-                            "TrueFalse must contain exactly True and False.");
-                    }
-
-                    // Normalize spelling while preserving correctness.
-                    foreach (var answer in question.Answers)
-                    {
-                        answer.AnswerText =
-                            answer.AnswerText.Equals(
-                                "True", StringComparison.OrdinalIgnoreCase)
-                                ? "True"
-                                : "False";
-                    }
-                    break;
-
-                case "FillInTheBlank":
-                    if (!question.QuestionText.Contains("____"))
-                    {
-                        throw new InvalidOperationException(
-                            "FillInTheBlank must contain ____.");
-                    }
-
-                    if (!question.Answers[0].IsCorrect)
-                    {
-                        throw new InvalidOperationException(
-                            "The fill-in-the-blank answer must be correct.");
-                    }
-                    break;
             }
         }
     }

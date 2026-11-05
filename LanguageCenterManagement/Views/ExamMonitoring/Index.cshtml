@@ -1,15 +1,24 @@
 ﻿@model LanguageCenterManagement.ViewModels.ExamMonitoringDashboardViewModel
 
 @{
-    ViewData["Title"] = "Exam Integrity Dashboard";
+    ViewData["Title"] = "Exam Monitoring Dashboard";
 }
 
 <div class="container-fluid py-4 px-lg-5">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Exam Integrity Dashboard</h2>
+            <h2 class="fw-bold mb-1">Exam Monitoring Dashboard
+                <i class="bi bi-question-circle ms-2 text-primary"
+                   role="button" tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="Giám sát tính toàn vẹn kỳ thi"
+                   data-bs-content="Theo dõi các sự kiện gián đoạn trong quá trình thi, chẳng hạn như chuyển tab hoặc rời khỏi cửa sổ bài thi. Dữ liệu hỗ trợ giáo viên và admin xem xét quá trình làm bài của học viên.">
+                </i>
+            </h2>
             <p class="text-muted mb-0">
                 Review exam interruptions and manage monitoring incidents.
+                
             </p>
         </div>
     </div>
@@ -40,7 +49,15 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-2">Total incidents</div>
+                    <div class="text-muted small mb-2">Total incidents
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Tổng số sự kiện"
+                           data-bs-content="Tổng số sự kiện gián đoạn được hệ thống ghi nhận trong quá trình học viên làm bài thi.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold">@Model.TotalIncidents</div>
                     <div class="text-muted small">Recorded events</div>
                 </div>
@@ -50,7 +67,15 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-2">Students flagged</div>
+                    <div class="text-muted small mb-2">Students flagged
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Học viên cần xem xét"
+                           data-bs-content="Số học viên có các sự kiện gián đoạn cần được giáo viên hoặc quản trị viên kiểm tra thêm.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold">@Model.StudentsFlagged</div>
                     <div class="text-muted small">Students with recorded events</div>
                 </div>
@@ -60,7 +85,15 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-2">Pending reviews</div>
+                    <div class="text-muted small mb-2">Pending reviews
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Đang chờ xem xét"
+                           data-bs-content="Số sự kiện chưa được giáo viên hoặc quản trị viên kiểm tra và đưa ra nhận xét.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold text-warning">
                         @Model.PendingReviews
                     </div>
@@ -72,7 +105,15 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <div class="text-muted small mb-2">Reviewed / resolved</div>
+                    <div class="text-muted small mb-2">Reviewed / resolved
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Đã xem xét"
+                           data-bs-content="Số sự kiện đã được giáo viên hoặc quản trị viên kiểm tra và cập nhật trạng thái xử lý.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold text-success">
                         @Model.ReviewedIncidents
                     </div>
@@ -86,7 +127,15 @@
         <div class="card-header bg-white border-0 pt-4 px-4">
             <div class="d-flex flex-wrap justify-content-between gap-2">
                 <div>
-                    <h5 class="fw-bold mb-1">Student monitoring overview</h5>
+                    <h5 class="fw-bold mb-1">Student monitoring overview
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Tổng quan giám sát học viên"
+                           data-bs-content="Hiển thị các sự kiện được ghi nhận theo từng học viên. Mức độ rủi ro chỉ hỗ trợ ưu tiên kiểm tra, không phải bằng chứng xác định hành vi gian lận.">
+                        </i>
+                    </h5>
                     <p class="text-muted small mb-0">
                         Students are ranked by incident count.
                         Risk labels indicate review priority, not proof of misconduct.

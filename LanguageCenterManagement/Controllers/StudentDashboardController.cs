@@ -45,14 +45,17 @@ namespace LanguageCenterManagement.Controllers
                         enrollment.StudentId == studentId &&
                         enrollment.Status != "Cancelled"));
 
-            // Upcoming exams must be published and not yet started.
+            // Show published exams that this student has not submitted.
             var availableExamsQuery = enrolledExams
-                .Where(e => e.Status == "Published");
+                .Where(e =>
+                    e.Status == "Published" &&
+                    !e.ExamResults.Any(r => r.StudentId == studentId));
 
-            var upcomingExamCount = await availableExamsQuery.CountAsync(cancellationToken);
+            var upcomingExamCount = await availableExamsQuery
+                .CountAsync(cancellationToken);
 
             var upcomingExams = await availableExamsQuery
-                .OrderByDescending(e => e.ExamDate)
+                .OrderBy(e => e.ExamDate)
                 .Take(5)
                 .Select(e => new UpcomingExamDashboardItem
                 {

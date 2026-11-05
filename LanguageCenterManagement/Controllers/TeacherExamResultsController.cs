@@ -523,6 +523,63 @@ namespace LanguageCenterManagement.Controllers
             return View("Grade", model);
         }
 
+        // POST: TeacherExamResults/AssessExam
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssessExam(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null || !user.TeacherId.HasValue)
+                return Forbid();
+
+            var result = await _context.ExamResults
+                .Include(r => r.Exam)
+                    .ThenInclude(e => e!.Class)
+                .Include(r => r.Student)
+                .Include(r => r.ExamAnswers)
+                    .ThenInclude(a => a.Question)
+                .Include(r => r.ExamAnswers)
+                    .ThenInclude(a => a.Answer)
+                .FirstOrDefaultAsync(
+                    r => r.ExamResultId == id,
+                    cancellationToken);
+
+            if (result == null || result.Exam?.Class == null)
+                return NotFound();
+
+            if (result.Exam.Class.TeacherId != user.TeacherId.Value)
+                return Forbid();
+
+            var model = await BuildGradeViewModelAsync(result);
+
+            try
+            {
+                model.AiExamAssessment =
+                    await _writingAssessmentService.AssessExamAsync(
+                        model.ExamName,
+                        model.Questions,
+                        cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                model.AiExamAssessmentError =
+                    "Assessment was cancelled or timed out.";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Exam assessment failed for ExamResultId {Id}", id);
+
+                model.AiExamAssessmentError =
+                    "AI exam assessment failed. Check Ollama and try again.";
+            }
+
+            return View("Grade", model);
+        }
+
         private async Task PopulateWritingFlagsAsync(TeacherExamGradeViewModel model)
         {
             var answerIds = model.Questions
@@ -742,13 +799,13 @@ namespace LanguageCenterManagement.Controllers
                     .FirstOrDefault(q =>
                         q.QuestionId == question.QuestionId);
 
-                submittedQuestion.ExamAnswerId =
-                    existingAnswer?.ExamAnswerId;
-
                 if (submittedQuestion == null)
                 {
                     continue;
                 }
+
+                submittedQuestion.ExamAnswerId =
+                    existingAnswer?.ExamAnswerId;
 
                 submittedQuestion.ExamQuestionId =
                     examQuestion.ExamQuestionId;

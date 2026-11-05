@@ -12,7 +12,17 @@
 <div class="container-fluid py-4 px-lg-5">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1">AI Usage Dashboard</h2>
+            <h2 class="fw-bold mb-1">AI Usage Dashboard
+                <i class="bi bi-question-circle ms-2 text-primary"
+                   role="button"
+                   tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-trigger="hover focus"
+                   data-bs-placement="right"
+                   data-bs-content="Hệ thống ghi nhận các hoạt động sử dụng AI, trạng thái xử lý và mức độ sử dụng của các chức năng AI, giúp Admin kiểm soát tài nguyên và theo dõi tình trạng hoạt động của các dịch vụ AI.">
+                </i>
+            </h2>
             <p class="text-muted mb-0">
                 Monitor AI question generation and daily quota consumption.
             </p>
@@ -38,6 +48,16 @@
                 <div class="card-body">
                     <div class="text-muted small mb-2">
                         Questions charged today
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-content="Tổng số câu hỏi được tính vào hạn mức AI trong ngày."
+                           >
+                        </i>
                     </div>
                     <div class="fs-2 fw-bold">
                         @Model.QuestionsUsedToday
@@ -45,6 +65,7 @@
                     <div class="text-muted small">
                         Across all accounts
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -54,6 +75,16 @@
                 <div class="card-body">
                     <div class="text-muted small mb-2">
                         Successful requests
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-content="Số yêu cầu AI đã xử lý thành công."
+                           >
+                        </i>
                     </div>
                     <div class="fs-2 fw-bold text-success">
                         @Model.SuccessfulRequestsToday
@@ -70,6 +101,16 @@
                 <div class="card-body">
                     <div class="text-muted small mb-2">
                         Failed requests
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-content="Số yêu cầu AI gặp lỗi trong quá trình xử lý."
+                          >
+                        </i>
                     </div>
                     <div class="fs-2 fw-bold text-danger">
                         @Model.FailedRequestsToday
@@ -86,6 +127,16 @@
                 <div class="card-body">
                     <div class="text-muted small mb-2">
                         In-progress requests
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-content="Số yêu cầu AI đang được xử lý."
+                        >
+                        </i>
                     </div>
                     <div class="fs-2 fw-bold text-primary">
                         @Model.InProgressRequestsToday
@@ -101,7 +152,18 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="fw-bold mb-0">Daily quota consumption</h5>
+                <h5 class="fw-bold mb-0">Daily quota consumption
+                <i class="bi bi-question-circle ms-2 text-primary"
+                   role="button"
+                   tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-trigger="hover focus"
+                   data-bs-placement="right"
+                   data-bs-content="Theo dõi mức sử dụng hạn mức câu hỏi AI hằng ngày của các tài khoản."
+                >
+                </i>
+            </h5>
                 <span class="text-muted">
                     @Model.QuestionsUsedToday questions
                 </span>
@@ -126,7 +188,18 @@
 
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white py-3">
-            <h5 class="fw-bold mb-0">Usage by account</h5>
+            <h5 class="fw-bold mb-0">Usage by account
+            <i class="bi bi-question-circle ms-2 text-primary"
+               role="button"
+               tabindex="0"
+               data-demo-popover
+               data-bs-toggle="popover"
+               data-bs-trigger="hover focus"
+               data-bs-placement="right"
+               data-bs-content="Thống kê mức sử dụng AI của từng tài khoản."
+            >
+            </i>
+            </h5>
         </div>
 
         <div class="card-body p-0">
@@ -198,7 +271,18 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3">
-            <h5 class="fw-bold mb-0">Recent AI requests</h5>
+            <h5 class="fw-bold mb-0">Recent AI requests
+            <i class="bi bi-question-circle ms-2 text-primary"
+               role="button"
+               tabindex="0"
+               data-demo-popover
+               data-bs-toggle="popover"
+               data-bs-trigger="hover focus"
+               data-bs-placement="right"
+               data-bs-content= "Lịch sử các yêu cầu AI gần đây, bao gồm trạng thái và thông tin xử lý."
+              >
+            </i>
+        </h5>
         </div>
 
         <div class="card-body p-0">

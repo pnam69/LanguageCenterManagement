@@ -29,19 +29,19 @@ namespace LanguageCenterManagement.Controllers
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = query.Where(e =>
-                    e.Student != null &&
-                    (
-                        e.Student.StudentCode.Contains(search) ||
-                        e.Student.FullName.Contains(search) ||
-                        e.Student.Phone.Contains(search) ||
-                        e.Student.Email.Contains(search)
-                    )
+                    (e.Student != null &&
+                        (
+                            (e.Student.StudentCode ?? "").Contains(search) ||
+                            (e.Student.FullName ?? "").Contains(search) ||
+                            (e.Student.Phone ?? "").Contains(search) ||
+                            (e.Student.Email ?? "").Contains(search)
+                        ))
                     ||
-                    e.Class != null &&
-                    (
-                        e.Class.ClassCode.Contains(search) ||
-                        e.Class.ClassName.Contains(search)
-                    )
+                    (e.Class != null &&
+                        (
+                            (e.Class.ClassCode ?? "").Contains(search) ||
+                            (e.Class.ClassName ?? "").Contains(search)
+                        ))
                 );
             }
 

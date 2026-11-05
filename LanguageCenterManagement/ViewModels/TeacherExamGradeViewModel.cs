@@ -26,6 +26,8 @@
 
         public string? Note { get; set; }
 
+        public WritingAssessmentResultViewModel? AiExamAssessment { get; set; }
+        public string? AiExamAssessmentError { get; set; }
         public List<TeacherExamGradeQuestionViewModel> Questions { get; set; }
             = new();
     }

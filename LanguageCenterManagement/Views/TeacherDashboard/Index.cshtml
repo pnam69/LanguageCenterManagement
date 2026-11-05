@@ -9,6 +9,13 @@
         <div>
             <h3 class="fw-bold text-primary mb-1">
                 <i class="bi bi-person-workspace me-2"></i>Teacher Dashboard
+                <i class="bi bi-question-circle ms-2 text-primary"
+                   role="button" tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="Bảng điều khiển giáo viên"
+                   data-bs-content="Trang tổng quan dành cho giáo viên, cung cấp thông tin về lịch giảng dạy, lớp học, bài thi, kết quả và các công cụ hỗ trợ giảng dạy.">
+                </i>
             </h3>
             <p class="text-muted mb-0 fs-6">
                 Welcome back, <strong class="text-dark fs-5">@User.Identity?.Name</strong>! Here is your teaching overview.
@@ -23,6 +30,13 @@
 
     <h5 class="fw-bold text-secondary mb-3">
         <i class="bi bi-speedometer2 me-2"></i>Teaching Overview
+        <i class="bi bi-question-circle ms-2 text-primary"
+           role="button" tabindex="0"
+           data-demo-popover
+           data-bs-toggle="popover"
+           data-bs-title="Tổng quan giảng dạy"
+           data-bs-content="Tổng hợp các thông tin quan trọng về hoạt động giảng dạy, giúp giáo viên theo dõi lịch học, bài thi và công việc cần xử lý.">
+        </i>
     </h5>
 
     <div class="card border-0 shadow-sm mb-4">
@@ -31,6 +45,13 @@
             <h5 class="mb-0">
                 <i class="bi bi-calendar-week me-2 text-primary"></i>
                 Upcoming Classes
+                <i class="bi bi-question-circle ms-2 text-primary"
+                   role="button" tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="Lớp học sắp tới"
+                   data-bs-content="Hiển thị các buổi học sắp diễn ra, bao gồm ngày, giờ, tên lớp, phòng học và trạng thái lịch học.">
+                </i>
             </h5>
 
             <a asp-controller="TeacherSchedules"
@@ -109,7 +130,15 @@
         <div class="col-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3">
-                    <div class="text-muted small mb-2">Upcoming Exams</div>
+                    <div class="text-muted small mb-2">Upcoming Exams
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Bài thi sắp tới"
+                           data-bs-content="Số lượng bài thi đã được lên lịch và sắp diễn ra trong các lớp giáo viên phụ trách.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold text-primary">
                         @ViewBag.UpcomingExams
                     </div>
@@ -125,7 +154,15 @@
         <div class="col-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3">
-                    <div class="text-muted small mb-2">All My Exams</div>
+                    <div class="text-muted small mb-2">All My Exams
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Tất cả bài thi"
+                           data-bs-content="Tổng số bài thi thuộc phạm vi quản lý của giáo viên, bao gồm các bài thi đã tạo và được phân công.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold text-info">
                         @ViewBag.TotalExams
                     </div>
@@ -141,7 +178,15 @@
         <div class="col-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3">
-                    <div class="text-muted small mb-2">Awaiting Grading</div>
+                    <div class="text-muted small mb-2">Awaiting Grading
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Bài thi chờ chấm điểm"
+                           data-bs-content="Số bài làm của học viên đang chờ giáo viên chấm điểm hoặc hoàn tất đánh giá.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold text-warning">
                         @ViewBag.PendingGrading
                     </div>
@@ -157,7 +202,15 @@
         <div class="col-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3">
-                    <div class="text-muted small mb-2">Integrity Reviews</div>
+                    <div class="text-muted small mb-2">Integrity Reviews
+                        <i class="bi bi-question-circle ms-1 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Đánh giá tính toàn vẹn"
+                           data-bs-content="Số bài viết có dấu hiệu bất thường được AI đề xuất giáo viên kiểm tra thêm. Đây chỉ là cảnh báo tham khảo, không phải kết luận về hành vi gian lận.">
+                        </i>
+                    </div>
                     <div class="fs-2 fw-bold text-danger">
                         @ViewBag.PendingIntegrityReviews
                     </div>
@@ -179,6 +232,13 @@
                     <h5 class="fw-bold mb-1">
                         <i class="bi bi-stars text-primary me-2"></i>
                         AI Teaching Tools
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Công cụ AI hỗ trợ giảng dạy"
+                           data-bs-content="Tập hợp các công cụ AI giúp giáo viên tạo câu hỏi, tạo bài đọc, đánh giá bài viết và kiểm tra các dấu hiệu bất thường trong bài làm của học viên.">
+                        </i>
                     </h5>
                     <p class="text-muted mb-0">
                         Generate questions, review student writing, and
@@ -214,7 +274,15 @@
                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
                             <i class="bi bi-easel2-fill fs-3"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">My Classes</h5>
+                        <h5 class="fw-bold text-dark mb-0">My Classes
+                            <i class="bi bi-question-circle ms-2 text-primary"
+                               role="button" tabindex="0"
+                               data-demo-popover
+                               data-bs-toggle="popover"
+                               data-bs-title="Lớp học của tôi"
+                               data-bs-content="Xem và quản lý các lớp học được phân công, theo dõi thông tin học viên và tổ chức hoạt động giảng dạy.">
+                            </i>
+                        </h5>
                     </div>
                     <p class="text-muted mb-4 flex-grow-1">
                         View and manage your assigned classes, check teaching schedules, and organize lesson plans.
@@ -234,7 +302,15 @@
                         <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
                             <i class="bi bi-ui-checks fs-3"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">Attendance</h5>
+                        <h5 class="fw-bold text-dark mb-0">Attendance
+                            <i class="bi bi-question-circle ms-2 text-primary"
+                               role="button" tabindex="0"
+                               data-demo-popover
+                               data-bs-toggle="popover"
+                               data-bs-title="Quản lý điểm danh"
+                               data-bs-content="Ghi nhận tình trạng tham gia buổi học của học viên, theo dõi số buổi vắng và quản lý thông tin điểm danh.">
+                            </i>
+                        </h5>
                     </div>
                     <p class="text-muted mb-4 flex-grow-1">
                         Record daily student attendance, track absences, and manage class participation.
@@ -253,7 +329,15 @@
                         <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
                             <i class="bi bi-calendar3 fs-2 text-success"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">My Schedule</h5>
+                        <h5 class="fw-bold text-dark mb-0">My Schedule
+                            <i class="bi bi-question-circle ms-2 text-primary"
+                               role="button" tabindex="0"
+                               data-demo-popover
+                               data-bs-toggle="popover"
+                               data-bs-title="Lịch giảng dạy"
+                               data-bs-content="Hiển thị lịch giảng dạy theo tuần, bao gồm thời gian, lớp học và phòng học được phân công.">
+                            </i>
+                        </h5>
                     </div>
                     <p class="text-muted mb-4 flex-grow-1">
                         View your weekly teaching schedule and classroom assignments.
@@ -274,7 +358,15 @@
                         <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
                             <i class="bi bi-file-earmark-text-fill fs-3"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">Exams</h5>
+                        <h5 class="fw-bold text-dark mb-0">Exams
+                            <i class="bi bi-question-circle ms-2 text-primary"
+                               role="button" tabindex="0"
+                               data-demo-popover
+                               data-bs-toggle="popover"
+                               data-bs-title="Quản lý bài thi"
+                               data-bs-content="Tạo và quản lý bài thi, thiết lập lịch thi, tổ chức kiểm tra và theo dõi tình trạng bài làm của học viên.">
+                            </i>
+                        </h5>
                     </div>
                     <p class="text-muted mb-4 flex-grow-1">
                         Manage exam schedules, grade student submissions, and update academic results.
@@ -293,7 +385,15 @@
                         <div class="bg-dark bg-opacity-10 text-dark rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
                             <i class="bi bi-file-earmark-text-fill fs-3"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">Exam Results</h5>
+                        <h5 class="fw-bold text-dark mb-0">Exam Results
+                            <i class="bi bi-question-circle ms-2 text-primary"
+                               role="button" tabindex="0"
+                               data-demo-popover
+                               data-bs-toggle="popover"
+                               data-bs-title="Kết quả bài thi"
+                               data-bs-content="Xem và quản lý kết quả thi, theo dõi thành tích học tập của học viên và tổng hợp báo cáo kết quả trong các lớp phụ trách.">
+                            </i>
+                        </h5>
                     </div>
                     <p class="text-muted mb-4 flex-grow-1">
                         Manage exam results, view student performance, and generate reports for your classes.
@@ -313,7 +413,15 @@
                         <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 55px; height: 55px;">
                             <i class="bi bi-file-earmark-text-fill fs-3"></i>
                         </div>
-                        <h5 class="fw-bold text-dark mb-0">Questions</h5>
+                        <h5 class="fw-bold text-dark mb-0">Questions
+                            <i class="bi bi-question-circle ms-2 text-primary"
+                               role="button" tabindex="0"
+                               data-demo-popover
+                               data-bs-toggle="popover"
+                               data-bs-title="Ngân hàng câu hỏi"
+                               data-bs-content="Quản lý ngân hàng câu hỏi được sử dụng để xây dựng đề thi và bài luyện tập cho học viên.">
+                            </i>
+                        </h5>
                     </div>
                     <p class="text-muted mb-4 flex-grow-1">
                         Manage questions.

@@ -55,13 +55,14 @@ namespace LanguageCenterManagement.Controllers
             {
                 var history = (model.History ?? new())
                     .Where(m =>
-                        m.Role is "user" or "assistant" &&
+                        m != null &&
+                        (m.Role is "user" or "assistant") &&
                         !string.IsNullOrWhiteSpace(m.Content))
                     .TakeLast(10)
                     .Select(m => new ChatMessage
                     {
                         Role = m.Role,
-                        Content = m.Content.Length > 3000
+                        Content = m.Content!.Length > 3000
                             ? m.Content[..3000]
                             : m.Content
                     })
@@ -145,10 +146,12 @@ namespace LanguageCenterManagement.Controllers
 
             var answers = await _context.ExamAnswers
                 .AsNoTracking()
-                .Where(a => resultIds.Contains(a.ExamResultId))
+                .Where(a =>
+                    resultIds.Contains(a.ExamResultId) &&
+                    a.Question != null)
                 .Select(a => new
                 {
-                    Skill = a.Question.Skill,
+                    Skill = a.Question!.Skill,
                     a.IsCorrect
                 })
                 .ToListAsync(cancellationToken);

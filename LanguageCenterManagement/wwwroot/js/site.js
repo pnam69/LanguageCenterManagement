@@ -2,3 +2,14 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('[data-demo-popover]').forEach(element => {
+        new bootstrap.Popover(element, {
+            trigger: "hover focus",
+            placement: "auto",
+            container: "body",
+            html: false
+        });
+    });
+});

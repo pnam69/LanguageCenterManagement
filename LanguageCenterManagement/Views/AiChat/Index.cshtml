@@ -10,7 +10,17 @@
             <i class="bi bi-robot fs-3"></i>
         </div>
         <div>
-            <h2 class="mb-1">AI Study Coach</h2>
+            <h2 class="mb-1">AI Study Coach
+                <i class="bi bi-question-circle text-primary"
+                   role="button" tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="AI Chatbot"
+                   data-bs-content="Học sinh có thể trò chuyện trực tiếp với AI, đặt câu hỏi về kiến thức, yêu cầu giải thích hoặc nhờ hỗ trợ trong quá trình học tập.
+                    Chatbot sử dụng mô hình AI chạy cục bộ, cho phép hệ thống cung cấp hỗ trợ học tập mà không cần phụ thuộc vào API AI trả phí bên ngoài
+                    .">
+                </i>
+            </h2>
             <p class="text-muted mb-0">
                 Your personal assistant for learning English.
             </p>
@@ -42,23 +52,62 @@
             <div class="d-flex flex-wrap gap-2 mb-3">
                 <button type="button"
                         class="btn btn-sm btn-outline-primary suggestion"
-                        data-prompt="Explain the difference between the present perfect and past simple.">
-                    Grammar help
+                        data-prompt="Analyze my recent exam results. Identify my strongest and weakest English skills, explain what the results suggest, and recommend what I should improve first.">
+                    Analyze my results
                 </button>
+
                 <button type="button"
                         class="btn btn-sm btn-outline-primary suggestion"
-                        data-prompt="Give me five B1-level vocabulary words with examples.">
-                    Vocabulary
+                        data-prompt="Based on my exam results, create a personalized 7-day English study plan. Include daily activities, estimated study time, specific skills to practice, and measurable goals.">
+                    My 7-day study plan
                 </button>
+
                 <button type="button"
                         class="btn btn-sm btn-outline-primary suggestion"
-                        data-prompt="Give me a short B1 English paragraph and ask me three reading comprehension questions.">
+                        data-prompt="Based on my weakest skills in my exam results, create targeted English exercises for me. Include questions, answers, and explanations. Adjust the difficulty to my current level.">
+                    Practice my weak skills
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary suggestion"
+                        data-prompt="Based on my recent exam results, create a 30-day English improvement roadmap. Divide it into weekly goals and explain how I can measure my progress.">
+                    30-day improvement plan
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary suggestion"
+                        data-prompt="Review my performance across recent exams. Have I improved, declined, or stayed consistent? Explain what can and cannot be concluded from the available results.">
+                    Track my progress
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary suggestion"
+                        data-prompt="Give me a short English diagnostic test covering grammar, vocabulary, reading, and writing. Evaluate my answers and recommend what I should study next.">
+                    Diagnostic test
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary suggestion"
+                        data-prompt="Teach me 10 useful English vocabulary words related to my weakest skill. Include definitions, example sentences, and a short quiz.">
+                    Targeted vocabulary
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary suggestion"
+                        data-prompt="Give me a B1-level English reading passage with five comprehension questions. After I answer, evaluate my answers and explain my mistakes.">
                     Reading practice
                 </button>
+
                 <button type="button"
                         class="btn btn-sm btn-outline-primary suggestion"
-                        data-prompt="Teach me how to improve an English paragraph, with an example.">
-                    Writing tips
+                        data-prompt="Give me an English writing task appropriate for my level. After I submit my writing, evaluate grammar, vocabulary, organization, and clarity, then suggest improvements.">
+                    Writing practice
+                </button>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-primary suggestion"
+                        data-prompt="Create a short English grammar quiz focused on the topics I am most likely to struggle with based on my recent results. Ask one question at a time and explain each answer.">
+                    Grammar quiz
                 </button>
             </div>
 

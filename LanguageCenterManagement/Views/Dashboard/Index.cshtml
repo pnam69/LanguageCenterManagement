@@ -23,16 +23,42 @@
 
     <h5 class="fw-bold text-secondary mb-3 mt-2">
         <i class="bi bi-speedometer2 me-2"></i>Center Overview
+
+        <i class="bi bi-question-circle ms-2 text-primary"
+           role="button"
+           tabindex="0"
+           data-demo-popover
+           data-bs-toggle="popover"
+           data-bs-trigger="hover focus"
+           data-bs-placement="right"
+           data-bs-title="Tổng quan trung tâm"
+           data-bs-content="Đây là trang tổng quan dành cho quản trị viên, hiển thị các thông tin chính về học viên, giáo viên, lớp học và hoạt động của trung tâm."
+           aria-label="Giải thích tổng quan trung tâm">
+        </i>
     </h5>
 
     <div class="row g-3 mb-4">
         <div class="col-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3">
-                    <div class="text-muted small mb-2">AI Requests Today</div>
+                    <div class="text-muted small mb-2">AI Requests Today
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-title="Lượt sử dụng AI hôm nay"
+                           data-bs-content="Tổng số yêu cầu sử dụng AI được ghi nhận trong ngày trên toàn hệ thống."
+                           aria-label="Lượt sử dụng AI hôm nay">
+                        </i>
+                    </div>
+                    
                     <div class="fs-2 fw-bold text-primary">
                         @ViewBag.AiRequestsToday
                     </div>
+                    
                     <div class="small text-muted">All tracked AI features</div>
                 </div>
             </div>
@@ -41,7 +67,20 @@
         <div class="col-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3">
-                    <div class="text-muted small mb-2">Questions Used Today</div>
+                    <div class="text-muted small mb-2">Questions Used Today
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                       role="button"
+                       tabindex="0"
+                       data-demo-popover
+                       data-bs-toggle="popover"
+                       data-bs-trigger="hover focus"
+                       data-bs-placement="right"
+                       data-bs-title="Số câu hỏi đã sử dụng"
+                       data-bs-content="Theo dõi số lượng câu hỏi đã được sử dụng trong hạn mức tạo câu hỏi AI."
+                       aria-label="Số câu hỏi đã sử dụng">
+                    </i>
+                    </div>
+                    
                     <div class="fs-2 fw-bold text-info">
                         @ViewBag.QuestionsUsedToday
                     </div>
@@ -53,7 +92,20 @@
         <div class="col-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-3">
-                    <div class="text-muted small mb-2">AI Failures Today</div>
+                    <div class="text-muted small mb-2">AI Failures Today
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-title="Yêu cầu AI thất bại"
+                           data-bs-content="Số yêu cầu AI không xử lý thành công, giúp quản trị viên theo dõi lỗi phát sinh."
+                           aria-label="Yêu cầu AI thất bại">
+                        </i>
+                    </div>
+
                     <div class="fs-2 fw-bold text-danger">
                         @ViewBag.AiFailedToday
                     </div>
@@ -112,7 +164,19 @@
                     <h5 class="mb-0">
                         <i class="bi bi-bar-chart-line me-2 text-primary"></i>
                         Class Performance
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-title="Kết quả học tập theo lớp"
+                           data-bs-content="Thống kê điểm trung bình của các lớp dựa trên kết quả bài thi đã hoàn thành."
+                           aria-label="Kết quả học tập theo lớp">
+                        </i>
                     </h5>
+                    
                     <small class="text-muted">
                         Based on completed exam results
                     </small>
@@ -181,6 +245,17 @@
                     <h5 class="mb-0">
                         <i class="bi bi-trophy me-2 text-warning"></i>
                         Top Student Performance
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button"
+                           tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-trigger="hover focus"
+                           data-bs-placement="right"
+                           data-bs-title="Học viên có kết quả cao"
+                           data-bs-content="Xếp hạng học viên dựa trên điểm trung bình của các bài thi đã hoàn thành."
+                           aria-label="Học viên có kết quả cao">
+                        </i>
                     </h5>
                     <small class="text-muted">
                         Ranked by average completed-exam score

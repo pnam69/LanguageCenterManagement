@@ -12,6 +12,13 @@
             <h3 class="fw-bold text-primary">
                 <i class="bi bi-clipboard-check me-2"></i>
                 Grade Exam
+                <i class="bi bi-question-circle text-primary"
+                   role="button" tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="Grade using AI"
+                   data-bs-content="Hệ thống có thể tổng hợp kết quả và sử dụng AI để phân tích bài làm, nhận xét những điểm học sinh làm tốt và những nội dung cần cải thiện.">
+                </i>
             </h3>
 
             <p class="text-muted mb-1">
@@ -111,12 +118,79 @@
                     </div>
 
                 </div>
+
+                
             </div>
 
         </div>
 
-    </div>
+        <div class="card border-primary mb-4">
+            <div class="card-header bg-light">
+                <strong>
+                    <i class="bi bi-robot me-2"></i>
+                    AI Exam Assessment
+                </strong>
+            </div>
 
+            <div class="card-body">
+                <p class="text-muted">
+                    Review the student's complete exam submission and receive
+                    feedback on overall performance, weaknesses and improvements.
+                </p>
+
+                <form asp-action="AssessExam"
+                      asp-controller="TeacherExamResults"
+                      asp-route-id="@Model.ExamResultId"
+                      method="post">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-clipboard-check me-1"></i>
+                        Assess Entire Exam with AI
+                    </button>
+                </form>
+
+                @if (!string.IsNullOrWhiteSpace(Model.AiExamAssessmentError))
+                {
+                    <div class="alert alert-danger mt-3">
+                        @Model.AiExamAssessmentError
+                    </div>
+                }
+
+                @if (Model.AiExamAssessment != null)
+                {
+                    <hr />
+
+                    <h5>Overall Assessment</h5>
+                    <p>@Model.AiExamAssessment.OverallFeedback</p>
+
+                    <h5 class="mt-3">
+                        Assessment Score:
+                        @Model.AiExamAssessment.TotalScore /
+                        @Model.AiExamAssessment.MaxScore
+                    </h5>
+
+                    @foreach (var criterion in Model.AiExamAssessment.Criteria)
+                    {
+                        <div class="mb-3">
+                            <strong>
+                                @criterion.Name
+                                (@criterion.Score/@criterion.MaxScore)
+                            </strong>
+                            <p class="mb-0">@criterion.Feedback</p>
+                        </div>
+                    }
+
+                    <h6 class="mt-3">Recommendations</h6>
+                    <ul>
+                        @foreach (var suggestion in Model.AiExamAssessment.Suggestions)
+                        {
+                            <li>@suggestion</li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
     <form asp-action="Grade"
           asp-route-id="@Model.ExamResultId"
           method="post">
@@ -395,7 +469,7 @@
                                             on the student's official score.
                                         </p>
 
-                                        <button type="submit"
+                                        @* <button type="submit"
                                                 formaction="@Url.Action(
                                                 "AssessWriting",
                                                 "TeacherExamResults",
@@ -407,7 +481,7 @@
                                                 disabled="@(question.ExamAnswerId == null)">
                                             <i class="bi bi-clipboard-check me-1"></i>
                                             Assess with AI
-                                        </button>
+                                        </button> *@
 
                                         @if (!string.IsNullOrWhiteSpace(question.AiAssessmentError))
                                         {

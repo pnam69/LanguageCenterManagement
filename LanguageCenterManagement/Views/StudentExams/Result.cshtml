@@ -74,6 +74,13 @@
                class="btn btn-outline-primary">
                 <i class="bi bi-download me-1"></i>
                 Download AI Review
+                <i class="bi bi-question-circle text-primary"
+                   role="button" tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="Tải báo cáo đánh giá"
+                   data-bs-content="Tải báo cáo nhận xét và đánh giá học tập do AI tạo để lưu lại và xem xét sau.">
+                </i>
             </a>
 
             <a asp-controller="StudentExams"
@@ -90,6 +97,13 @@
                class="btn btn-primary">
                 <i class="bi bi-stars me-1"></i>
                 Practise My Mistakes
+                <i class="bi bi-question-circle text-primary"
+                   role="button" tabindex="0"
+                   data-demo-popover
+                   data-bs-toggle="popover"
+                   data-bs-title="Luyện tập câu trả lời sai"
+                   data-bs-content="Giúp học viên ôn tập lại những câu hỏi hoặc kiến thức mình chưa trả lời chính xác.">
+                </i>
             </a>
         </div>
 
@@ -158,7 +172,15 @@
         <div class="card-body p-4">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                 <div>
-                    <h5 class="fw-bold mb-1">AI Exam Review</h5>
+                    <h5 class="fw-bold mb-1">AI Exam Review
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Đánh giá bài thi bằng AI"
+                           data-bs-content="Tổng hợp kết quả bài thi và cung cấp nhận xét về những nội dung học viên đã làm tốt cũng như những điểm cần cải thiện.">
+                        </i>
+                    </h5>
                     <p class="text-muted mb-0">
                         Understand your overall performance and what to practise next.
                     </p>
@@ -237,6 +259,13 @@
                 <div>
                     <h5 class="fw-bold mb-1">
                         Question Results
+                        <i class="bi bi-question-circle ms-2 text-primary"
+                           role="button" tabindex="0"
+                           data-demo-popover
+                           data-bs-toggle="popover"
+                           data-bs-title="Kết quả từng câu hỏi"
+                           data-bs-content="Hiển thị câu trả lời của học viên, đáp án chính xác và điểm số tương ứng của từng câu hỏi.">
+                        </i>
                     </h5>
 
                     <p class="text-muted mb-0">
@@ -473,6 +502,13 @@
                                                     data-question-id="@answer.QuestionId">
                                                 <i class="bi bi-stars me-1"></i>
                                                 Explain with AI
+                                            <i class="bi bi-question-circle text-primary"
+                                               role="button" tabindex="0"
+                                               data-demo-popover
+                                               data-bs-toggle="popover"
+                                               data-bs-title="Giải thích bằng AI"
+                                               data-bs-content="Yêu cầu AI giải thích câu trả lời, giúp học viên hiểu vì sao đáp án đúng hoặc sai.">
+                                            </i>
                                             </button>
 
                                             <div class="ai-review-result mt-3"
